@@ -6,11 +6,11 @@ import { GetWebGL2Context, CreateSquareVbo, AttachShader,
          LinkProgram } from './glUtils';
 
 const RENDER_VERTEX = require('./shaders/render.vert');
-const RENDER_PRISM = require('./shaders/spheiraPrism.frag');
 
 export default class Canvas3D extends Canvas {
-    constructor(canvasId) {
+    constructor(canvasId, spheirahedra, fragment) {
         super(canvasId);
+        this.spheirahedra = spheirahedra;
         this.pixelRatio = window.devicePixelRatio;
         this.camera = new CameraOnSphere(new Vec3(0, 0, 0), Math.PI / 3,
                                          4, new Vec3(0, 1, 0));
@@ -22,7 +22,7 @@ export default class Canvas3D extends Canvas {
         this.renderProgram = this.gl.createProgram();
         AttachShader(this.gl, RENDER_VERTEX,
                      this.renderProgram, this.gl.VERTEX_SHADER);
-        AttachShader(this.gl, RENDER_PRISM,
+        AttachShader(this.gl, fragment,
                      this.renderProgram, this.gl.FRAGMENT_SHADER);
         LinkProgram(this.gl, this.renderProgram);
         this.renderCanvasVAttrib = this.gl.getAttribLocation(this.renderProgram,
@@ -55,12 +55,14 @@ export default class Canvas3D extends Canvas {
         this.uniLocations.push(this.gl.getUniformLocation(this.renderProgram,
                                                           'u_resolution'));
         this.camera.setUniformLocations(this.gl, this.uniLocations, this.renderProgram);
+        this.spheirahedra.setUniformLocations(this.gl, this.uniLocations, this.renderProgram);
     }
 
     setRenderUniformValues(width, height) {
         let i = 0;
         this.gl.uniform2f(this.uniLocations[i++], width, height);
         i = this.camera.setUniformValues(this.gl, this.uniLocations, i);
+        i = this.spheirahedra.setUniformValues(this.gl, this.uniLocations, i);
     }
 
     render() {

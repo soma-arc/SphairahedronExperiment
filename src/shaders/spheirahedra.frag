@@ -19,6 +19,7 @@ uniform Camera u_camera;
 uniform Sphere u_iniSpheres[3];
 uniform Sphere u_inversionSphere;
 uniform Sphere u_spheirahedraSpheres[6];
+uniform Sphere u_seedSpheres[8];
 
 vec3 calcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,
               const vec2 resolution, const vec2 coord){
@@ -126,33 +127,50 @@ float distPrism(const vec3 pos) {
     return d;
 }
 
-float distSphere(const vec3 pos, const Sphere sphere) {
-    return distance(pos, sphere.center) - sphere.r.x;
+float distSphere(const vec3 pos, const Sphere sphere, vec3 offset) {
+    return distance(pos, sphere.center + offset) - sphere.r.x;
 }
 
 float distInfSpheirahedra(const vec3 pos) {
     float d = distPrism(pos);
-    d = max(-distSphere(pos, u_iniSpheres[0]), d);
-    d = max(-distSphere(pos, u_iniSpheres[1]), d);
-    d = max(-distSphere(pos, u_iniSpheres[2]), d);
+    d = max(-distSphere(pos, u_iniSpheres[0], vec3(0)), d);
+    d = max(-distSphere(pos, u_iniSpheres[1], vec3(0)), d);
+    d = max(-distSphere(pos, u_iniSpheres[2], vec3(0)), d);
+    return d;
+}
+
+float distSpheirahedra(vec3 pos) {
+    Sphere s;
+    s.center = u_inversionSphere.center;
+    s.r.x = u_inversionSphere.r.x * 1.2;
+    float d = distSphere(pos, s, -u_inversionSphere.center);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[0], -u_inversionSphere.center), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[1], -u_inversionSphere.center), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[2], -u_inversionSphere.center), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[3], -u_inversionSphere.center), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[4], -u_inversionSphere.center), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[5], -u_inversionSphere.center), d);
     return d;
 }
 
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
-    hit = distUnion(hit, vec4(distInfSpheirahedra(pos), ID_PRISM, -1, -1));
+    hit = distUnion(hit, vec4(distSpheirahedra(pos), ID_PRISM, -1, -1));
+    // for(int i = 0; i < 8; i++) {
+    //     hit = distUnion(hit, vec4(distSphere(pos, u_seedSpheres[i], -u_inversionSphere.center), ID_PRISM, -1, -1));
+    // }
     return hit;
 }
 
-const vec2 NORMAL_COEFF = vec2(0.005, 0.);
+const vec2 NORMAL_COEFF = vec2(0.001, 0.);
 vec3 computeNormal(const vec3 p) {
     return normalize(vec3(distFunc(p + NORMAL_COEFF.xyy).x - distFunc(p - NORMAL_COEFF.xyy).x,
                           distFunc(p + NORMAL_COEFF.yxy).x - distFunc(p - NORMAL_COEFF.yxy).x,
                           distFunc(p + NORMAL_COEFF.yyx).x - distFunc(p - NORMAL_COEFF.yyx).x));
 }
 
-const int MAX_MARCHING_LOOP = 2000;
-const float MARCHING_THRESHOLD = 0.01;
+const int MAX_MARCHING_LOOP = 3000;
+const float MARCHING_THRESHOLD = 0.001;
 void march(const vec3 rayOrg, const vec3 rayDir, inout IsectInfo isectInfo) {
     float rayLength = 0.;
     vec3 rayPos = rayOrg + rayDir * rayLength;
