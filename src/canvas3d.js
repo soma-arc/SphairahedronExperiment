@@ -37,6 +37,10 @@ export default class Canvas3D extends Canvas {
             prevPosition: new Vec2(0, 0),
             button: -1
         };
+
+        this.fudgeFactor = 0.2;
+        this.marchingThreshold = 0.00001;
+        this.maxIterations = 50;
     }
 
     /**
@@ -57,6 +61,12 @@ export default class Canvas3D extends Canvas {
         this.uniLocations.push(this.gl.getUniformLocation(this.renderProgram,
                                                           'u_resolution'));
         this.camera.setUniformLocations(this.gl, this.uniLocations, this.renderProgram);
+        this.uniLocations.push(this.gl.getUniformLocation(this.renderProgram,
+                                                          'u_fudgeFactor'));
+        this.uniLocations.push(this.gl.getUniformLocation(this.renderProgram,
+                                                          'u_marchingThreshold'));
+        this.uniLocations.push(this.gl.getUniformLocation(this.renderProgram,
+                                                          'u_maxIterations'));
         this.spheirahedra.setUniformLocations(this.gl, this.uniLocations, this.renderProgram);
     }
 
@@ -64,6 +74,10 @@ export default class Canvas3D extends Canvas {
         let i = 0;
         this.gl.uniform2f(this.uniLocations[i++], width, height);
         i = this.camera.setUniformValues(this.gl, this.uniLocations, i);
+        this.gl.uniform1f(this.uniLocations[i++], this.fudgeFactor);
+        this.gl.uniform1f(this.uniLocations[i++], this.marchingThreshold);
+        this.gl.uniform1i(this.uniLocations[i++], this.maxIterations);
+
         i = this.spheirahedra.setUniformValues(this.gl, this.uniLocations, i);
     }
 

@@ -18,8 +18,12 @@ uniform vec2 u_resolution;
 uniform Camera u_camera;
 uniform Sphere u_iniSpheres[3];
 uniform Sphere u_inversionSphere;
+uniform Sphere u_convexSphere;
 uniform Sphere u_spheirahedraSpheres[6];
 uniform Sphere u_seedSpheres[8];
+uniform float u_fudgeFactor;
+uniform float u_marchingThreshold;
+uniform int u_maxIterations;
 
 vec3 calcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,
               const vec2 resolution, const vec2 coord){
@@ -80,6 +84,32 @@ IsectInfo newIsectInfo() {
     return isectInfo;
 }
 
+bool intersectBoundingSphere(vec3 sphereCenter, float radius,
+                             vec3 rayOrigin, vec3 rayDir,
+                             out float t0, out float t1){
+  	vec3 v = rayOrigin - sphereCenter;
+  	float b = dot(rayDir, v);
+  	float c = dot(v, v) - radius * radius;
+  	float d = b * b - c;
+    const float EPSILON = 0.0001;
+  	if(d >= 0.){
+    	float s = sqrt(d);
+    	float tm = -b - s;
+        t0 = tm;
+        if(tm <= EPSILON){
+            t1 = tm;
+            tm = -b + s;
+            t0 = tm;
+        }else{
+        	t1 = -b + s;
+        }
+    	if(EPSILON < tm){
+      		return true;
+    	}
+  	}
+  	return false;
+}
+
 bool intersectBBox(vec3 rayOrg, vec3 rayDir, vec3 boxMin, vec3 boxMax,
                   out float hit0, out float hit1, out bool inBox) {
 	float t0 = -1000000.0, t1 = 1000000.0;
@@ -127,8 +157,9 @@ bool intersectBBox(vec3 rayOrg, vec3 rayDir, vec3 boxMin, vec3 boxMax,
 void sphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {
     vec3 diff = pos - center;
     float lenSq = dot(diff, diff);
-    dr *= r.y / lenSq; // (r * r) / lenSq
-    pos = (diff * r.y) / lenSq + center;
+    float k = r.y / lenSq;
+    dr *= k; // (r * r) / lenSq
+    pos = (diff * k) + center;
 }
 
 vec2 rand2n(const vec2 co, const float sampleIndex) {
@@ -184,10 +215,11 @@ float distSpheirahedra(vec3 pos) {
 
 float g_invNum;
 float distLimitset(vec3 pos) {
-    pos += u_seedSpheres[3].center;
+    pos += u_convexSphere.center;
     float dr = 1.;
     float invNum = 0.;
-    for(int i = 0; i < 100; i++) {
+    for(int i = 0; i < 1000; i++) {
+        if(u_maxIterations <= i) break;
         bool inFund = true;
         if(distance(pos, u_spheirahedraSpheres[0].center) < u_spheirahedraSpheres[0].r.x) {
             invNum++;
@@ -237,10 +269,9 @@ float distLimitset(vec3 pos) {
     float minDist = 9999999.;
     for(int i = 0; i < 8; i++) {
         minDist = min(minDist,
-                      (distance(pos, u_seedSpheres[i].center) - u_seedSpheres[i].r.x) / abs(dr) * 0.2);
+                      (distance(pos, u_seedSpheres[i].center) - u_seedSpheres[i].r.x) / abs(dr) * u_fudgeFactor);
     }
     return minDist;
-    //    return (distance(pos, u_inversionSphere.center) - u_inversionSphere.r.x * .1) / dr * 0.05;
 }
 
 vec4 distFunc(const vec3 pos) {
@@ -268,7 +299,7 @@ void march(const vec3 rayOrg, const vec3 rayDir, inout IsectInfo isectInfo) {
         dist = distFunc(rayPos);
         rayLength += dist.x;
         rayPos = rayOrg + rayDir * rayLength;
-        if(dist.x < MARCHING_THRESHOLD) {
+        if(dist.x < u_marchingThreshold) {
             isectInfo.objId = int(dist.y);
             //isectInfo.objIndex = int(dist.z);
             //isectInfo.objComponentId = int(dist.w);
