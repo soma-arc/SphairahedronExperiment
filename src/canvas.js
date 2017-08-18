@@ -2,6 +2,7 @@ export default class Canvas {
     constructor(canvasId) {
         this.canvasId = canvasId;
         this.canvas = document.getElementById(canvasId);
+        console.log(this.canvas);
         this.pixelRatio = 1.0;//window.devicePixelRatio;
 //        this.resizeCanvas();
 
