@@ -32,6 +32,28 @@ vec3 calcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,
     return normalize(origin + (xaxis * coord.x) + (yaxis * (resolution.y - coord.y)));
 }
 
+const float DISPLAY_GAMMA_COEFF = 1. / 2.2;
+vec4 gammaCorrect(vec4 rgba) {
+    return vec4((min(pow(rgba.r, DISPLAY_GAMMA_COEFF), 1.)),
+                (min(pow(rgba.g, DISPLAY_GAMMA_COEFF), 1.)),
+                (min(pow(rgba.b, DISPLAY_GAMMA_COEFF), 1.)),
+                rgba.a);
+}
+
+
+vec3 hsv2rgb(float h, float s, float v){
+    vec3 c = vec3(h, s, v);
+    const vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+// front to back blend
+vec4 blendCol(vec4 srcC, vec4 outC){
+	srcC.rgb *= srcC.a;
+	return outC + srcC * (1.0 - outC.a);
+}
+
 struct IsectInfo {
     int objId;
     int objIndex;
@@ -160,11 +182,12 @@ float distSpheirahedra(vec3 pos) {
     return d;
 }
 
+float g_invNum;
 float distLimitset(vec3 pos) {
-    pos += u_inversionSphere.center;
+    pos += u_seedSpheres[3].center;
     float dr = 1.;
     float invNum = 0.;
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < 100; i++) {
         bool inFund = true;
         if(distance(pos, u_spheirahedraSpheres[0].center) < u_spheirahedraSpheres[0].r.x) {
             invNum++;
@@ -210,7 +233,7 @@ float distLimitset(vec3 pos) {
         }
         if(inFund) break;
     }
-
+    g_invNum = invNum;
     float minDist = 9999999.;
     for(int i = 0; i < 8; i++) {
         minDist = min(minDist,
@@ -233,8 +256,8 @@ vec3 computeNormal(const vec3 p) {
                           distFunc(p + NORMAL_COEFF.yyx).x - distFunc(p - NORMAL_COEFF.yyx).x));
 }
 
-const int MAX_MARCHING_LOOP = 3000;
-const float MARCHING_THRESHOLD = 0.001;
+const int MAX_MARCHING_LOOP = 1000;
+const float MARCHING_THRESHOLD = 0.00001;
 void march(const vec3 rayOrg, const vec3 rayDir, inout IsectInfo isectInfo) {
     float rayLength = 0.;
     vec3 rayPos = rayOrg + rayDir * rayLength;
@@ -249,7 +272,7 @@ void march(const vec3 rayOrg, const vec3 rayDir, inout IsectInfo isectInfo) {
             isectInfo.objId = int(dist.y);
             //isectInfo.objIndex = int(dist.z);
             //isectInfo.objComponentId = int(dist.w);
-            // isectInfo.matColor = (g_invNum == 0.) ?
+            isectInfo.matColor = hsv2rgb(-0.13 + (g_invNum ) * 0.01, 1., 1.);
             //     hsv2rgb(0.33, 1., .77) :
             //     hsv2rgb(0.0 + g_invNum * 0.12 , 1., 1.);
             isectInfo.intersection = rayPos;
@@ -270,7 +293,7 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 
     march(rayPos, rayDir, isectInfo);
     if(isectInfo.hit) {
-        vec3 matColor = vec3(1);
+        vec3 matColor = isectInfo.matColor;
         vec3 diffuse =  clamp(dot(isectInfo.normal, LIGHT_DIR), 0., 1.) * matColor;
         vec3 ambient = matColor * AMBIENT_FACTOR;
         l += (diffuse) + ambient;
@@ -281,8 +304,13 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 
 out vec4 outColor;
 void main() {
-    vec2 coordOffset = rand2n(gl_FragCoord.xy, 0.);
-    vec3 ray = calcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,
-                       u_resolution, gl_FragCoord.xy + coordOffset);
-    outColor = vec4(computeColor(u_camera.pos, ray), 1.0);
+    vec3 sum = vec3(0);
+    float MAX_SAMPLES = 1.;
+    for (float i = 0. ; i < MAX_SAMPLES ; i++) {
+        vec2 coordOffset = rand2n(gl_FragCoord.xy, i);
+        vec3 ray = calcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,
+                           u_resolution, gl_FragCoord.xy + coordOffset);
+        sum += computeColor(u_camera.pos, ray);
+    }
+    outColor = gammaCorrect(vec4(sum / MAX_SAMPLES, 1.0));
 }

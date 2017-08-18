@@ -1,5 +1,6 @@
 import Sphere from './sphere.js';
 import Vec3 from './vector3d.js';
+import Vec2 from './vector2d.js';
 
 export default class Spheirahedra {
     /**
@@ -10,6 +11,25 @@ export default class Spheirahedra {
     constructor(zb, zc) {
         this.zb = zb;
         this.zc = zc;
+        this.updateListeners = [];
+        this.update();
+
+        this.selectedComponentId = -1;
+        this.pointRadius = 0.02;
+        this.lineWidth = 0.01;
+    }
+
+    addUpdateListener(listener) {
+        this.updateListeners.push(listener);
+    }
+
+    updated() {
+        for (const listener of this.updateListeners) {
+            listener();
+        }
+    }
+
+    update() {
         this.computeSpheres();
 
         this.inversionSphere = new Sphere(-this.s6.center.x,
@@ -21,15 +41,17 @@ export default class Spheirahedra {
 
         this.computeVertexes();
         this.computeSeedSpheres();
+
+        this.updated();
     }
 
     computeSpheres() {
         const r2 = 0.5 + (this.zb * this.zc) / 3.0;
-        const r4 = 0.5 + (this.zb * this.zb - this.zb * this.zc) /3.0;
+        const r4 = 0.5 + (this.zb * this.zb - this.zb * this.zc) / 3.0;
         const r6 = 0.5 + (-this.zb * this.zc + this.zc * this.zc) / 3.0;
         this.s2 = new Sphere(1 - r2, 0, 0, r2);
-	    this.s4 = new Sphere(-(1 - r4)/2, this.zb, Math.sqrt(3) * (1 - r4)/2, r4);
-	    this.s6 = new Sphere(-(1 - r6)/2, this.zc, -Math.sqrt(3) * (1 - r6)/2, r6);
+        this.s4 = new Sphere(-(1 - r4) * 0.5, this.zb, Math.sqrt(3) * (1 - r4) * 0.5, r4);
+        this.s6 = new Sphere(-(1 - r6) * 0.5, this.zc, -Math.sqrt(3) * (1 - r6) * 0.5, r6);
     }
 
     computeInvSpheres() {
@@ -49,6 +71,9 @@ export default class Spheirahedra {
     }
 
     setUniformLocations(gl, uniLocations, program) {
+        uniLocations.push(gl.getUniformLocation(program, 'u_zbzc'));
+        uniLocations.push(gl.getUniformLocation(program, 'u_ui'));
+
         uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[0].center'));
         uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[0].r'));
         uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[1].center'));
@@ -58,6 +83,8 @@ export default class Spheirahedra {
 
         uniLocations.push(gl.getUniformLocation(program, 'u_inversionSphere.center'));
         uniLocations.push(gl.getUniformLocation(program, 'u_inversionSphere.r'));
+        uniLocations.push(gl.getUniformLocation(program, 'u_convexSphere.center'));
+        uniLocations.push(gl.getUniformLocation(program, 'u_convexSphere.r'));
 
         uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[0].center'));
         uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[0].r'));
@@ -90,7 +117,12 @@ export default class Spheirahedra {
         uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[7].r'));
     }
 
-    setUniformValues(gl, uniLocations, uniI) {
+    setUniformValues(gl, uniLocations, uniI, scale) {
+        gl.uniform2f(uniLocations[uniI++],
+                     this.zb, this.zc);
+        gl.uniform2f(uniLocations[uniI++],
+                     this.pointRadius * scale, this.lineWidth * scale);
+
         gl.uniform3f(uniLocations[uniI++],
                      this.s2.center.x, this.s2.center.y, this.s2.center.z);
         gl.uniform2f(uniLocations[uniI++],
@@ -108,6 +140,10 @@ export default class Spheirahedra {
                      this.inversionSphere.center.x, this.inversionSphere.center.y, this.inversionSphere.center.z);
         gl.uniform2f(uniLocations[uniI++],
                      this.inversionSphere.r, this.inversionSphere.rSq);
+        gl.uniform3f(uniLocations[uniI++],
+                     this.convexSphere.center.x, this.convexSphere.center.y, this.convexSphere.center.z);
+        gl.uniform2f(uniLocations[uniI++],
+                     this.convexSphere.r, this.convexSphere.rSq);
 
         gl.uniform3f(uniLocations[uniI++],
                      this.s1inv.center.x, this.s1inv.center.y, this.s1inv.center.z);
@@ -135,24 +171,24 @@ export default class Spheirahedra {
         gl.uniform2f(uniLocations[uniI++],
                      this.s6inv.r, this.s6inv.rSq);
 
-        for(let i = 0; i < 8 ; i++){
+        for (let i = 0; i < 8; i++) {
             gl.uniform3f(uniLocations[uniI++],
                          this.seedSpheres[i].center.x, this.seedSpheres[i].center.y, this.seedSpheres[i].center.z);
             gl.uniform2f(uniLocations[uniI++],
                          this.seedSpheres[i].r, this.seedSpheres[i].rSq);
         }
-        
+
         return uniI;
     }
 
     /**
-     * 
+     *
      * @param {Vec3} x
      * @param {Vec3} y
      * @param {Sphere} a
      * @param {Sphere} b
      * @param {Sphere} c
-     * @returns {Sphere} 
+     * @returns {Sphere}
      */
     computeSeedSphere(x, y, a, b, c) {
         const ab = b.center.sub(a.center);
@@ -164,24 +200,23 @@ export default class Spheirahedra {
     }
 
     /**
-     * 
+     *
      * @param {Vec3} x
      * @param {} vertexes
      * @param {Sphere} a
      * @param {Sphere} b
      * @param {Sphere} c
-     * @returns {Sphere} 
+     * @returns {Sphere}
      */
     computeMinSeedSphere(x, vertexes, a, b, c) {
         let minSphere = new Sphere(0, 0, 0, 99999999999);
-        for(const ov of vertexes) {
+        for (const ov of vertexes) {
             if (Vec3.distance(x, ov) < 0.000001) {
                 // x === ov
                 continue;
             }
             const s = this.computeSeedSphere(x, ov, a, b, c);
-            console.log(s);
-            if(s.r < minSphere.r) {
+            if (s.r < minSphere.r) {
                 minSphere = s;
             }
         }
@@ -189,8 +224,8 @@ export default class Spheirahedra {
     }
 
     addSphereIfNotExists(spheres, sphere) {
-        for(const s of spheres) {
-            if(Math.abs(s.r, sphere.r) < 0.00001 &&
+        for (const s of spheres) {
+            if (Math.abs(s.r, sphere.r) < 0.00001 &&
                Vec3.distance(s.center, sphere.center) < 0.00001) {
                 console.log('duplicate');
                 return;
@@ -225,7 +260,10 @@ export default class Spheirahedra {
         this.addSphereIfNotExists(this.seedSpheres,
                                   this.computeMinSeedSphere(this.vertexes[7], this.vertexes,
                                                             this.s1inv, this.s3inv, this.s5inv));
-        console.log(this.seedSpheres);
+        this.convexSphere = Sphere.fromPoints(this.vertexes[0],
+                                              this.vertexes[2],
+                                              this.vertexes[4],
+                                              this.vertexes[7]);
     }
 
     computeVertexes() {
@@ -238,9 +276,8 @@ export default class Spheirahedra {
         this.vertexes.push(this.computeIdealVertex(this.s2inv, this.s3inv, this.s6inv));
         this.vertexes.push(this.computeIdealVertex(this.s2inv, this.s4inv, this.s6inv));
         this.vertexes.push(this.computeIdealVertex(this.s1inv, this.s3inv, this.s5inv));
-        console.log(this.vertexes);
     }
-    
+
     computeIdealVertex(a, b, c) {
         const AB = (a.center.lengthSq() - b.center.lengthSq() - a.rSq + b.rSq) * 0.5 -
               a.center.lengthSq() + Vec3.dot(a.center, b.center);
@@ -253,5 +290,31 @@ export default class Spheirahedra {
         const s = (AB * y - AC * z) / (x * y - z * z);
         const t = (AC * x - AB * z) / (x * y - z * z);
         return a.center.add((b.center.sub(a.center)).scale(s)).add((c.center.sub(a.center)).scale(t));
+    }
+
+    select(mouse, scale) {
+        const zbzc = new Vec2(this.zb, this.zc);
+        if (Vec2.distance(mouse, new Vec2(this.zb, this.zc)) < 0.1) {
+            this.selectedComponentId = Spheirahedra.POINT_ZB_ZC;
+            this.diffToComponent = mouse.sub(zbzc);
+            return;
+        }
+
+        this.selectedComponentId = -1;
+    }
+
+    move(mouse) {
+        if (this.selectedComponentId === Spheirahedra.POINT_ZB_ZC) {
+            const np = mouse.sub(this.diffToComponent);
+            this.zb = np.x;
+            this.zc = np.y;
+            this.update();
+            return true;
+        }
+        return false;
+    }
+
+    static get POINT_ZB_ZC() {
+        return 0;
     }
 }

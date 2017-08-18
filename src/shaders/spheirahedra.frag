@@ -18,6 +18,7 @@ uniform vec2 u_resolution;
 uniform Camera u_camera;
 uniform Sphere u_iniSpheres[3];
 uniform Sphere u_inversionSphere;
+uniform Sphere u_convexSphere;
 uniform Sphere u_spheirahedraSpheres[6];
 uniform Sphere u_seedSpheres[8];
 
@@ -30,6 +31,14 @@ vec3 calcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,
     vec3 center = v * imagePlane;
     vec3 origin = center - (xaxis * (resolution.x  *.5)) - (yaxis * (resolution.y * .5));
     return normalize(origin + (xaxis * coord.x) + (yaxis * (resolution.y - coord.y)));
+}
+
+const float DISPLAY_GAMMA_COEFF = 1. / 2.2;
+vec4 gammaCorrect(vec4 rgba) {
+    return vec4((min(pow(rgba.r, DISPLAY_GAMMA_COEFF), 1.)),
+                (min(pow(rgba.g, DISPLAY_GAMMA_COEFF), 1.)),
+                (min(pow(rgba.b, DISPLAY_GAMMA_COEFF), 1.)),
+                rgba.a);
 }
 
 struct IsectInfo {
@@ -141,15 +150,13 @@ float distInfSpheirahedra(const vec3 pos) {
 
 float distSpheirahedra(vec3 pos) {
     Sphere s;
-    s.center = u_inversionSphere.center;
-    s.r.x = u_inversionSphere.r.x * 1.2;
-    float d = distSphere(pos, s, -u_inversionSphere.center);
-    d = max(-distSphere(pos, u_spheirahedraSpheres[0], -u_inversionSphere.center), d);
-    d = max(-distSphere(pos, u_spheirahedraSpheres[1], -u_inversionSphere.center), d);
-    d = max(-distSphere(pos, u_spheirahedraSpheres[2], -u_inversionSphere.center), d);
-    d = max(-distSphere(pos, u_spheirahedraSpheres[3], -u_inversionSphere.center), d);
-    d = max(-distSphere(pos, u_spheirahedraSpheres[4], -u_inversionSphere.center), d);
-    d = max(-distSphere(pos, u_spheirahedraSpheres[5], -u_inversionSphere.center), d);
+    float d = distSphere(pos, u_convexSphere, -u_convexSphere.center);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[0], -u_convexSphere.center), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[1], -u_convexSphere.center), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[2], -u_convexSphere.center), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[3], -u_convexSphere.center), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[4], -u_convexSphere.center), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[5], -u_convexSphere.center), d);
     return d;
 }
 
@@ -162,7 +169,7 @@ vec4 distFunc(const vec3 pos) {
     return hit;
 }
 
-const vec2 NORMAL_COEFF = vec2(0.001, 0.);
+const vec2 NORMAL_COEFF = vec2(0.00001, 0.);
 vec3 computeNormal(const vec3 p) {
     return normalize(vec3(distFunc(p + NORMAL_COEFF.xyy).x - distFunc(p - NORMAL_COEFF.xyy).x,
                           distFunc(p + NORMAL_COEFF.yxy).x - distFunc(p - NORMAL_COEFF.yxy).x,
@@ -170,7 +177,7 @@ vec3 computeNormal(const vec3 p) {
 }
 
 const int MAX_MARCHING_LOOP = 3000;
-const float MARCHING_THRESHOLD = 0.001;
+const float MARCHING_THRESHOLD = 0.0001;
 void march(const vec3 rayOrg, const vec3 rayDir, inout IsectInfo isectInfo) {
     float rayLength = 0.;
     vec3 rayPos = rayOrg + rayDir * rayLength;
@@ -217,8 +224,13 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 
 out vec4 outColor;
 void main() {
-    vec2 coordOffset = rand2n(gl_FragCoord.xy, 0.);
-    vec3 ray = calcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,
-                       u_resolution, gl_FragCoord.xy + coordOffset);
-    outColor = vec4(computeColor(u_camera.pos, ray), 1.0);
+    vec3 sum = vec3(0);
+    float MAX_SAMPLES = 10.;
+    for (float i = 0. ; i < MAX_SAMPLES ; i++) {
+        vec2 coordOffset = rand2n(gl_FragCoord.xy, i);
+        vec3 ray = calcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,
+                           u_resolution, gl_FragCoord.xy + coordOffset);
+        sum += computeColor(u_camera.pos, ray);
+    }
+    outColor = gammaCorrect(vec4(sum / MAX_SAMPLES, 1.0));
 }

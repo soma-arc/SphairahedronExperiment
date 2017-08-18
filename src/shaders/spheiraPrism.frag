@@ -31,6 +31,14 @@ vec3 calcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,
     return normalize(origin + (xaxis * coord.x) + (yaxis * (resolution.y - coord.y)));
 }
 
+const float DISPLAY_GAMMA_COEFF = 1. / 2.2;
+vec4 gammaCorrect(vec4 rgba) {
+    return vec4((min(pow(rgba.r, DISPLAY_GAMMA_COEFF), 1.)),
+                (min(pow(rgba.g, DISPLAY_GAMMA_COEFF), 1.)),
+                (min(pow(rgba.b, DISPLAY_GAMMA_COEFF), 1.)),
+                rgba.a);
+}
+
 struct IsectInfo {
     int objId;
     int objIndex;
@@ -202,5 +210,5 @@ void main() {
     vec2 coordOffset = rand2n(gl_FragCoord.xy, 0.);
     vec3 ray = calcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,
                        u_resolution, gl_FragCoord.xy + coordOffset);
-    outColor = vec4(computeColor(u_camera.pos, ray), 1.0);
+    outColor = gammaCorrect(vec4(computeColor(u_camera.pos, ray), 1.0));
 }
