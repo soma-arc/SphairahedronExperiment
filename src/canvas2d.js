@@ -34,6 +34,7 @@ export default class Canvas2D extends Canvas {
         this.scale = 5;
         this.scaleFactor = 1.25;
         this.translate = new Vec2(0, 0);
+        this.isTweaking = false;
     }
 
     /**
@@ -119,7 +120,7 @@ export default class Canvas2D extends Canvas {
         const mouse = this.calcSceneCoord(event.clientX, event.clientY);
         if (this.mouseState.button === Canvas.MOUSE_BUTTON_LEFT) {
             const moved = this.spheirahedra.move(mouse);
-            if (moved) this.render();
+            if (moved) this.isTweaking = true;
         } else if (this.mouseState.button === Canvas.MOUSE_BUTTON_RIGHT) {
             this.translate = this.translate.sub(mouse.sub(this.mouseState.prevPosition));
             this.render();
@@ -128,5 +129,6 @@ export default class Canvas2D extends Canvas {
 
     mouseUpListener(event) {
         this.mouseState.isPressing = false;
+        this.isTweaking = false;
     }
 }

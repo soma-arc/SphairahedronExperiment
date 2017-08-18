@@ -11,7 +11,7 @@ export default class Canvas3D extends Canvas {
     constructor(canvasId, spheirahedra, fragment) {
         super(canvasId);
         this.spheirahedra = spheirahedra;
-        this.spheirahedra.addUpdateListener(this.render.bind(this));
+//        this.spheirahedra.addUpdateListener(this.render.bind(this));
         this.pixelRatio = window.devicePixelRatio;
         this.camera = new CameraOnSphere(new Vec3(0, 0, 0), Math.PI / 3,
                                          1, new Vec3(0, 1, 0));
@@ -41,6 +41,7 @@ export default class Canvas3D extends Canvas {
         this.fudgeFactor = 0.2;
         this.marchingThreshold = 0.00001;
         this.maxIterations = 50;
+        this.isRendering = false;
     }
 
     /**
@@ -123,6 +124,7 @@ export default class Canvas3D extends Canvas {
 
     mouseUpListener(event) {
         this.mouseState.isPressing = false;
+        this.isRendering = false;
     }
 
     mouseMoveListener(event) {
@@ -134,14 +136,14 @@ export default class Canvas3D extends Canvas {
             this.camera.theta = prevThetaPhi.x + (this.mouseState.prevPosition.x - mouse.x) * 0.01;
             this.camera.phi = prevThetaPhi.y - (this.mouseState.prevPosition.y - mouse.y) * 0.01;
             this.camera.update();
-            this.render();
+            this.isRendering = true;
         } else if (this.mouseState.button === Canvas.MOUSE_BUTTON_RIGHT) {
             const d = mouse.sub(this.mouseState.prevPosition);
             const [xVec, yVec] = this.camera.getFocalXYVector(this.canvas.width,
                                                               this.canvas.height);
             this.camera.target = this.camera.prevTarget.add(xVec.scale(-d.x).add(yVec.scale(-d.y)).scale(0.005));
             this.camera.update();
-            this.render();
+            this.isRendering = true;
         }
     }
 }

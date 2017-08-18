@@ -22,20 +22,35 @@ window.addEventListener('load', () => {
     maxIterBox.addEventListener('change', function(event){
         limitsetCanvas.maxIterations = maxIterBox.value;
         limitsetCanvas.render();
-    })
+    });
 
     const marchingThresholdBox = document.getElementById('marchingThreshold');
     marchingThresholdBox.value = limitsetCanvas.marchingThreshold;
     marchingThresholdBox.addEventListener('change', function(event){
         limitsetCanvas.marchingThreshold = marchingThresholdBox.value;
         limitsetCanvas.render();
-    })
+    });
 
     const fudgeFactorBox = document.getElementById('fudgeFactor');
     fudgeFactorBox.value = limitsetCanvas.fudgeFactor;
     fudgeFactorBox.addEventListener('change', function(event){
         limitsetCanvas.fudgeFactor = fudgeFactorBox.value;
         limitsetCanvas.render();
-    })
-});
+    });
 
+    function renderLoop() {
+        if(limitsetCanvas.isRendering) {
+            limitsetCanvas.render();
+        } else if(canvas.isRendering) {
+            canvas.render();
+        } else if(parameterCanvas.isTweaking) {
+            limitsetCanvas.render();
+            canvas.render();
+            parameterCanvas.render();
+        }
+
+        requestAnimationFrame(renderLoop);
+    }
+
+    renderLoop();
+});
