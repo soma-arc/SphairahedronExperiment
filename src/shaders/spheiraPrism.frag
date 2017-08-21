@@ -152,7 +152,7 @@ vec4 distFunc(const vec3 pos) {
     return hit;
 }
 
-const vec2 NORMAL_COEFF = vec2(0.005, 0.);
+const vec2 NORMAL_COEFF = vec2(0.00001, 0.);
 vec3 computeNormal(const vec3 p) {
     return normalize(vec3(distFunc(p + NORMAL_COEFF.xyy).x - distFunc(p - NORMAL_COEFF.xyy).x,
                           distFunc(p + NORMAL_COEFF.yxy).x - distFunc(p - NORMAL_COEFF.yxy).x,
@@ -160,7 +160,7 @@ vec3 computeNormal(const vec3 p) {
 }
 
 const int MAX_MARCHING_LOOP = 2000;
-const float MARCHING_THRESHOLD = 0.01;
+const float MARCHING_THRESHOLD = 0.0001;
 void march(const vec3 rayOrg, const vec3 rayDir, inout IsectInfo isectInfo) {
     float rayLength = 0.;
     vec3 rayPos = rayOrg + rayDir * rayLength;
@@ -207,8 +207,13 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 
 out vec4 outColor;
 void main() {
-    vec2 coordOffset = rand2n(gl_FragCoord.xy, 0.);
-    vec3 ray = calcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,
-                       u_resolution, gl_FragCoord.xy + coordOffset);
-    outColor = gammaCorrect(vec4(computeColor(u_camera.pos, ray), 1.0));
+    vec3 sum = vec3(0);
+    float MAX_SAMPLES = 10.;
+    for (float i = 0. ; i < MAX_SAMPLES ; i++) {
+        vec2 coordOffset = rand2n(gl_FragCoord.xy, i);
+        vec3 ray = calcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,
+                           u_resolution, gl_FragCoord.xy + coordOffset);
+        sum += computeColor(u_camera.pos, ray);
+    }
+    outColor = gammaCorrect(vec4(sum / MAX_SAMPLES, 1.0));
 }
