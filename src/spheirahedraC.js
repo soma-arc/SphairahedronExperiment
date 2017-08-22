@@ -9,7 +9,7 @@ export default class SpheirahedraC extends Spheirahedra {
         this.computeSpheres();
 
         this.inversionSphere = new Sphere(-this.s2.center.x,
-                                          -this.s4.center.y,
+                                          -this.s4.center.y + 3,
                                           this.s4.center.z,
                                           this.s6.r);
 

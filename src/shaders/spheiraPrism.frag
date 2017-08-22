@@ -149,6 +149,7 @@ float distInfSpheirahedra(const vec3 pos) {
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
     hit = distUnion(hit, vec4(distInfSpheirahedra(pos), ID_PRISM, -1, -1));
+    hit = distUnion(hit, vec4(distSphere(pos, u_inversionSphere), ID_PRISM, -1, -1));
     return hit;
 }
 
