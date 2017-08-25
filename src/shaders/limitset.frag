@@ -24,6 +24,8 @@ uniform Sphere u_seedSpheres[8];
 uniform float u_fudgeFactor;
 uniform float u_marchingThreshold;
 uniform int u_maxIterations;
+uniform vec3 u_dividePlaneOrigin;
+uniform vec3 u_dividePlaneNormal;
 
 vec3 calcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,
               const vec2 resolution, const vec2 coord){
@@ -184,6 +186,7 @@ float distPrism(const vec3 pos) {
     float d = distPlane(pos, vec3(1, 0 ,0), normalize(vec3(sqrt(3.) * .5, 0., 1.5)));
     d = max(distPlane(pos, vec3(1, 0 ,0), normalize(vec3(sqrt(3.) * .5, 0., -1.5))), d);
     d = max(distPlane(pos, vec3(-0.5, 0 ,0), normalize(vec3(-1, 0, 0))), d);
+    d = max(distPlane(pos, u_dividePlaneOrigin, u_dividePlaneNormal), d);
     return d;
 }
 
@@ -201,15 +204,13 @@ float distInfSpheirahedra(const vec3 pos) {
 
 float distSpheirahedra(vec3 pos) {
     Sphere s;
-    s.center = u_inversionSphere.center;
-    s.r.x = u_inversionSphere.r.x * 1.2;
-    float d = distSphere(pos, s, -u_inversionSphere.center);
-    d = max(-distSphere(pos, u_spheirahedraSpheres[0], -u_inversionSphere.center), d);
-    d = max(-distSphere(pos, u_spheirahedraSpheres[1], -u_inversionSphere.center), d);
-    d = max(-distSphere(pos, u_spheirahedraSpheres[2], -u_inversionSphere.center), d);
-    d = max(-distSphere(pos, u_spheirahedraSpheres[3], -u_inversionSphere.center), d);
-    d = max(-distSphere(pos, u_spheirahedraSpheres[4], -u_inversionSphere.center), d);
-    d = max(-distSphere(pos, u_spheirahedraSpheres[5], -u_inversionSphere.center), d);
+    float d = distSphere(pos, u_convexSphere, -vec3(0));
+    d = max(-distSphere(pos, u_spheirahedraSpheres[0], -vec3(0)), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[1], -vec3(0)), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[2], -vec3(0)), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[3], -vec3(0)), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[4], -vec3(0)), d);
+    d = max(-distSphere(pos, u_spheirahedraSpheres[5], -vec3(0)), d);
     return d;
 }
 
@@ -227,36 +228,31 @@ float distLimitset(vec3 pos) {
                          u_spheirahedraSpheres[0].center,
                          u_spheirahedraSpheres[0].r);
             inFund = false;
-        }
-        if(distance(pos, u_spheirahedraSpheres[1].center) < u_spheirahedraSpheres[1].r.x) {
+        } else if(distance(pos, u_spheirahedraSpheres[1].center) < u_spheirahedraSpheres[1].r.x) {
             invNum++;
             sphereInvert(pos, dr,
                          u_spheirahedraSpheres[1].center,
                          u_spheirahedraSpheres[1].r);
             inFund = false;
-        }
-        if(distance(pos, u_spheirahedraSpheres[2].center) < u_spheirahedraSpheres[2].r.x) {
+        } else if(distance(pos, u_spheirahedraSpheres[2].center) < u_spheirahedraSpheres[2].r.x) {
             invNum++;
             sphereInvert(pos, dr,
                          u_spheirahedraSpheres[2].center,
                          u_spheirahedraSpheres[2].r);
             inFund = false;
-        }
-        if(distance(pos, u_spheirahedraSpheres[3].center) < u_spheirahedraSpheres[3].r.x) {
+        } else if(distance(pos, u_spheirahedraSpheres[3].center) < u_spheirahedraSpheres[3].r.x) {
             invNum++;
             sphereInvert(pos, dr,
                          u_spheirahedraSpheres[3].center,
                          u_spheirahedraSpheres[3].r);
             inFund = false;
-        }
-        if(distance(pos, u_spheirahedraSpheres[4].center) < u_spheirahedraSpheres[4].r.x) {
+        } else if(distance(pos, u_spheirahedraSpheres[4].center) < u_spheirahedraSpheres[4].r.x) {
             invNum++;
             sphereInvert(pos, dr,
                          u_spheirahedraSpheres[4].center,
                          u_spheirahedraSpheres[4].r);
             inFund = false;
-        }
-        if(distance(pos, u_spheirahedraSpheres[5].center) < u_spheirahedraSpheres[5].r.x) {
+        } else if(distance(pos, u_spheirahedraSpheres[5].center) < u_spheirahedraSpheres[5].r.x) {
             invNum++;
             sphereInvert(pos, dr,
                          u_spheirahedraSpheres[5].center,
@@ -267,10 +263,73 @@ float distLimitset(vec3 pos) {
     }
     g_invNum = invNum;
     float minDist = 9999999.;
-    for(int i = 0; i < 8; i++) {
+    for(int i = 0; i < 6; i++) {
         minDist = min(minDist,
-                      (distance(pos, u_seedSpheres[i].center) - u_seedSpheres[i].r.x) / abs(dr) * u_fudgeFactor);
+                      (distSphere(pos, u_seedSpheres[i], vec3(0))) / abs(dr) * u_fudgeFactor);
     }
+    // minDist = min(minDist,
+    //               distSpheirahedra(pos) / abs(dr) * u_fudgeFactor);
+    return minDist;
+}
+
+float distPrismLimitset(vec3 pos) {
+    float dr = 1.;
+    float invNum = 0.;
+    for(int i = 0; i < 1000; i++) {
+        if(u_maxIterations <= i) break;
+        bool inFund = true;
+        if(distance(pos, u_iniSpheres[0].center) < u_iniSpheres[0].r.x) {
+            invNum++;
+            sphereInvert(pos, dr,
+                         u_iniSpheres[0].center,
+                         u_iniSpheres[0].r);
+            inFund = false;
+        } else if(distance(pos, u_iniSpheres[1].center) < u_iniSpheres[1].r.x) {
+            invNum++;
+            sphereInvert(pos, dr,
+                         u_iniSpheres[1].center,
+                         u_iniSpheres[1].r);
+            inFund = false;
+        } else if(distance(pos, u_iniSpheres[2].center) < u_iniSpheres[2].r.x) {
+            invNum++;
+            sphereInvert(pos, dr,
+                         u_iniSpheres[2].center,
+                         u_iniSpheres[2].r);
+            inFund = false;
+        }
+        pos.x -= -0.5;
+        if(pos.x < 0.) {
+            pos.x *= -1.;
+            invNum++;
+            pos.x -= 0.5;
+            continue;
+        }
+        pos.x += -0.5;
+
+        pos.x -= 1.;
+        vec3 n = normalize(vec3(sqrt(3.) * 0.5, 0., 1.5));
+        float d = dot(pos, n);
+        if(d > 0.) {
+            invNum++;
+            pos -= 2. * d * n;
+            pos.x += 1.;
+            continue;
+        }
+        n = n * vec3(1, 1, -1);
+        d = dot(pos, n);
+        if(d > 0.) {
+            invNum++;
+            pos -= 2. * d * n;
+            pos.x += 1.;
+            continue;
+        }
+        pos.x += 1.;
+
+        if(inFund) break;
+    }
+    g_invNum = invNum;
+    float minDist = 9999999.;
+    minDist = min(minDist, distInfSpheirahedra(pos) / abs(dr) * u_fudgeFactor);
     return minDist;
 }
 
@@ -287,7 +346,7 @@ vec3 computeNormal(const vec3 p) {
                           distFunc(p + NORMAL_COEFF.yyx).x - distFunc(p - NORMAL_COEFF.yyx).x));
 }
 
-const int MAX_MARCHING_LOOP = 1000;
+const int MAX_MARCHING_LOOP = 3000;
 const float MARCHING_THRESHOLD = 0.00001;
 void march(const vec3 rayOrg, const vec3 rayDir, inout IsectInfo isectInfo) {
     float rayLength = 0.;
