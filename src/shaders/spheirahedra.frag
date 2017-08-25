@@ -41,6 +41,13 @@ vec4 gammaCorrect(vec4 rgba) {
                 rgba.a);
 }
 
+vec3 hsv2rgb(float h, float s, float v){
+    vec3 c = vec3(h, s, v);
+    const vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
 struct IsectInfo {
     int objId;
     int objIndex;
@@ -128,6 +135,7 @@ float distPlane(const vec3 pos, const vec3 p, const vec3 normal) {
 }
 
 const int ID_PRISM = 0;
+const int ID_INI_SPHERES = 1;
 
 float distPrism(const vec3 pos) {
     float d = distPlane(pos, vec3(1, 0 ,0), normalize(vec3(sqrt(3.) * .5, 0., 1.5)));
@@ -160,12 +168,34 @@ float distSpheirahedra(vec3 pos) {
     return d;
 }
 
+void intersectSphere(const int objId, const int objIndex, const int objComponentId,
+                     const vec3 matColor,
+                     const vec3 sphereCenter, const float radius,
+                     const vec3 rayOrigin, const vec3 rayDir, inout IsectInfo isectInfo){
+    vec3 v = rayOrigin - sphereCenter;
+    float b = dot(rayDir, v);
+    float c = dot(v, v) - radius * radius;
+    float d = b * b - c;
+    if(d >= 0.){
+        float s = sqrt(d);
+        float t = -b - s;
+        if(t <= THRESHOLD) t = -b + s;
+        if(THRESHOLD < t && t < isectInfo.mint){
+            isectInfo.objId = objId;
+            isectInfo.objIndex = objIndex;
+            isectInfo.objComponentId = objComponentId;
+            isectInfo.matColor = matColor;
+            isectInfo.mint = t;
+            isectInfo.intersection = (rayOrigin + t * rayDir);
+            isectInfo.normal = normalize(isectInfo.intersection - sphereCenter);
+            isectInfo.hit = true;
+        }
+    }
+}
+
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
     hit = distUnion(hit, vec4(distSpheirahedra(pos), ID_PRISM, -1, -1));
-    // for(int i = 0; i < 8; i++) {
-    //     hit = distUnion(hit, vec4(distSphere(pos, u_seedSpheres[i], -u_inversionSphere.center), ID_PRISM, -1, -1));
-    // }
     return hit;
 }
 
@@ -192,11 +222,10 @@ void march(const vec3 rayOrg, const vec3 rayDir, inout IsectInfo isectInfo) {
             isectInfo.objId = int(dist.y);
             //isectInfo.objIndex = int(dist.z);
             //isectInfo.objComponentId = int(dist.w);
-            // isectInfo.matColor = (g_invNum == 0.) ?
-            //     hsv2rgb(0.33, 1., .77) :
-            //     hsv2rgb(0.0 + g_invNum * 0.12 , 1., 1.);
+            isectInfo.matColor = vec3(0.7);
             isectInfo.intersection = rayPos;
             isectInfo.normal = computeNormal(rayPos);
+            isectInfo.mint = rayLength;
             isectInfo.hit = true;
             break;
         }
@@ -211,12 +240,48 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 
     vec3 l = vec3(0);
 
-    march(rayPos, rayDir, isectInfo);
-    if(isectInfo.hit) {
-        vec3 matColor = vec3(1);
-        vec3 diffuse =  clamp(dot(isectInfo.normal, LIGHT_DIR), 0., 1.) * matColor;
-        vec3 ambient = matColor * AMBIENT_FACTOR;
-        l += (diffuse) + ambient;
+    float transparency = 0.8;
+    float coeff = 1.;
+    for(int depth = 0 ; depth < 8; depth++){
+        march(rayPos, rayDir, isectInfo);
+        for(int i = 0; i < 6 ; i++) {
+            intersectSphere(ID_INI_SPHERES, i, -1,
+                            hsv2rgb(float(i) * 0.3, 1., 1.),
+                            u_spheirahedraSpheres[i].center -u_convexSphere.center,
+                            u_spheirahedraSpheres[i].r.x*1.00001,
+                            rayPos, rayDir, isectInfo);
+        }
+        // for(int i = 0; i < 8 ; i++) {
+        //     intersectSphere(ID_INI_SPHERES, i, -1,
+        //                     hsv2rgb(float(i) * 0.3, 1., 1.),
+        //                     u_seedSpheres[i].center -u_convexSphere.center,
+        //                     u_seedSpheres[i].r.x * 1.0000,
+        //                     rayPos, rayDir, isectInfo);
+        // }
+        intersectSphere(ID_INI_SPHERES, -1, -1,
+                        vec3(0.7),
+                        u_convexSphere.center -u_convexSphere.center,
+                        u_convexSphere.r.x * 1.000001,
+                        rayPos, rayDir, isectInfo);
+
+        if(isectInfo.hit) {
+            vec3 matColor = isectInfo.matColor;
+            vec3 diffuse =  clamp(dot(isectInfo.normal, LIGHT_DIR), 0., 1.) * matColor;
+            vec3 ambient = matColor * AMBIENT_FACTOR;
+
+            bool transparent =  (isectInfo.objId == ID_INI_SPHERES) ?
+                true : false;
+            if(transparent) {
+                coeff *= transparency;
+                l += (diffuse + ambient) * coeff;
+                rayPos = isectInfo.intersection + rayDir * 0.00000001 * 2.;
+                isectInfo = newIsectInfo();
+                continue;
+            } else {
+                l += (diffuse + ambient) * coeff;
+            }
+        }
+        break;
     }
 
     return l;
