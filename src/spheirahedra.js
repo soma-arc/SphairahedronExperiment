@@ -86,35 +86,18 @@ export default class Spheirahedra {
         uniLocations.push(gl.getUniformLocation(program, 'u_convexSphere.center'));
         uniLocations.push(gl.getUniformLocation(program, 'u_convexSphere.r'));
 
-        uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[0].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[0].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[1].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[1].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[2].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[2].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[3].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[3].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[4].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[4].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[5].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[5].r'));
+        uniLocations.push(gl.getUniformLocation(program, 'u_dividePlaneOrigin'));
+        uniLocations.push(gl.getUniformLocation(program, 'u_dividePlaneNormal'));
 
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[0].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[0].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[1].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[1].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[2].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[2].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[3].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[3].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[4].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[4].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[5].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[5].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[6].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[6].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[7].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[7].r'));
+        for (let i = 0; i < 6; i++) {
+            uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[' + i + '].center'));
+            uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[' + i + '].r'));
+        }
+
+        for (let i = 0; i < 8; i++) {
+            uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[' + i + '].center'));
+            uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[' + i + '].r'));
+        }
     }
 
     setUniformValues(gl, uniLocations, uniI, scale) {
@@ -144,6 +127,11 @@ export default class Spheirahedra {
                      this.convexSphere.center.x, this.convexSphere.center.y, this.convexSphere.center.z);
         gl.uniform2f(uniLocations[uniI++],
                      this.convexSphere.r, this.convexSphere.rSq);
+
+        gl.uniform3f(uniLocations[uniI++],
+                     this.p1.x, this.p1.y, this.p1.z);
+        gl.uniform3f(uniLocations[uniI++],
+                     this.dividePlaneNormal.x, this.dividePlaneNormal.y, this.dividePlaneNormal.z);
 
         gl.uniform3f(uniLocations[uniI++],
                      this.s1inv.center.x, this.s1inv.center.y, this.s1inv.center.z);
@@ -276,6 +264,16 @@ export default class Spheirahedra {
         this.vertexes.push(this.computeIdealVertex(this.s2inv, this.s3inv, this.s6inv));
         this.vertexes.push(this.computeIdealVertex(this.s2inv, this.s4inv, this.s6inv));
         this.vertexes.push(this.computeIdealVertex(this.s1inv, this.s3inv, this.s5inv));
+
+        this.p1 = this.inversionSphere.invertOnPoint(this.vertexes[0]);
+        const p2 = this.inversionSphere.invertOnPoint(this.vertexes[1]);
+        const p3 = this.inversionSphere.invertOnPoint(this.vertexes[2]);
+        const v1 = p2.sub(this.p1);
+        const v2 = p3.sub(this.p1);
+        this.dividePlaneNormal = Vec3.cross(v1, v2).normalize();
+        if (this.dividePlaneNormal.y < 0) {
+            this.dividePlaneNormal = this.dividePlaneNormal.scale(-1);
+        }
     }
 
     computeIdealVertex(a, b, c) {
