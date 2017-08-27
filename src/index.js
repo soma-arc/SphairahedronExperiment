@@ -1,6 +1,8 @@
 import Canvas3D from './canvas3d.js';
 import Canvas2D from './canvas2d.js';
 import Spheirahedra from './spheirahedraC.js';
+import SpheirahedraPrism from './spheiraPrism.js';
+import SpheiraCake1 from './spheiraCake1.js';
 
 const RENDER_PRISM = require('./shaders//spheiraPrism.frag');
 const RENDER_SPHEIRAHEDRA = require('./shaders/spheirahedra.frag');
@@ -9,12 +11,28 @@ const RENDER_LIMIT_SET = require('./shaders/limitset.frag');
 const RENDER_PARAMETER = require('./shaders/parameter.frag');
 const RENDER_PARAMETER_B = require('./shaders/parameterC.frag');
 
+const RENDER_PRISM_TWO_SPHERES = require('./shaders/spheiraPrism.frag');
+const RENDER_PRISM_LIMITSET = require('./shaders/prismLimitset.frag');
+const RENDER_SPHEIRAHEDRA_TWO_SPHERES = require('./shaders/spheirahedraPrismTwoSpheres.frag');
+
+const RENDER_SPHEIRA_INF_CAKE = require('./shaders/spheiraCake.frag');
+const RENDER_LIMIT_CAKE = require('./shaders/cakeLimitset.frag');
+
 window.addEventListener('load', () => {
     const spheirahedra = new Spheirahedra(0, Math.sqrt(3) / 2);
-    const prismCanvas = new Canvas3D('prismCanvas', spheirahedra, RENDER_PRISM);
-    const limitsetCanvas = new Canvas3D('limitsetCanvas', spheirahedra, RENDER_LIMIT_SET);
-    const parameterCanvas = new Canvas2D('parameterCanvas', spheirahedra, RENDER_PARAMETER_B);
-    const spheirahedraCanvas = new Canvas3D('spheirahedraCanvas', spheirahedra, RENDER_SPHEIRAHEDRA);
+    const spheirahedraPrism = new SpheirahedraPrism(1.78);
+    const spheiraCake1 = new SpheiraCake1(1.5);
+    //    const prismCanvas = new Canvas3D('prismCanvas', spheirahedra, RENDER_PRISM);
+    //    const prismCanvas = new Canvas3D('prismCanvas', spheirahedraPrism, RENDER_PRISM_TWO_SPHERES);
+    const prismCanvas = new Canvas3D('prismCanvas', spheiraCake1, RENDER_SPHEIRA_INF_CAKE);
+    // const limitsetCanvas = new Canvas3D('limitsetCanvas', spheirahedra, RENDER_LIMIT_SET);
+    //    const limitsetCanvas = new Canvas3D('limitsetCanvas', spheirahedraPrism, RENDER_PRISM_LIMITSET);
+    const limitsetCanvas = new Canvas3D('limitsetCanvas', spheiraCake1, RENDER_LIMIT_CAKE);
+    // const parameterCanvas = new Canvas2D('parameterCanvas', spheirahedra, RENDER_PARAMETER_B);
+    //    const parameterCanvas = new Canvas2D('parameterCanvas', spheirahedraPrism, RENDER_PARAMETER_B);
+    const parameterCanvas = new Canvas2D('parameterCanvas', spheiraCake1, RENDER_PARAMETER_B);
+    // const spheirahedraCanvas = new Canvas3D('spheirahedraCanvas', spheirahedra, RENDER_SPHEIRAHEDRA);
+    const spheirahedraCanvas = new Canvas3D('spheirahedraCanvas', spheirahedraPrism, RENDER_SPHEIRAHEDRA_TWO_SPHERES);
     prismCanvas.render();
     limitsetCanvas.render();
     parameterCanvas.render();
