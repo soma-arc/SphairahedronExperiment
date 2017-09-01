@@ -21,6 +21,13 @@ module.exports = () => ({
                 loader: 'shader-loader',
             },
             {
+                test: /\.(njk|nunjucks)\.(glsl|vert|frag)$/,
+                loader: 'nunjucks-loader',
+                query: {
+                    root: `${__dirname}/src`,
+                },
+            },
+            {
                 test: /\.js$/,
                 exclude: /node_modules(?!(\/|\\)keen-ui)/,
                 loader: 'babel-loader',

@@ -1,4 +1,5 @@
 import Vec3 from './vector3d.js';
+import Plane from './plane.js';
 
 export default class Sphere {
     /**
@@ -151,16 +152,14 @@ export default class Sphere {
     }
 
     /**
-     * 
-     * @param {Vec3} p1
-     * @param {Vec3} p2
-     * @param {Vec3} p3
-     * @return {Sphere}
+     *
+     * @param {Plane} plane
+     * @returns {}
      */
-    invertOnPlane(p1, p2, p3) {
-        return Sphere.fromPoints(this.invertOnPoint(p1),
-                                 this.invertOnPoint(p2),
-                                 this.invertOnPoint(p3),
+    invertOnPlane(plane) {
+        return Sphere.fromPoints(this.invertOnPoint(plane.p1),
+                                 this.invertOnPoint(plane.p2),
+                                 this.invertOnPoint(plane.p3),
                                  this.center);
     }
 }
