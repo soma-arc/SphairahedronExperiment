@@ -1,16 +1,9 @@
-import Plane from '../plane.js';
 import Sphere from '../sphere.js';
-import Vec3 from '../vector3d.js';
 import Spheirahedra from '../spheirahedra.js';
-
-const RT_3 = Math.sqrt(3);
-const RT_3_INV = 1.0 / Math.sqrt(3);
 
 export default class SpheirahedraCube extends Spheirahedra {
     constructor(tb, tc) {
         super(tb, tc);
-        this.tb = tb;
-        this.tc = tc;
 
         this.numFaces = 6;
         this.numSpheres = 3;
@@ -34,6 +27,6 @@ export default class SpheirahedraCube extends Spheirahedra {
         this.convexSphere = Sphere.fromPoints(this.vertexes[0],
                                               this.vertexes[2],
                                               this.vertexes[4],
-                                              this.vertexes[7]);
+                                              this.vertexes[6]);
     }
 }

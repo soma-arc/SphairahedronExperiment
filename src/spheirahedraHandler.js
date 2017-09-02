@@ -1,5 +1,5 @@
 import Spheirahedra from './spheirahedra.js';
-import cubeParams from './cube/index.js';
+import cubeParams from './cube/implementations.js';
 
 export default class SpheirahedraHandler {
     constructor() {

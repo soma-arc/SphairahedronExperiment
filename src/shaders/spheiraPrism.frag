@@ -14,6 +14,11 @@ struct Sphere {
     vec2 r;
 };
 
+struct Plane {
+    vec3 origin;
+    vec3 normal;
+};
+
 uniform vec2 u_resolution;
 uniform Camera u_camera;
 uniform Sphere u_iniSpheres[3];
@@ -21,6 +26,7 @@ uniform Sphere u_inversionSphere;
 uniform Sphere u_spheirahedraSpheres[6];
 uniform vec3 u_dividePlaneOrigin;
 uniform vec3 u_dividePlaneNormal;
+uniform Plane u_prismPlanes[3];
 
 vec3 calcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,
               const vec2 resolution, const vec2 coord){
@@ -138,9 +144,12 @@ const int ID_PRISM = 0;
 const int ID_INI_SPHERES = 1;
 
 float distPrism(const vec3 pos) {
-    float d = distPlane(pos, vec3(1, 0 ,0), normalize(vec3(sqrt(3.) * .5, 0., 1.5)));
-    d = max(distPlane(pos, vec3(1, 0 ,0), normalize(vec3(sqrt(3.) * .5, 0., -1.5))), d);
-    d = max(distPlane(pos, vec3(-0.5, 0 ,0), normalize(vec3(-1, 0, 0))), d);
+    float d = -1.;
+    for(int i = 0; i < 3; i++) {
+        d = max(distPlane(pos, u_prismPlanes[i].origin,
+                          u_prismPlanes[i].normal),
+                d);
+    }
     d = max(distPlane(pos, u_dividePlaneOrigin, u_dividePlaneNormal), d);
     return d;
 }

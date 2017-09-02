@@ -14,6 +14,11 @@ struct Sphere {
     vec2 r;
 };
 
+struct Plane {
+    vec3 origin;
+    vec3 normal;
+};
+
 uniform vec2 u_resolution;
 uniform Camera u_camera;
 uniform Sphere u_iniSpheres[3];
@@ -26,6 +31,7 @@ uniform float u_marchingThreshold;
 uniform int u_maxIterations;
 uniform vec3 u_dividePlaneOrigin;
 uniform vec3 u_dividePlaneNormal;
+uniform Plane u_prismPlanes[3];
 
 vec3 calcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,
               const vec2 resolution, const vec2 coord){
@@ -183,9 +189,12 @@ float distPlane(const vec3 pos, const vec3 p, const vec3 normal) {
 const int ID_PRISM = 0;
 
 float distPrism(const vec3 pos) {
-    float d = distPlane(pos, vec3(1, 0 ,0), normalize(vec3(sqrt(3.) * .5, 0., 1.5)));
-    d = max(distPlane(pos, vec3(1, 0 ,0), normalize(vec3(sqrt(3.) * .5, 0., -1.5))), d);
-    d = max(distPlane(pos, vec3(-0.5, 0 ,0), normalize(vec3(-1, 0, 0))), d);
+    float d = -1.;
+    for(int i = 0; i < 3; i++) {
+        d = max(distPlane(pos, u_prismPlanes[i].origin,
+                          u_prismPlanes[i].normal),
+                d);
+    }
     d = max(distPlane(pos, u_dividePlaneOrigin, u_dividePlaneNormal), d);
     return d;
 }
@@ -297,33 +306,18 @@ float distPrismLimitset(vec3 pos) {
                          u_iniSpheres[2].r);
             inFund = false;
         }
-        pos.x -= -0.5;
-        if(pos.x < 0.) {
-            pos.x *= -1.;
-            invNum++;
-            pos.x -= 0.5;
-            continue;
-        }
-        pos.x += -0.5;
 
-        pos.x -= 1.;
-        vec3 n = normalize(vec3(sqrt(3.) * 0.5, 0., 1.5));
-        float d = dot(pos, n);
-        if(d > 0.) {
-            invNum++;
-            pos -= 2. * d * n;
-            pos.x += 1.;
-            continue;
+
+        for(int i = 0; i < 3; i++) {
+            pos -= u_prismPlanes[i].origin;
+            float d = dot(pos, u_prismPlanes[i].normal);
+            if(d > 0.) {
+                invNum++;
+                pos -= 2. * d * u_prismPlanes[i].normal;
+                inFund = false;
+            }
+            pos += u_prismPlanes[i].origin;
         }
-        n = n * vec3(1, 1, -1);
-        d = dot(pos, n);
-        if(d > 0.) {
-            invNum++;
-            pos -= 2. * d * n;
-            pos.x += 1.;
-            continue;
-        }
-        pos.x += 1.;
 
         if(inFund) break;
     }
@@ -336,6 +330,7 @@ float distPrismLimitset(vec3 pos) {
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
     hit = distUnion(hit, vec4(distLimitset(pos), ID_PRISM, -1, -1));
+    //hit = distUnion(hit, vec4(distPrismLimitset(pos), ID_PRISM, -1, -1));
     return hit;
 }
 
@@ -362,7 +357,7 @@ void march(const vec3 rayOrg, const vec3 rayDir, inout IsectInfo isectInfo) {
             isectInfo.objId = int(dist.y);
             //isectInfo.objIndex = int(dist.z);
             //isectInfo.objComponentId = int(dist.w);
-            isectInfo.matColor = hsv2rgb(-0.13 + (g_invNum ) * 0.01, 1., 1.);
+            isectInfo.matColor = hsv2rgb(min(1., -0.13 + (g_invNum ) * 0.01), 1., 1.);
             //     hsv2rgb(0.33, 1., .77) :
             //     hsv2rgb(0.0 + g_invNum * 0.12 , 1., 1.);
             isectInfo.intersection = rayPos;

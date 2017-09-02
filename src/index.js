@@ -4,19 +4,10 @@ import SpheirahedraPrism from './spheiraPrism.js';
 import SpheiraCake1 from './spheiraCake1.js';
 import SpheirahedraHandler from './spheirahedraHandler.js';
 
-const RENDER_PRISM = require('./shaders//spheiraPrism.frag');
+const RENDER_PRISM = require('./shaders/spheiraPrism.frag');
 const RENDER_SPHEIRAHEDRA = require('./shaders/spheirahedra.frag');
 const RENDER_LIMIT_SET = require('./shaders/limitset.frag');
-
 const RENDER_PARAMETER = require('./shaders/parameter.frag');
-const RENDER_PARAMETER_B = require('./shaders/parameterC.frag');
-
-const RENDER_PRISM_TWO_SPHERES = require('./shaders/spheiraPrism.frag');
-const RENDER_PRISM_LIMITSET = require('./shaders/prismLimitset.frag');
-const RENDER_SPHEIRAHEDRA_TWO_SPHERES = require('./shaders/spheirahedraPrismTwoSpheres.frag');
-
-const RENDER_SPHEIRA_INF_CAKE = require('./shaders/spheiraCake.frag');
-const RENDER_LIMIT_CAKE = require('./shaders/cakeLimitset.frag');
 
 window.addEventListener('load', () => {
     const spheirahedraHandler = new SpheirahedraHandler();
@@ -71,7 +62,7 @@ window.addEventListener('load', () => {
     window.addEventListener('keydown', (event) => {
         console.log(event.key);
         const n = Number(event.key);
-        if (n === 0 || n === 1 || n === 2) {
+        if (n <= 9) {
             spheirahedraHandler.setParamIndex(n);
             prismCanvas.render();
             limitsetCanvas.render();

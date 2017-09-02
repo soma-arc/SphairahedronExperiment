@@ -2,7 +2,7 @@ import Vec3 from './vector3d.js';
 
 export default class Plane {
     /**
-     * 
+     *
      * @param {Vec3} p1
      * @param {Vec3} p2
      * @param {Vec3} p3

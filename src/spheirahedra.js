@@ -63,7 +63,6 @@ export default class Spheirahedra {
                                                        this.gSpheres[vert[1]],
                                                        this.gSpheres[vert[2]]));
         }
-
         this.p1 = this.inversionSphere.invertOnPoint(this.vertexes[0]);
         const p2 = this.inversionSphere.invertOnPoint(this.vertexes[1]);
         const p3 = this.inversionSphere.invertOnPoint(this.vertexes[2]);
@@ -106,6 +105,11 @@ export default class Spheirahedra {
 
         uniLocations.push(gl.getUniformLocation(program, 'u_dividePlaneOrigin'));
         uniLocations.push(gl.getUniformLocation(program, 'u_dividePlaneNormal'));
+
+        for (let i = 0; i < 3; i++) {
+            uniLocations.push(gl.getUniformLocation(program, 'u_prismPlanes[' + i + '].origin'));
+            uniLocations.push(gl.getUniformLocation(program, 'u_prismPlanes[' + i + '].normal'));
+        }
 
         for (let i = 0; i < 6; i++) {
             uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[' + i + '].center'));
@@ -150,6 +154,13 @@ export default class Spheirahedra {
                      this.p1.x, this.p1.y, this.p1.z);
         gl.uniform3f(uniLocations[uniI++],
                      this.dividePlaneNormal.x, this.dividePlaneNormal.y, this.dividePlaneNormal.z);
+
+        for (let i = 0; i < 3; i++) {
+            gl.uniform3f(uniLocations[uniI++],
+                         this.planes[i].p1.x, this.planes[i].p1.y, this.planes[i].p1.z);
+            gl.uniform3f(uniLocations[uniI++],
+                         this.planes[i].normal.x, this.planes[i].normal.y, this.planes[i].normal.z);
+        }
 
         for (let i = 0; i < 6; i++) {
             gl.uniform3f(uniLocations[uniI++],
@@ -289,15 +300,15 @@ export default class Spheirahedra {
         return [new Plane(new Vec3(0.5, 5, RT_3 * 0.5),
                           new Vec3(1, 1, 0),
                           new Vec3(0.75, 2, RT_3 * 0.25),
-                          new Vec3(0.75, 2, RT_3 * 0.25).normalize()),
+                          new Vec3(1, 0, RT_3_INV).normalize()),
                 new Plane(new Vec3(1, 0, 0),
-                          new Vec3(0, 1, -RT_3),
+                          new Vec3(0, 5, -RT_3 / 3),
                           new Vec3(-0.5, 2, -RT_3 * 0.5),
-                          new Vec3(1, 0, -RT_3)),
+                          new Vec3(1, 0, -RT_3).normalize()),
                 new Plane(new Vec3(0.5, 3, RT_3 * 0.5),
                           new Vec3(0, 4, 0),
                           new Vec3(-0.5, 2, -RT_3 * 0.5),
-                          new Vec3(-1, 0, RT_3).normalize())];
+                          new Vec3(-1, 0, RT_3_INV).normalize())];
     }
 
     static get PRISM_PLANES_244 () {
@@ -310,9 +321,9 @@ export default class Spheirahedra {
                           new Vec3(0.5, 3, -0.5),
                           new Vec3(1, 2, 0),
                           new Vec3(0.5, 0, -0.5).normalize()),
-                new Plane(new Vec3(0, 0, 1),
-                          new Vec3(0, 1, 0),
-                          new Vec3(0, 2, -1),
+                new Plane(new Vec3(0, -7, 1),
+                          new Vec3(0, -4, 0),
+                          new Vec3(0, 8, -1),
                           new Vec3(-1, 0, 0))];
     }
 }
