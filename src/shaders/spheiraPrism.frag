@@ -27,6 +27,10 @@ uniform Sphere u_spheirahedraSpheres[6];
 uniform vec3 u_dividePlaneOrigin;
 uniform vec3 u_dividePlaneNormal;
 uniform Plane u_prismPlanes[3];
+uniform int u_numPrismSpheres;
+uniform int u_numPrismPlanes;
+uniform int u_numGenSpheres;
+uniform int u_numSeedSpheres;
 
 vec3 calcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,
               const vec2 resolution, const vec2 coord){
@@ -160,9 +164,10 @@ float distSphere(const vec3 pos, const Sphere sphere) {
 
 float distInfSpheirahedra(const vec3 pos) {
     float d = distPrism(pos);
-    d = max(-distSphere(pos, u_iniSpheres[0]), d);
-    d = max(-distSphere(pos, u_iniSpheres[1]), d);
-    d = max(-distSphere(pos, u_iniSpheres[2]), d);
+    for(int i = 0; i < 3; i++) {
+        if (u_numPrismSpheres < i) break;
+        d = max(-distSphere(pos, u_iniSpheres[i]), d);
+    }
     return d;
 }
 

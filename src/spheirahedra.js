@@ -27,6 +27,7 @@ export default class Spheirahedra {
         this.vertexIndexes = [];
         this.numVertexes = this.vertexIndexes.length;
 
+        this.prismSpheres = new Array(3);
         this.planes = [];
 
 //        this.update();
@@ -66,6 +67,7 @@ export default class Spheirahedra {
         this.p1 = this.inversionSphere.invertOnPoint(this.vertexes[0]);
         const p2 = this.inversionSphere.invertOnPoint(this.vertexes[1]);
         const p3 = this.inversionSphere.invertOnPoint(this.vertexes[2]);
+
         const v1 = p2.sub(this.p1);
         const v2 = p3.sub(this.p1);
         this.dividePlaneNormal = Vec3.cross(v1, v2).normalize();
@@ -91,13 +93,6 @@ export default class Spheirahedra {
         uniLocations.push(gl.getUniformLocation(program, 'u_zbzc'));
         uniLocations.push(gl.getUniformLocation(program, 'u_ui'));
 
-        uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[0].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[0].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[1].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[1].r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[2].center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[2].r'));
-
         uniLocations.push(gl.getUniformLocation(program, 'u_inversionSphere.center'));
         uniLocations.push(gl.getUniformLocation(program, 'u_inversionSphere.r'));
         uniLocations.push(gl.getUniformLocation(program, 'u_convexSphere.center'));
@@ -105,6 +100,16 @@ export default class Spheirahedra {
 
         uniLocations.push(gl.getUniformLocation(program, 'u_dividePlaneOrigin'));
         uniLocations.push(gl.getUniformLocation(program, 'u_dividePlaneNormal'));
+
+        uniLocations.push(gl.getUniformLocation(program, 'u_numPrismSpheres'));
+        uniLocations.push(gl.getUniformLocation(program, 'u_numPrismPlanes'));
+        uniLocations.push(gl.getUniformLocation(program, 'u_numSeedSpheres'));
+        uniLocations.push(gl.getUniformLocation(program, 'u_numGenSpheres'));
+
+        for (let i = 0; i < 3; i++) {
+            uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[' + i + '].center'));
+            uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[' + i + '].r'));
+        }
 
         for (let i = 0; i < 3; i++) {
             uniLocations.push(gl.getUniformLocation(program, 'u_prismPlanes[' + i + '].origin'));
@@ -129,19 +134,6 @@ export default class Spheirahedra {
                      this.pointRadius * scale, this.lineWidth * scale);
 
         gl.uniform3f(uniLocations[uniI++],
-                     this.s2.center.x, this.s2.center.y, this.s2.center.z);
-        gl.uniform2f(uniLocations[uniI++],
-                     this.s2.r, this.s2.rSq);
-        gl.uniform3f(uniLocations[uniI++],
-                     this.s4.center.x, this.s4.center.y, this.s4.center.z);
-        gl.uniform2f(uniLocations[uniI++],
-                     this.s4.r, this.s4.rSq);
-        gl.uniform3f(uniLocations[uniI++],
-                     this.s6.center.x, this.s6.center.y, this.s6.center.z);
-        gl.uniform2f(uniLocations[uniI++],
-                     this.s6.r, this.s6.rSq);
-
-        gl.uniform3f(uniLocations[uniI++],
                      this.inversionSphere.center.x, this.inversionSphere.center.y, this.inversionSphere.center.z);
         gl.uniform2f(uniLocations[uniI++],
                      this.inversionSphere.r, this.inversionSphere.rSq);
@@ -155,6 +147,17 @@ export default class Spheirahedra {
         gl.uniform3f(uniLocations[uniI++],
                      this.dividePlaneNormal.x, this.dividePlaneNormal.y, this.dividePlaneNormal.z);
 
+        gl.uniform1i(uniLocations[uniI++], this.numSpheres);
+        gl.uniform1i(uniLocations[uniI++], this.numPlanes);
+        gl.uniform1i(uniLocations[uniI++], this.numVertexes);
+        gl.uniform1i(uniLocations[uniI++], this.numFaces);
+        for (let i = 0; i < 3; i++) {
+            gl.uniform3f(uniLocations[uniI++],
+                         this.prismSpheres[i].center.x, this.prismSpheres[i].center.y, this.prismSpheres[i].center.z);
+            gl.uniform2f(uniLocations[uniI++],
+                         this.prismSpheres[i].r, this.prismSpheres[i].rSq);
+        }
+
         for (let i = 0; i < 3; i++) {
             gl.uniform3f(uniLocations[uniI++],
                          this.planes[i].p1.x, this.planes[i].p1.y, this.planes[i].p1.z);
@@ -163,6 +166,10 @@ export default class Spheirahedra {
         }
 
         for (let i = 0; i < 6; i++) {
+            if (this.numFaces <= i) {
+                uniI++;
+                continue;
+            }
             gl.uniform3f(uniLocations[uniI++],
                          this.gSpheres[i].center.x, this.gSpheres[i].center.y, this.gSpheres[i].center.z);
             gl.uniform2f(uniLocations[uniI++],
@@ -170,6 +177,10 @@ export default class Spheirahedra {
         }
 
         for (let i = 0; i < 8; i++) {
+            if (this.numVertexes <= i) {
+                uniI++;
+                continue;
+            }
             gl.uniform3f(uniLocations[uniI++],
                          this.seedSpheres[i].center.x, this.seedSpheres[i].center.y, this.seedSpheres[i].center.z);
             gl.uniform2f(uniLocations[uniI++],
@@ -280,7 +291,7 @@ export default class Spheirahedra {
     }
 
     static get PRISM_PLANES_333 () {
-        // O1, O3, O5
+        // AB - CA - BC
         return [new Plane(new Vec3(0, 5, RT_3_INV),
                           new Vec3(1, 1, 0),
                           new Vec3(2, 2, -RT_3_INV),
@@ -296,7 +307,7 @@ export default class Spheirahedra {
     }
 
     static get PRISM_PLANES_236 () {
-        // O1, O3, O5
+        // AB - CA - BC
         return [new Plane(new Vec3(0.5, 5, RT_3 * 0.5),
                           new Vec3(1, 1, 0),
                           new Vec3(0.75, 2, RT_3 * 0.25),
@@ -306,13 +317,13 @@ export default class Spheirahedra {
                           new Vec3(-0.5, 2, -RT_3 * 0.5),
                           new Vec3(1, 0, -RT_3).normalize()),
                 new Plane(new Vec3(0.5, 3, RT_3 * 0.5),
-                          new Vec3(0, 4, 0),
-                          new Vec3(-0.5, 2, -RT_3 * 0.5),
+                          new Vec3(0, -10, 0),
+                          new Vec3(-0.5, -3, -RT_3 * 0.5),
                           new Vec3(-1, 0, RT_3_INV).normalize())];
     }
 
     static get PRISM_PLANES_244 () {
-        // O1, O3, O5
+        // AB - CA - BC
         return [new Plane(new Vec3(0, 5, 1),
                           new Vec3(0.5, 1, 0.5),
                           new Vec3(1, 2, 0),

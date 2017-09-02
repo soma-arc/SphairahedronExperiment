@@ -32,6 +32,10 @@ uniform int u_maxIterations;
 uniform vec3 u_dividePlaneOrigin;
 uniform vec3 u_dividePlaneNormal;
 uniform Plane u_prismPlanes[3];
+uniform int u_numPrismSpheres;
+uniform int u_numPrismPlanes;
+uniform int u_numGenSpheres;
+uniform int u_numSeedSpheres;
 
 vec3 calcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,
               const vec2 resolution, const vec2 coord){
@@ -205,9 +209,10 @@ float distSphere(const vec3 pos, const Sphere sphere, vec3 offset) {
 
 float distInfSpheirahedra(const vec3 pos) {
     float d = distPrism(pos);
-    d = max(-distSphere(pos, u_iniSpheres[0], vec3(0)), d);
-    d = max(-distSphere(pos, u_iniSpheres[1], vec3(0)), d);
-    d = max(-distSphere(pos, u_iniSpheres[2], vec3(0)), d);
+    for(int i = 0; i < 3; i++) {
+        if (u_numPrismSpheres < i) break;
+        d = max(-distSphere(pos, u_iniSpheres[i], vec3(0)), d);
+    }
     return d;
 }
 
@@ -231,42 +236,15 @@ float distLimitset(vec3 pos) {
     for(int i = 0; i < 1000; i++) {
         if(u_maxIterations <= i) break;
         bool inFund = true;
-        if(distance(pos, u_spheirahedraSpheres[0].center) < u_spheirahedraSpheres[0].r.x) {
-            invNum++;
-            sphereInvert(pos, dr,
-                         u_spheirahedraSpheres[0].center,
-                         u_spheirahedraSpheres[0].r);
-            inFund = false;
-        } else if(distance(pos, u_spheirahedraSpheres[1].center) < u_spheirahedraSpheres[1].r.x) {
-            invNum++;
-            sphereInvert(pos, dr,
-                         u_spheirahedraSpheres[1].center,
-                         u_spheirahedraSpheres[1].r);
-            inFund = false;
-        } else if(distance(pos, u_spheirahedraSpheres[2].center) < u_spheirahedraSpheres[2].r.x) {
-            invNum++;
-            sphereInvert(pos, dr,
-                         u_spheirahedraSpheres[2].center,
-                         u_spheirahedraSpheres[2].r);
-            inFund = false;
-        } else if(distance(pos, u_spheirahedraSpheres[3].center) < u_spheirahedraSpheres[3].r.x) {
-            invNum++;
-            sphereInvert(pos, dr,
-                         u_spheirahedraSpheres[3].center,
-                         u_spheirahedraSpheres[3].r);
-            inFund = false;
-        } else if(distance(pos, u_spheirahedraSpheres[4].center) < u_spheirahedraSpheres[4].r.x) {
-            invNum++;
-            sphereInvert(pos, dr,
-                         u_spheirahedraSpheres[4].center,
-                         u_spheirahedraSpheres[4].r);
-            inFund = false;
-        } else if(distance(pos, u_spheirahedraSpheres[5].center) < u_spheirahedraSpheres[5].r.x) {
-            invNum++;
-            sphereInvert(pos, dr,
-                         u_spheirahedraSpheres[5].center,
-                         u_spheirahedraSpheres[5].r);
-            inFund = false;
+        for(int i = 0; i < 6; i++) {
+            if (u_numGenSpheres < i) break;
+            if(distance(pos, u_iniSpheres[i].center) < u_iniSpheres[i].r.x) {
+                invNum++;
+                sphereInvert(pos, dr,
+                             u_iniSpheres[i].center,
+                             u_iniSpheres[i].r);
+                inFund = false;
+            }
         }
         if(inFund) break;
     }
@@ -287,26 +265,16 @@ float distPrismLimitset(vec3 pos) {
     for(int i = 0; i < 1000; i++) {
         if(u_maxIterations <= i) break;
         bool inFund = true;
-        if(distance(pos, u_iniSpheres[0].center) < u_iniSpheres[0].r.x) {
-            invNum++;
-            sphereInvert(pos, dr,
-                         u_iniSpheres[0].center,
-                         u_iniSpheres[0].r);
-            inFund = false;
-        } else if(distance(pos, u_iniSpheres[1].center) < u_iniSpheres[1].r.x) {
-            invNum++;
-            sphereInvert(pos, dr,
-                         u_iniSpheres[1].center,
-                         u_iniSpheres[1].r);
-            inFund = false;
-        } else if(distance(pos, u_iniSpheres[2].center) < u_iniSpheres[2].r.x) {
-            invNum++;
-            sphereInvert(pos, dr,
-                         u_iniSpheres[2].center,
-                         u_iniSpheres[2].r);
-            inFund = false;
+        for(int i = 0; i < 6; i++) {
+            if (u_numPrismSpheres < i) break;
+            if(distance(pos, u_iniSpheres[i].center) < u_iniSpheres[i].r.x) {
+                invNum++;
+                sphereInvert(pos, dr,
+                             u_iniSpheres[i].center,
+                             u_iniSpheres[i].r);
+                inFund = false;
+            }
         }
-
 
         for(int i = 0; i < 3; i++) {
             pos -= u_prismPlanes[i].origin;
@@ -329,8 +297,8 @@ float distPrismLimitset(vec3 pos) {
 
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
-    hit = distUnion(hit, vec4(distLimitset(pos), ID_PRISM, -1, -1));
-    //hit = distUnion(hit, vec4(distPrismLimitset(pos), ID_PRISM, -1, -1));
+    //hit = distUnion(hit, vec4(distLimitset(pos), ID_PRISM, -1, -1));
+    hit = distUnion(hit, vec4(distPrismLimitset(pos), ID_PRISM, -1, -1));
     return hit;
 }
 

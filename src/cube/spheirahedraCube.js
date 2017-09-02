@@ -15,12 +15,12 @@ export default class SpheirahedraCube extends Spheirahedra {
 
     computeGenSpheres() {
         this.gSpheres = new Array(6);
-        this.gSpheres[0] = this.inversionSphere.invertOnPlane(this.planes[0]);
-        this.gSpheres[1] = this.inversionSphere.invertOnSphere(this.s2);
-        this.gSpheres[2] = this.inversionSphere.invertOnPlane(this.planes[1]);
-        this.gSpheres[3] = this.inversionSphere.invertOnSphere(this.s4);
-        this.gSpheres[4] = this.inversionSphere.invertOnPlane(this.planes[2]);
-        this.gSpheres[5] = this.inversionSphere.invertOnSphere(this.s6);
+        this.gSpheres[0] = this.inversionSphere.invertOnPlane(this.planes[0]); // O1
+        this.gSpheres[1] = this.inversionSphere.invertOnSphere(this.prismSpheres[0]); // O2
+        this.gSpheres[2] = this.inversionSphere.invertOnPlane(this.planes[1]); // O3
+        this.gSpheres[3] = this.inversionSphere.invertOnSphere(this.prismSpheres[1]); // O4
+        this.gSpheres[4] = this.inversionSphere.invertOnPlane(this.planes[2]); // O5
+        this.gSpheres[5] = this.inversionSphere.invertOnSphere(this.prismSpheres[2]); // O6
     }
 
     computeConvexSphere() {

@@ -21,6 +21,10 @@ uniform Sphere u_inversionSphere;
 uniform Sphere u_convexSphere;
 uniform Sphere u_spheirahedraSpheres[6];
 uniform Sphere u_seedSpheres[8];
+uniform int u_numPrismSpheres;
+uniform int u_numPrismPlanes;
+uniform int u_numGenSpheres;
+uniform int u_numSeedSpheres;
 
 vec3 calcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,
               const vec2 resolution, const vec2 coord){
@@ -159,10 +163,15 @@ float distInfSpheirahedra(const vec3 pos) {
 float distSpheirahedra(vec3 pos) {
     Sphere s;
     float d = distSphere(pos, u_convexSphere, -u_convexSphere.center);
+    // for(int index = 0; index < 6 ; index++) {
+    //     if(u_numGenSpheres <= index) break;
+    //     d = max(-distSphere(pos, u_spheirahedraSpheres[index], -u_convexSphere.center), d);
+    // }
     d = max(-distSphere(pos, u_spheirahedraSpheres[0], -u_convexSphere.center), d);
     d = max(-distSphere(pos, u_spheirahedraSpheres[1], -u_convexSphere.center), d);
     d = max(-distSphere(pos, u_spheirahedraSpheres[2], -u_convexSphere.center), d);
     d = max(-distSphere(pos, u_spheirahedraSpheres[3], -u_convexSphere.center), d);
+    if(u_numGenSpheres <= 4) return d;
     d = max(-distSphere(pos, u_spheirahedraSpheres[4], -u_convexSphere.center), d);
     d = max(-distSphere(pos, u_spheirahedraSpheres[5], -u_convexSphere.center), d);
     return d;
@@ -245,6 +254,7 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
     for(int depth = 0 ; depth < 8; depth++){
         march(rayPos, rayDir, isectInfo);
         for(int i = 0; i < 6 ; i++) {
+            if(u_numGenSpheres <= i) break;
             intersectSphere(ID_INI_SPHERES, i, -1,
                             hsv2rgb(float(i) * 0.3, 1., 1.),
                             u_spheirahedraSpheres[i].center -u_convexSphere.center,
@@ -258,11 +268,11 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
         //                     u_seedSpheres[i].r.x * 1.0000,
         //                     rayPos, rayDir, isectInfo);
         // }
-        intersectSphere(ID_INI_SPHERES, -1, -1,
-                        vec3(0.7),
-                        u_convexSphere.center -u_convexSphere.center,
-                        u_convexSphere.r.x * 1.000001,
-                        rayPos, rayDir, isectInfo);
+        // intersectSphere(ID_INI_SPHERES, -1, -1,
+        //                 vec3(0.7),
+        //                 u_convexSphere.center -u_convexSphere.center,
+        //                 u_convexSphere.r.x * 1.000001,
+        //                 rayPos, rayDir, isectInfo);
 
         if(isectInfo.hit) {
             vec3 matColor = isectInfo.matColor;
