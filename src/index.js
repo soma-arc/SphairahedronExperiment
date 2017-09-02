@@ -1,6 +1,5 @@
 import Canvas3D from './canvas3d.js';
 import Canvas2D from './canvas2d.js';
-import Spheirahedra from './spheirahedraC.js';
 import SpheirahedraPrism from './spheiraPrism.js';
 import SpheiraCake1 from './spheiraCake1.js';
 import SpheirahedraHandler from './spheirahedraHandler.js';
@@ -68,6 +67,18 @@ window.addEventListener('load', () => {
 
         requestAnimationFrame(renderLoop);
     }
+
+    window.addEventListener('keydown', (event) => {
+        console.log(event.key);
+        const n = Number(event.key);
+        if (n === 0 || n === 1 || n === 2) {
+            spheirahedraHandler.setParamIndex(n);
+            prismCanvas.render();
+            limitsetCanvas.render();
+            parameterCanvas.render();
+            spheirahedraCanvas.render();
+        }
+    });
 
     renderLoop();
 });

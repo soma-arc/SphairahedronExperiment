@@ -48,7 +48,7 @@ export default class Spheirahedra {
         this.computeVertexes();
         this.computeSeedSpheres();
         this.computeConvexSphere();
-        
+
         this.updated();
     }
 
@@ -58,10 +58,10 @@ export default class Spheirahedra {
 
     computeVertexes() {
         this.vertexes = [];
-        for(const vert of this.vertexIndexes) {
+        for (const vert of this.vertexIndexes) {
             this.vertexes.push(this.computeIdealVertex(this.gSpheres[vert[0]],
                                                        this.gSpheres[vert[1]],
-                                                       this.gSpheres[vert[2]])); 
+                                                       this.gSpheres[vert[2]]));
         }
 
         this.p1 = this.inversionSphere.invertOnPoint(this.vertexes[0]);
@@ -74,7 +74,7 @@ export default class Spheirahedra {
             this.dividePlaneNormal = this.dividePlaneNormal.scale(-1);
         }
     }
-    
+
     computeSeedSpheres() {
         this.seedSpheres = [];
         for (let i = 0; i < this.numVertexes; i++) {
@@ -87,7 +87,7 @@ export default class Spheirahedra {
     }
 
     computeConvexSphere() {}
-    
+
     static setUniformLocations(gl, uniLocations, program) {
         uniLocations.push(gl.getUniformLocation(program, 'u_zbzc'));
         uniLocations.push(gl.getUniformLocation(program, 'u_ui'));
@@ -151,7 +151,7 @@ export default class Spheirahedra {
         gl.uniform3f(uniLocations[uniI++],
                      this.dividePlaneNormal.x, this.dividePlaneNormal.y, this.dividePlaneNormal.z);
 
-        for(let i = 0; i < 6; i++) {
+        for (let i = 0; i < 6; i++) {
             gl.uniform3f(uniLocations[uniI++],
                          this.gSpheres[i].center.x, this.gSpheres[i].center.y, this.gSpheres[i].center.z);
             gl.uniform2f(uniLocations[uniI++],
@@ -198,11 +198,11 @@ export default class Spheirahedra {
     }
 
     /**
-     * 
+     *
      * @param {Sphere} a
      * @param {Sphere} b
      * @param {Sphere} c
-     * @returns {Vec3} 
+     * @returns {Vec3}
      */
     computeIdealVertex(a, b, c) {
         const AB = (a.center.lengthSq() - b.center.lengthSq() - a.rSq + b.rSq) * 0.5 -
@@ -269,26 +269,50 @@ export default class Spheirahedra {
     }
 
     static get PRISM_PLANES_333 () {
+        // O1, O3, O5
         return [new Plane(new Vec3(0, 5, RT_3_INV),
                           new Vec3(1, 1, 0),
                           new Vec3(2, 2, -RT_3_INV),
-                          new Vec3(RT_3 * .5, 0., 1.5).normalize()),
+                          new Vec3(RT_3 * 0.5, 0, 1.5).normalize()),
                 new Plane(new Vec3(0, 3, -RT_3_INV),
                           new Vec3(1, 3, 0),
                           new Vec3(2, 2, RT_3_INV),
-                          new Vec3(RT_3 * .5, 0., -1.5).normalize()),
+                          new Vec3(RT_3 * 0.5, 0, -1.5).normalize()),
                 new Plane(new Vec3(-0.5, 0, 1),
                           new Vec3(-0.5, 1, 0),
                           new Vec3(-0.5, 2, 1),
-                          new Vec3(-1, 0, 0)),
-               ]
+                          new Vec3(-1, 0, 0))];
     }
 
     static get PRISM_PLANES_236 () {
-        return []
+        // O1, O3, O5
+        return [new Plane(new Vec3(0.5, 5, RT_3 * 0.5),
+                          new Vec3(1, 1, 0),
+                          new Vec3(0.75, 2, RT_3 * 0.25),
+                          new Vec3(0.75, 2, RT_3 * 0.25).normalize()),
+                new Plane(new Vec3(1, 0, 0),
+                          new Vec3(0, 1, -RT_3),
+                          new Vec3(-0.5, 2, -RT_3 * 0.5),
+                          new Vec3(1, 0, -RT_3)),
+                new Plane(new Vec3(0.5, 3, RT_3 * 0.5),
+                          new Vec3(0, 4, 0),
+                          new Vec3(-0.5, 2, -RT_3 * 0.5),
+                          new Vec3(-1, 0, RT_3).normalize())];
     }
 
     static get PRISM_PLANES_244 () {
-        return []
+        // O1, O3, O5
+        return [new Plane(new Vec3(0, 5, 1),
+                          new Vec3(0.5, 1, 0.5),
+                          new Vec3(1, 2, 0),
+                          new Vec3(0.5, 0, 0.5).normalize()),
+                new Plane(new Vec3(0, 3, -1),
+                          new Vec3(0.5, 3, -0.5),
+                          new Vec3(1, 2, 0),
+                          new Vec3(0.5, 0, -0.5).normalize()),
+                new Plane(new Vec3(0, 0, 1),
+                          new Vec3(0, 1, 0),
+                          new Vec3(0, 2, -1),
+                          new Vec3(-1, 0, 0))];
     }
 }
