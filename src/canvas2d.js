@@ -2,28 +2,15 @@ import Canvas from './canvas.js';
 import Vec2 from './vector2d.js';
 import { GetWebGL2Context, CreateSquareVbo, AttachShader,
          LinkProgram } from './glUtils';
-const RENDER_VERTEX = require('./shaders/render.vert');
 
 export default class Canvas2D extends Canvas {
-    constructor(canvasId, spheirahedra, fragment) {
+    constructor(canvasId, spheirahedra) {
         super(canvasId);
         this.canvasRatio = this.canvas.width / this.canvas.height / 2;
         this.spheirahedra = spheirahedra;
 
         this.gl = GetWebGL2Context(this.canvas);
         this.vertexBuffer = CreateSquareVbo(this.gl);
-
-        this.renderProgram = this.gl.createProgram();
-        AttachShader(this.gl, RENDER_VERTEX,
-                     this.renderProgram, this.gl.VERTEX_SHADER);
-        AttachShader(this.gl, fragment,
-                     this.renderProgram, this.gl.FRAGMENT_SHADER);
-        LinkProgram(this.gl, this.renderProgram);
-        this.renderCanvasVAttrib = this.gl.getAttribLocation(this.renderProgram,
-                                                             'a_vertex');
-        this.gl.enableVertexAttribArray(this.renderCanvasVAttrib);
-
-        this.getRenderUniformLocations();
 
         this.mouseState = {
             isPressing: false,
@@ -64,11 +51,10 @@ export default class Canvas2D extends Canvas {
 
     getRenderUniformLocations() {
         this.uniLocations = [];
-        this.uniLocations.push(this.gl.getUniformLocation(this.renderProgram,
+        this.uniLocations.push(this.gl.getUniformLocation(this.spheirahedraProgram,
                                                           'u_resolution'));
-        this.uniLocations.push(this.gl.getUniformLocation(this.renderProgram,
+        this.uniLocations.push(this.gl.getUniformLocation(this.spheirahedraProgram,
                                                           'u_geometry'));
-        this.spheirahedra.setUniformLocations(this.gl, this.uniLocations, this.renderProgram);
     }
 
     setRenderUniformValues(width, height) {
@@ -76,12 +62,13 @@ export default class Canvas2D extends Canvas {
         this.gl.uniform2f(this.uniLocations[i++], width, height);
         this.gl.uniform3f(this.uniLocations[i++],
                           this.translate.x, this.translate.y, this.scale);
-        i = this.spheirahedra.setUniformValues(this.gl, this.uniLocations, i, this.scale);
+        this.spheirahedra.setUniformValues(this.gl, this.spheirahedraUniLocations, 0, this.scale);
     }
 
     render() {
+        if(this.spheirahedraProgram === undefined) return;
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        this.gl.useProgram(this.renderProgram);
+        this.gl.useProgram(this.spheirahedraProgram);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.vertexAttribPointer(this.renderCanvasVAttrib, 2,
                                     this.gl.FLOAT, false, 0, 0);

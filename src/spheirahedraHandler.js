@@ -5,6 +5,8 @@ import { AttachShader, LinkProgram } from './glUtils';
 
 const RENDER_VERTEX = require('./shaders/render.vert');
 
+const RENDER_PARAM_SHADER = require('./shaders/parameter.frag');
+
 export default class SpheirahedraHandler {
     constructor() {
         this.spheirahedraCubes = [];
@@ -24,6 +26,7 @@ export default class SpheirahedraHandler {
         this.spheirahedraPrograms = {};
         this.limitsetPrograms = {};
         this.prismPrograms = {};
+        this.parameterPrograms = {};
     }
 
     static buildRenderProgram(gl, fragment) {
@@ -65,6 +68,13 @@ export default class SpheirahedraHandler {
             this.limitsetPrograms[this.currentType] = this.buildProgramUniLocationsPair(gl, limitsetShader);
         }
         return this.limitsetPrograms[this.currentType];
+    }
+
+    getParameterProgram(gl) {
+        if (this.parameterPrograms[this.currentType] === undefined) {
+            this.parameterPrograms[this.currentType] = this.buildProgramUniLocationsPair(gl, RENDER_PARAM_SHADER);
+        }
+        return this.parameterPrograms[this.currentType];
     }
 
     select(mouse, scale) {

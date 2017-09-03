@@ -25,6 +25,9 @@ export default class Canvas {
         this.canvas.addEventListener('contextmenu', event => event.preventDefault());
 
         this.renderCallback = this.render.bind(this);
+
+        this.spheirahedraProgram = undefined;
+        this.spheirahedraUniLocations = undefined;
     }
 
     resizeCanvas() {
@@ -85,6 +88,15 @@ export default class Canvas {
         a.href = URL.createObjectURL(blob);
         a.download = filename;
         a.click();
+    }
+
+    setPrograms(programLocationsPair) {
+        this.spheirahedraProgram = programLocationsPair['program'];
+        this.spheirahedraUniLocations = programLocationsPair['uniLocations'];
+        this.getRenderUniformLocations(this.spheirahedraProgram);
+        this.renderCanvasVAttrib = this.gl.getAttribLocation(this.spheirahedraProgram,
+                                                             'a_vertex');
+        this.gl.enableVertexAttribArray(this.renderCanvasVAttrib);
     }
 
     static get MOUSE_BUTTON_LEFT() {

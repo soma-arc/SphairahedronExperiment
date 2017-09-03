@@ -17,14 +17,13 @@ export default class CanvasHandler {
                                            spheirahedraHandler);
         this.spheirahedraCanvas = new Canvas3D(SPHEIRAHEDRA_CANVAS_NAME,
                                                spheirahedraHandler);
-        // this.parameterCanvas = new Canvas2D(PARAMETER_CANVAS_NAME,
-        //                                     spheirahedraHandler,
-        //                                     RENDER_PARAM_SHADER);
+        this.parameterCanvas = new Canvas2D(PARAMETER_CANVAS_NAME,
+                                            spheirahedraHandler);
         this.changeSpheirahedron();
 
         this.limitsetCanvas.render();
         this.prismCanvas.render();
-//        this.parameterCanvas.render();
+        this.parameterCanvas.render();
         this.spheirahedraCanvas.render();
     }
 
@@ -32,10 +31,13 @@ export default class CanvasHandler {
         this.spheirahedraCanvas.setPrograms(
             this.spheirahedraHandler.getSpheirahedraProgram(this.spheirahedraCanvas.gl));
         this.limitsetCanvas.setPrograms(
-            this.spheirahedraHandler.getLimitsetProgram(this.limitsetCanvas.gl) 
+            this.spheirahedraHandler.getLimitsetProgram(this.limitsetCanvas.gl)
         );
         this.prismCanvas.setPrograms(
             this.spheirahedraHandler.getPrismProgram(this.prismCanvas.gl)
+        );
+        this.parameterCanvas.setPrograms(
+            this.spheirahedraHandler.getParameterProgram(this.parameterCanvas.gl)
         );
     }
 
@@ -49,11 +51,11 @@ export default class CanvasHandler {
             this.prismCanvas.render();
         } else if (this.spheirahedraCanvas.isRendering) {
             this.spheirahedraCanvas.render();
-        }//  else if (this.parameterCanvas.isTweaking) {
-//             this.limitsetCanvas.render();
-//             this.prismCanvas.render();
-// //            this.parameterCanvas.render();
-//             this.spheirahedraCanvas.render();
-//         }
+        } else if (this.parameterCanvas.isTweaking) {
+            this.limitsetCanvas.render();
+            this.prismCanvas.render();
+            this.parameterCanvas.render();
+            this.spheirahedraCanvas.render();
+        }
     }
 }

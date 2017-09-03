@@ -15,8 +15,9 @@ float g_invNum;
 
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
-    //hit = DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos, g_invNum), ID_PRISM, -1, -1));
-	hit = DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos, g_invNum), ID_PRISM, -1, -1));
+	// hit = DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos, g_invNum), ID_PRISM, -1, -1));
+	// hit = DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos, g_invNum), ID_PRISM, -1, -1));
+	hit = DistUnion(hit, vec4(DistLimitsetTerrain(pos, g_invNum), ID_PRISM, -1, -1));
     return hit;
 }
 

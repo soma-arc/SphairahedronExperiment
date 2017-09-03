@@ -217,7 +217,29 @@ float DistLimitsetFromSeedSpheres(vec3 pos, out float invNum) {
     return minDist;
 }
 
+
 float DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {
+    float dr = 1.;
+    invNum = 0.;
+    for(int i = 0; i < 1000; i++) {
+        if(u_maxIterations <= i) break;
+        bool inFund = true;
+		{% for n in range(0, numSpheirahedraSpheres) %}
+		if(distance(pos, u_spheirahedraSpheres[{{ n }}].center) < u_spheirahedraSpheres[{{ n }}].r.x) {
+			invNum++;
+			SphereInvert(pos, dr,
+						 u_spheirahedraSpheres[{{ n }}].center,
+						 u_spheirahedraSpheres[{{ n }}].r);
+			continue;
+		}
+		{% endfor %}
+        if(inFund) break;
+    }
+
+    return DistSpheirahedra(pos) / abs(dr) * u_fudgeFactor;
+}
+
+float DistLimitsetTerrain(vec3 pos, out float invNum) {
     float dr = 1.;
     invNum = 0.;
 	float d;
@@ -249,5 +271,5 @@ float DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {
         if(inFund) break;
     }
 
-    return DistSpheirahedra(pos) / abs(dr) * u_fudgeFactor;
+    return DistInfSpheirahedra(pos) / abs(dr) * u_fudgeFactor;
 }

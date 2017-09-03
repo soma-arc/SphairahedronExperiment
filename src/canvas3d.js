@@ -31,18 +31,6 @@ export default class Canvas3D extends Canvas {
         this.marchingThreshold = 0.00001;
         this.maxIterations = 50;
         this.isRendering = false;
-
-        this.spheirahedraProgram = undefined;
-        this.spheirahedraUniLocations = undefined;
-    }
-
-    setPrograms(programLocationsPair) {
-        this.spheirahedraProgram = programLocationsPair['program'];
-        this.spheirahedraUniLocations = programLocationsPair['uniLocations'];
-        this.getRenderUniformLocations(this.spheirahedraProgram);
-        this.renderCanvasVAttrib = this.gl.getAttribLocation(this.spheirahedraProgram,
-                                                             'a_vertex');
-        this.gl.enableVertexAttribArray(this.renderCanvasVAttrib);
     }
 
     /**

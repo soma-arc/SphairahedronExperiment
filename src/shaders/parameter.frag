@@ -11,9 +11,6 @@ uniform vec2 u_resolution;
 uniform vec3 u_geometry;
 uniform vec2 u_zbzc; //[zb, zc]
 uniform vec2 u_ui; //[pointRadius, lineWidth]
-uniform Sphere u_iniSpheres[3];
-uniform Sphere u_inversionSphere;
-uniform Sphere u_spheirahedraSpheres[6];
 
 const float DISPLAY_GAMMA_COEFF = 1. / 2.2;
 vec4 gammaCorrect(vec4 rgba) {
