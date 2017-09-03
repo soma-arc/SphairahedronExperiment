@@ -1,12 +1,15 @@
 import Spheirahedra from './spheirahedra.js';
 import cubeParams from './cube/implementations.js';
 import tetrahedraParams from './tetrahedron/implementations.js';
+import { AttachShader, LinkProgram } from './glUtils';
+
+const RENDER_VERTEX = require('./shaders/render.vert');
 
 export default class SpheirahedraHandler {
     constructor() {
         this.spheirahedraCubes = [];
         for (const Param of cubeParams) {
-            this.spheirahedraCubes.push(new Param(0, 0));
+            this.spheirahedraCubes.push(new Param(0.2, 0));
         }
         this.tetrahedron = [];
         for (const Param of tetrahedraParams) {
@@ -14,9 +17,54 @@ export default class SpheirahedraHandler {
         }
         this.baseTypes = { 'cube': this.spheirahedraCubes,
                            'tetrahedron': this.tetrahedron };
-        this.currentType = 'tetrahedron';
+        this.currentType = 'cube';
         this.currentSpheirahedra = this.baseTypes[this.currentType][0];
         this.currentSpheirahedra.update();
+
+        this.spheirahedraPrograms = {};
+        this.limitsetPrograms = {};
+        this.prismPrograms = {};
+    }
+
+    static buildRenderProgram(gl, fragment) {
+        const program = gl.createProgram();
+        AttachShader(gl, RENDER_VERTEX,
+                     program, gl.VERTEX_SHADER);
+        AttachShader(gl, fragment,
+                     program, gl.FRAGMENT_SHADER);
+        LinkProgram(gl, program);
+        return program;
+    }
+
+    buildProgramUniLocationsPair(gl, shader) {
+        const program = SpheirahedraHandler.buildRenderProgram(gl, shader);
+        const pair = { 'program': program,
+                       'uniLocations': this.currentSpheirahedra.getUniformLocations(gl, program)};
+        return pair;
+    }
+
+    getSpheirahedraProgram(gl) {
+        if (this.spheirahedraPrograms[this.currentType] === undefined) {
+            const spheirahedraShader = this.currentSpheirahedra.buildSpheirahedraShader();
+            this.spheirahedraPrograms[this.currentType] = this.buildProgramUniLocationsPair(gl, spheirahedraShader);
+        }
+        return this.spheirahedraPrograms[this.currentType];
+    }
+
+    getPrismProgram(gl) {
+        if (this.prismPrograms[this.currentType] === undefined) {
+            const prismShader = this.currentSpheirahedra.buildPrismShader();
+            this.prismPrograms[this.currentType] = this.buildProgramUniLocationsPair(gl, prismShader);
+        }
+        return this.prismPrograms[this.currentType];
+    }
+
+    getLimitsetProgram(gl) {
+        if (this.limitsetPrograms[this.currentType] === undefined) {
+            const limitsetShader = this.currentSpheirahedra.buildLimitsetShader();
+            this.limitsetPrograms[this.currentType] = this.buildProgramUniLocationsPair(gl, limitsetShader);
+        }
+        return this.limitsetPrograms[this.currentType];
     }
 
     select(mouse, scale) {
@@ -28,12 +76,9 @@ export default class SpheirahedraHandler {
     }
 
     setUniformValues(gl, uniLocations, uniI, scale) {
-        this.currentSpheirahedra.setUniformValues(gl, uniLocations,
+        this.currentSpheirahedra.setUniformValues(gl,
+                                                  uniLocations,
                                                   uniI, scale);
-    }
-
-    setUniformLocations(gl, uniLocations, program) {
-        Spheirahedra.setUniformLocations(gl, uniLocations, program);
     }
 
     setParamIndex(i) {

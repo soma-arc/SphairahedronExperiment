@@ -5,10 +5,11 @@ import { CameraOnSphere } from './camera.js';
 import { GetWebGL2Context, CreateSquareVbo, AttachShader,
          LinkProgram } from './glUtils';
 
+const RENDER_FRAGMENT = require('./shaders/render.frag');
 const RENDER_VERTEX = require('./shaders/render.vert');
 
 export default class Canvas3D extends Canvas {
-    constructor(canvasId, spheirahedra, fragment) {
+    constructor(canvasId, spheirahedra) {
         super(canvasId);
         this.spheirahedra = spheirahedra;
 //        this.spheirahedra.addUpdateListener(this.render.bind(this));
@@ -20,18 +21,6 @@ export default class Canvas3D extends Canvas {
         this.gl = GetWebGL2Context(this.canvas);
         this.vertexBuffer = CreateSquareVbo(this.gl);
 
-        this.renderProgram = this.gl.createProgram();
-        AttachShader(this.gl, RENDER_VERTEX,
-                     this.renderProgram, this.gl.VERTEX_SHADER);
-        AttachShader(this.gl, fragment,
-                     this.renderProgram, this.gl.FRAGMENT_SHADER);
-        LinkProgram(this.gl, this.renderProgram);
-        this.renderCanvasVAttrib = this.gl.getAttribLocation(this.renderProgram,
-                                                             'a_vertex');
-        this.gl.enableVertexAttribArray(this.renderCanvasVAttrib);
-
-        this.getRenderUniformLocations();
-
         this.mouseState = {
             isPressing: false,
             prevPosition: new Vec2(0, 0),
@@ -42,6 +31,18 @@ export default class Canvas3D extends Canvas {
         this.marchingThreshold = 0.00001;
         this.maxIterations = 50;
         this.isRendering = false;
+
+        this.spheirahedraProgram = undefined;
+        this.spheirahedraUniLocations = undefined;
+    }
+
+    setPrograms(programLocationsPair) {
+        this.spheirahedraProgram = programLocationsPair['program'];
+        this.spheirahedraUniLocations = programLocationsPair['uniLocations'];
+        this.getRenderUniformLocations(this.spheirahedraProgram);
+        this.renderCanvasVAttrib = this.gl.getAttribLocation(this.spheirahedraProgram,
+                                                             'a_vertex');
+        this.gl.enableVertexAttribArray(this.renderCanvasVAttrib);
     }
 
     /**
@@ -57,18 +58,17 @@ export default class Canvas3D extends Canvas {
                         (my - rect.top) * this.pixelRatio);
     }
 
-    getRenderUniformLocations() {
+    getRenderUniformLocations(program) {
         this.uniLocations = [];
-        this.uniLocations.push(this.gl.getUniformLocation(this.renderProgram,
+        this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_resolution'));
-        this.camera.setUniformLocations(this.gl, this.uniLocations, this.renderProgram);
-        this.uniLocations.push(this.gl.getUniformLocation(this.renderProgram,
+        this.camera.setUniformLocations(this.gl, this.uniLocations, program);
+        this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_fudgeFactor'));
-        this.uniLocations.push(this.gl.getUniformLocation(this.renderProgram,
+        this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_marchingThreshold'));
-        this.uniLocations.push(this.gl.getUniformLocation(this.renderProgram,
+        this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_maxIterations'));
-        this.spheirahedra.setUniformLocations(this.gl, this.uniLocations, this.renderProgram);
     }
 
     setRenderUniformValues(width, height) {
@@ -79,12 +79,14 @@ export default class Canvas3D extends Canvas {
         this.gl.uniform1f(this.uniLocations[i++], this.marchingThreshold);
         this.gl.uniform1i(this.uniLocations[i++], this.maxIterations);
 
-        i = this.spheirahedra.setUniformValues(this.gl, this.uniLocations, i);
+        this.spheirahedra.setUniformValues(this.gl, this.spheirahedraUniLocations,
+                                           0, this.scale);
     }
 
     render() {
+        if(this.spheirahedraProgram === undefined) return;
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        this.gl.useProgram(this.renderProgram);
+        this.gl.useProgram(this.spheirahedraProgram);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.vertexAttribPointer(this.renderCanvasVAttrib, 2,
                                     this.gl.FLOAT, false, 0, 0);

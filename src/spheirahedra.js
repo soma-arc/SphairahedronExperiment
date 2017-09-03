@@ -6,6 +6,10 @@ import Vec2 from './vector2d.js';
 const RT_3 = Math.sqrt(3);
 const RT_3_INV = 1.0 / Math.sqrt(3);
 
+const RENDER_PRISM_TMPL = require('./shaders/prism.njk.frag');
+const RENDER_SPHEIRAHEDRA_TMPL = require('./shaders/spheirahedra.njk.frag');
+const RENDER_LIMIT_SET_TMPL = require('./shaders/limitset.njk.frag');
+
 export default class Spheirahedra {
     /**
      *
@@ -89,7 +93,8 @@ export default class Spheirahedra {
 
     computeConvexSphere() {}
 
-    static setUniformLocations(gl, uniLocations, program) {
+    getUniformLocations(gl, program) {
+        const uniLocations = [];
         uniLocations.push(gl.getUniformLocation(program, 'u_zbzc'));
         uniLocations.push(gl.getUniformLocation(program, 'u_ui'));
 
@@ -106,25 +111,27 @@ export default class Spheirahedra {
         uniLocations.push(gl.getUniformLocation(program, 'u_numSeedSpheres'));
         uniLocations.push(gl.getUniformLocation(program, 'u_numGenSpheres'));
 
-        for (let i = 0; i < 3; i++) {
-            uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[' + i + '].center'));
-            uniLocations.push(gl.getUniformLocation(program, 'u_iniSpheres[' + i + '].r'));
+        for (let i = 0; i < this.numSpheres; i++) {
+            uniLocations.push(gl.getUniformLocation(program, 'u_prismSpheres[' + i + '].center'));
+            uniLocations.push(gl.getUniformLocation(program, 'u_prismSpheres[' + i + '].r'));
         }
 
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < this.numPlanes; i++) {
             uniLocations.push(gl.getUniformLocation(program, 'u_prismPlanes[' + i + '].origin'));
             uniLocations.push(gl.getUniformLocation(program, 'u_prismPlanes[' + i + '].normal'));
         }
 
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < this.numFaces; i++) {
             uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[' + i + '].center'));
             uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[' + i + '].r'));
         }
 
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < this.numVertexes; i++) {
             uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[' + i + '].center'));
             uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[' + i + '].r'));
         }
+
+        return uniLocations;
     }
 
     setUniformValues(gl, uniLocations, uniI, scale) {
@@ -151,36 +158,28 @@ export default class Spheirahedra {
         gl.uniform1i(uniLocations[uniI++], this.numPlanes);
         gl.uniform1i(uniLocations[uniI++], this.numVertexes);
         gl.uniform1i(uniLocations[uniI++], this.numFaces);
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < this.numSpheres; i++) {
             gl.uniform3f(uniLocations[uniI++],
                          this.prismSpheres[i].center.x, this.prismSpheres[i].center.y, this.prismSpheres[i].center.z);
             gl.uniform2f(uniLocations[uniI++],
                          this.prismSpheres[i].r, this.prismSpheres[i].rSq);
         }
 
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < this.numPlanes; i++) {
             gl.uniform3f(uniLocations[uniI++],
                          this.planes[i].p1.x, this.planes[i].p1.y, this.planes[i].p1.z);
             gl.uniform3f(uniLocations[uniI++],
                          this.planes[i].normal.x, this.planes[i].normal.y, this.planes[i].normal.z);
         }
 
-        for (let i = 0; i < 6; i++) {
-            if (this.numFaces <= i) {
-                uniI++;
-                continue;
-            }
+        for (let i = 0; i < this.numFaces; i++) {
             gl.uniform3f(uniLocations[uniI++],
                          this.gSpheres[i].center.x, this.gSpheres[i].center.y, this.gSpheres[i].center.z);
             gl.uniform2f(uniLocations[uniI++],
                          this.gSpheres[i].r, this.gSpheres[i].rSq);
         }
 
-        for (let i = 0; i < 8; i++) {
-            if (this.numVertexes <= i) {
-                uniI++;
-                continue;
-            }
+        for (let i = 0; i < this.numVertexes; i++) {
             gl.uniform3f(uniLocations[uniI++],
                          this.seedSpheres[i].center.x, this.seedSpheres[i].center.y, this.seedSpheres[i].center.z);
             gl.uniform2f(uniLocations[uniI++],
@@ -284,6 +283,27 @@ export default class Spheirahedra {
             return true;
         }
         return false;
+    }
+
+    getShaderTemplateContext() {
+        return {
+            'numPrismSpheres': this.numSpheres,
+            'numPrismPlanes': this.numPlanes,
+            'numSpheirahedraSpheres': this.numFaces,
+            'numSeedSpheres': this.numVertexes
+        }
+    }
+
+    buildPrismShader() {
+        return RENDER_PRISM_TMPL.render(this.getShaderTemplateContext());
+    }
+
+    buildSpheirahedraShader() {
+        return RENDER_SPHEIRAHEDRA_TMPL.render(this.getShaderTemplateContext());
+    }
+
+    buildLimitsetShader() {
+        return RENDER_LIMIT_SET_TMPL.render(this.getShaderTemplateContext());
     }
 
     static get POINT_ZB_ZC() {

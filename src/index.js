@@ -1,75 +1,47 @@
-import Canvas3D from './canvas3d.js';
-import Canvas2D from './canvas2d.js';
-import SpheirahedraPrism from './spheiraPrism.js';
-import SpheiraCake1 from './spheiraCake1.js';
 import SpheirahedraHandler from './spheirahedraHandler.js';
-
-const RENDER_PRISM = require('./shaders/spheiraPrism.frag');
-const RENDER_SPHEIRAHEDRA = require('./shaders/spheirahedra.frag');
-const RENDER_LIMIT_SET = require('./shaders/limitset.frag');
-const RENDER_PARAMETER = require('./shaders/parameter.frag');
+import CanvasHandler from './canvasHandler.js';
 
 window.addEventListener('load', () => {
     const spheirahedraHandler = new SpheirahedraHandler();
-    const prismCanvas = new Canvas3D('prismCanvas', spheirahedraHandler, RENDER_PRISM);
-    const limitsetCanvas = new Canvas3D('limitsetCanvas', spheirahedraHandler, RENDER_LIMIT_SET);
-    const parameterCanvas = new Canvas2D('parameterCanvas', spheirahedraHandler, RENDER_PARAMETER);
-    const spheirahedraCanvas = new Canvas3D('spheirahedraCanvas', spheirahedraHandler, RENDER_SPHEIRAHEDRA);
+    const canvasHandler = new CanvasHandler(spheirahedraHandler);
 
-    prismCanvas.render();
-    limitsetCanvas.render();
-    parameterCanvas.render();
-    spheirahedraCanvas.render();
+    // const maxIterBox = document.getElementById('maxIter');
+    // maxIterBox.value = limitsetCanvas.maxIterations;
+    // maxIterBox.addEventListener('change', function(event) {
+    //     limitsetCanvas.maxIterations = maxIterBox.value;
+    //     limitsetCanvas.render();
+    // });
 
-    const maxIterBox = document.getElementById('maxIter');
-    maxIterBox.value = limitsetCanvas.maxIterations;
-    maxIterBox.addEventListener('change', function(event) {
-        limitsetCanvas.maxIterations = maxIterBox.value;
-        limitsetCanvas.render();
-    });
+    // const marchingThresholdBox = document.getElementById('marchingThreshold');
+    // marchingThresholdBox.value = limitsetCanvas.marchingThreshold;
+    // marchingThresholdBox.addEventListener('change', function(event) {
+    //     limitsetCanvas.marchingThreshold = marchingThresholdBox.value;
+    //     limitsetCanvas.render();
+    // });
 
-    const marchingThresholdBox = document.getElementById('marchingThreshold');
-    marchingThresholdBox.value = limitsetCanvas.marchingThreshold;
-    marchingThresholdBox.addEventListener('change', function(event) {
-        limitsetCanvas.marchingThreshold = marchingThresholdBox.value;
-        limitsetCanvas.render();
-    });
-
-    const fudgeFactorBox = document.getElementById('fudgeFactor');
-    fudgeFactorBox.value = limitsetCanvas.fudgeFactor;
-    fudgeFactorBox.addEventListener('change', function(event) {
-        limitsetCanvas.fudgeFactor = fudgeFactorBox.value;
-        limitsetCanvas.render();
-    });
+    // const fudgeFactorBox = document.getElementById('fudgeFactor');
+    // fudgeFactorBox.value = limitsetCanvas.fudgeFactor;
+    // fudgeFactorBox.addEventListener('change', function(event) {
+    //     limitsetCanvas.fudgeFactor = fudgeFactorBox.value;
+    //     limitsetCanvas.render();
+    // });
 
     function renderLoop() {
-        if (limitsetCanvas.isRendering) {
-            limitsetCanvas.render();
-        } else if (prismCanvas.isRendering) {
-            prismCanvas.render();
-        } else if (spheirahedraCanvas.isRendering) {
-            spheirahedraCanvas.render();
-        } else if (parameterCanvas.isTweaking) {
-            limitsetCanvas.render();
-            prismCanvas.render();
-            parameterCanvas.render();
-            spheirahedraCanvas.render();
-        }
-
+        canvasHandler.render();
         requestAnimationFrame(renderLoop);
     }
 
-    window.addEventListener('keydown', (event) => {
-        console.log(event.key);
-        const n = Number(event.key);
-        if (n <= 9) {
-            spheirahedraHandler.setParamIndex(n);
-            prismCanvas.render();
-            limitsetCanvas.render();
-            parameterCanvas.render();
-            spheirahedraCanvas.render();
-        }
-    });
+    // window.addEventListener('keydown', (event) => {
+    //     console.log(event.key);
+    //     const n = Number(event.key);
+    //     if (n <= 9) {
+    //         spheirahedraHandler.setParamIndex(n);
+    //         prismCanvas.render();
+    //         limitsetCanvas.render();
+    //         parameterCanvas.render();
+    //         spheirahedraCanvas.render();
+    //     }
+    // });
 
     renderLoop();
 });
