@@ -15,8 +15,8 @@ float g_invNum;
 
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
-	// hit = DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos, g_invNum), ID_PRISM, -1, -1));
-	// hit = DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos, g_invNum), ID_PRISM, -1, -1));
+	// hit = DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_convexSphere.center, g_invNum), ID_PRISM, -1, -1));
+	//hit = DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_convexSphere.center, g_invNum), ID_PRISM, -1, -1));
 	hit = DistUnion(hit, vec4(DistLimitsetTerrain(pos, g_invNum), ID_PRISM, -1, -1));
     return hit;
 }
@@ -41,7 +41,7 @@ void march(const vec3 rayOrg, const vec3 rayDir,
         dist = distFunc(rayPos);
         rayLength += dist.x;
         rayPos = rayOrg + rayDir * rayLength;
-        if(dist.x < MARCHING_THRESHOLD) {
+        if(dist.x < u_marchingThreshold) {
             isectInfo.objId = int(dist.y);
             //isectInfo.objIndex = int(dist.z);
             //isectInfo.objComponentId = int(dist.w);
