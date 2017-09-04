@@ -38,6 +38,11 @@ window.addEventListener('load', () => {
             spheirahedraHandler.changeDihedralAngleType(n);
             canvasHandler.reRenderCanvases();
         }
+        if (event.key === 'q') {
+            canvasHandler.changeSpheirahedron('cube');
+        } else if (event.key === 'w') {
+            canvasHandler.changeSpheirahedron('tetrahedron');
+        }
     });
 
     renderLoop();

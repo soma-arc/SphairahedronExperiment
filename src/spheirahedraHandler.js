@@ -19,9 +19,8 @@ export default class SpheirahedraHandler {
         }
         this.baseTypes = { 'cube': this.spheirahedraCubes,
                            'tetrahedron': this.tetrahedron };
-        this.currentType = 'cube';
-        this.currentSpheirahedra = this.baseTypes[this.currentType][0];
-        this.currentSpheirahedra.update();
+        this.currentType = '';
+        this.currentSpheirahedra = undefined;
 
         this.spheirahedraPrograms = {};
         this.limitsetPrograms = {};
@@ -98,6 +97,11 @@ export default class SpheirahedraHandler {
         }
     }
 
-    changeSpheirahedron() {
+    changeSpheirahedron(typeName) {
+        if (this.baseTypes[typeName] !== undefined) {
+            this.currentType = typeName;
+            this.currentSpheirahedra = this.baseTypes[this.currentType][0];
+            this.currentSpheirahedra.update();
+        }
     }
 }

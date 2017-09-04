@@ -19,7 +19,7 @@ export default class CanvasHandler {
                                                spheirahedraHandler);
         this.parameterCanvas = new Canvas2D(PARAMETER_CANVAS_NAME,
                                             spheirahedraHandler);
-        this.changeSpheirahedron();
+        this.changeSpheirahedron('tetrahedron');
 
         this.reRenderCanvases();
     }
@@ -31,7 +31,11 @@ export default class CanvasHandler {
         this.spheirahedraCanvas.render();
     }
 
-    changeSpheirahedron() {
+    changeSpheirahedron(typeName) {
+        if (typeName === this.spheirahedraHandler.currentType) return;
+
+        this.spheirahedraHandler.changeSpheirahedron(typeName);
+
         this.spheirahedraCanvas.setPrograms(
             this.spheirahedraHandler.getSpheirahedraProgram(this.spheirahedraCanvas.gl));
         this.limitsetCanvas.setPrograms(
@@ -43,9 +47,8 @@ export default class CanvasHandler {
         this.parameterCanvas.setPrograms(
             this.spheirahedraHandler.getParameterProgram(this.parameterCanvas.gl)
         );
-    }
 
-    changeDihedralAngle() {
+        this.reRenderCanvases();
     }
 
     render() {

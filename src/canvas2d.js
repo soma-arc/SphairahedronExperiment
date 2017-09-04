@@ -49,11 +49,11 @@ export default class Canvas2D extends Canvas {
         return this.calcCanvasCoord(mx, my).add(this.translate);
     }
 
-    getRenderUniformLocations() {
+    getRenderUniformLocations(program) {
         this.uniLocations = [];
-        this.uniLocations.push(this.gl.getUniformLocation(this.spheirahedraProgram,
+        this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_resolution'));
-        this.uniLocations.push(this.gl.getUniformLocation(this.spheirahedraProgram,
+        this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_geometry'));
     }
 
@@ -66,7 +66,7 @@ export default class Canvas2D extends Canvas {
     }
 
     render() {
-        if(this.spheirahedraProgram === undefined) return;
+        if (this.spheirahedraProgram === undefined) return;
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         this.gl.useProgram(this.spheirahedraProgram);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);

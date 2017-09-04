@@ -72,7 +72,7 @@ export default class Canvas3D extends Canvas {
     }
 
     render() {
-        if(this.spheirahedraProgram === undefined) return;
+        if (this.spheirahedraProgram === undefined) return;
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         this.gl.useProgram(this.spheirahedraProgram);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
