@@ -31,17 +31,14 @@ window.addEventListener('load', () => {
         requestAnimationFrame(renderLoop);
     }
 
-    // window.addEventListener('keydown', (event) => {
-    //     console.log(event.key);
-    //     const n = Number(event.key);
-    //     if (n <= 9) {
-    //         spheirahedraHandler.setParamIndex(n);
-    //         prismCanvas.render();
-    //         limitsetCanvas.render();
-    //         parameterCanvas.render();
-    //         spheirahedraCanvas.render();
-    //     }
-    // });
+    window.addEventListener('keydown', (event) => {
+        console.log(event.key);
+        const n = Number(event.key);
+        if (n <= 9) {
+            spheirahedraHandler.changeDihedralAngleType(n);
+            canvasHandler.reRenderCanvases();
+        }
+    });
 
     renderLoop();
 });

@@ -21,6 +21,10 @@ export default class CanvasHandler {
                                             spheirahedraHandler);
         this.changeSpheirahedron();
 
+        this.reRenderCanvases();
+    }
+
+    reRenderCanvases() {
         this.limitsetCanvas.render();
         this.prismCanvas.render();
         this.parameterCanvas.render();

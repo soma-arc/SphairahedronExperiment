@@ -91,10 +91,13 @@ export default class SpheirahedraHandler {
                                                   uniI, scale);
     }
 
-    setParamIndex(i) {
-        if (cubeParams[i] !== undefined) {
+    changeDihedralAngleType(i) {
+        if (this.baseTypes[this.currentType][i] !== undefined) {
             this.currentSpheirahedra = this.baseTypes[this.currentType][i];
             this.currentSpheirahedra.update();
         }
+    }
+
+    changeSpheirahedron() {
     }
 }
