@@ -42,6 +42,8 @@ window.addEventListener('load', () => {
             canvasHandler.changeSpheirahedron('cube');
         } else if (event.key === 'w') {
             canvasHandler.changeSpheirahedron('tetrahedron');
+        } else if (event.key === 'e') {
+            canvasHandler.changeSpheirahedron('pentahedralPyramid');
         }
     });
 
