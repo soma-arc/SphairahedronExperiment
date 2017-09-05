@@ -1,6 +1,7 @@
 import cubeParams from './cube/implementations.js';
 import tetrahedraParams from './tetrahedron/implementations.js';
 import pentahedralPyramid from './pentahedralPyramid/implementations.js';
+import pentahedralPrism from './pentahedralPrism/implementations.js';
 import { AttachShader, LinkProgram } from './glUtils';
 
 const RENDER_VERTEX = require('./shaders/render.vert');
@@ -21,9 +22,14 @@ export default class SpheirahedraHandler {
         for (const Param of pentahedralPyramid) {
             this.pentahedralPyramid.push(new Param());
         }
+        this.pentahedralPrism = [];
+        for (const Param of pentahedralPrism) {
+            this.pentahedralPrism.push(new Param(0));
+        }
         this.baseTypes = { 'cube': this.spheirahedraCubes,
                            'tetrahedron': this.tetrahedron,
-                           'pentahedralPyramid': this.pentahedralPyramid };
+                           'pentahedralPyramid': this.pentahedralPyramid,
+                           'pentahedralPrism': this.pentahedralPrism };
         this.currentType = '';
         this.currentSpheirahedra = undefined;
 
