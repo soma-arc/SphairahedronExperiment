@@ -46,6 +46,8 @@ window.addEventListener('load', () => {
             canvasHandler.changeSpheirahedron('pentahedralPyramid');
         } else if (event.key === 'r') {
             canvasHandler.changeSpheirahedron('pentahedralPrism');
+        } else if (event.key === 't') {
+            canvasHandler.changeSpheirahedron('hexahedralCake2');
         }
     });
 
