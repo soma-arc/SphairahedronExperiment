@@ -25,6 +25,18 @@ class CubeA extends SpheirahedraCube {
                                           s6.r);
         this.prismSpheres = [s2, s4, s6];
     }
+
+    getParameterSpaceContext() {
+        return {
+            'conditions': ['xy - (3. / 4.)',
+                           'xx - xy - (3. / 4.)',
+                           'yy - xy - (3. / 4.)',
+                           'y - x * 2.'],
+            'regionCondition': 'x > 0. && y > 0. && ' +
+                'y > x * 2. && ' +
+                'yy - xy - (3. / 4.) < 0.'
+        }
+    }
 }
 
 class CubeB extends SpheirahedraCube {
@@ -45,6 +57,18 @@ class CubeB extends SpheirahedraCube {
                                           s4.center.z,
                                           s6.r);
         this.prismSpheres = [s2, s4, s6];
+    }
+
+    getParameterSpaceContext() {
+        return {
+            'conditions': ['-2. * SQRT_3 * xy + 54.0 - 30.0 * SQRT_3',
+                           '-3. * xx + 4. * xy + 15.0 / 4.0',
+                           '2. * xy - 3. * yy + (3. / 4.)'],
+            'regionCondition': 'x > 0. && ' +
+                '(-2. * SQRT_3 * xy + 54.0 - 30.0 * SQRT_3) > 0. && ' +
+                '(-3. * xx + 4. * xy + 15.0 / 4.0) > 0. && ' +
+                '(2. * xy -3. * yy + (3. / 4.)) > 0.'
+        }
     }
 }
 
@@ -67,6 +91,18 @@ class CubeC extends SpheirahedraCube {
                                           s4.center.z,
                                           s6.r);
         this.prismSpheres = [s2, s4, s6];
+    }
+
+    getParameterSpaceContext() {
+        return {
+            'conditions': ['-SQRT_3 * xx - 2. * SQRT_3 * xy + 90. - 51.0 * SQRT_3',
+                           '-3. * SQRT_3 * xx + 4. * SQRT_3 * xy + 90. - 48.0 * SQRT_3',
+                           'xx + 2. * xy - 5. * yy + (9. / 4.)'],
+            'regionCondition': 'x > 0. && ' +
+                '(-SQRT_3 * xx- 2. * SQRT_3 * xy + 90. - 51.0 * SQRT_3) > 0. &&' +
+                '(-3. * SQRT_3 * xx + 4. * SQRT_3 * xy + 90. - 48.0 * SQRT_3) > 0. &&' +
+                '(xx + 2. * xy - 5. * yy + (9. / 4.)) > 0.'
+        }
     }
 }
 

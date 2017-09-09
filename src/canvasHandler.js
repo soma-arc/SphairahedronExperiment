@@ -19,9 +19,35 @@ export default class CanvasHandler {
                                                spheirahedraHandler);
         this.parameterCanvas = new Canvas2D(PARAMETER_CANVAS_NAME,
                                             spheirahedraHandler);
-        this.changeSpheirahedron('tetrahedron');
+        this.changeSpheirahedron('cube');
 
         this.reRenderCanvases();
+
+        const maxIterBox = document.getElementById('maxIter');
+        maxIterBox.value = this.limitsetCanvas.maxIterations;
+        maxIterBox.addEventListener('change', function(event) {
+            this.limitsetCanvas.maxIterations = maxIterBox.value;
+            this.limitsetCanvas.render();
+        }.bind(this));
+
+        const marchingThresholdBox = document.getElementById('marchingThreshold');
+        marchingThresholdBox.value = this.limitsetCanvas.marchingThreshold;
+        marchingThresholdBox.addEventListener('change', function(event) {
+            this.limitsetCanvas.marchingThreshold = marchingThresholdBox.value;
+            this.limitsetCanvas.render();
+        }.bind(this));
+
+        const fudgeFactorBox = document.getElementById('fudgeFactor');
+        fudgeFactorBox.value = this.limitsetCanvas.fudgeFactor;
+        fudgeFactorBox.addEventListener('change', function(event) {
+            this.limitsetCanvas.fudgeFactor = fudgeFactorBox.value;
+            this.limitsetCanvas.render();
+        }.bind(this));
+
+        const typeBox = document.getElementById('sphairahedraTypeBox');
+        typeBox.addEventListener('change', function(event) {
+            this.changeSpheirahedron(typeBox.value);
+        }.bind(this))
     }
 
     reRenderCanvases() {
@@ -48,6 +74,14 @@ export default class CanvasHandler {
             this.spheirahedraHandler.getParameterProgram(this.parameterCanvas.gl)
         );
 
+        this.reRenderCanvases();
+    }
+
+    changeDihedralAngleType(n) {
+        this.spheirahedraHandler.changeDihedralAngleType(n);
+        this.parameterCanvas.setPrograms(
+            this.spheirahedraHandler.getParameterProgram(this.parameterCanvas.gl)
+        );
         this.reRenderCanvases();
     }
 

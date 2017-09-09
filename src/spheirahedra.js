@@ -9,6 +9,7 @@ const RT_3_INV = 1.0 / Math.sqrt(3);
 const RENDER_PRISM_TMPL = require('./shaders/prism.njk.frag');
 const RENDER_SPHEIRAHEDRA_TMPL = require('./shaders/spheirahedra.njk.frag');
 const RENDER_LIMIT_SET_TMPL = require('./shaders/limitset.njk.frag');
+const RENDER_PARAMETER_SPACE_TMPL = require('./shaders/parameter.njk.frag');
 
 export default class Spheirahedra {
     /**
@@ -290,7 +291,13 @@ export default class Spheirahedra {
             'numPrismSpheres': this.numSpheres,
             'numPrismPlanes': this.numPlanes,
             'numSpheirahedraSpheres': this.numFaces,
-            'numSeedSpheres': this.numVertexes
+            'numSeedSpheres': this.numVertexes,
+        }
+    }
+
+    getParameterSpaceContext() {
+        return {
+            'conditions': []
         }
     }
 
@@ -304,6 +311,10 @@ export default class Spheirahedra {
 
     buildLimitsetShader() {
         return RENDER_LIMIT_SET_TMPL.render(this.getShaderTemplateContext());
+    }
+
+    buildParameterSpaceShader() {
+        return RENDER_PARAMETER_SPACE_TMPL.render(this.getParameterSpaceContext());
     }
 
     static get POINT_ZB_ZC() {

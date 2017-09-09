@@ -3,11 +3,10 @@ import tetrahedraParams from './tetrahedron/implementations.js';
 import pentahedralPyramid from './pentahedralPyramid/implementations.js';
 import pentahedralPrism from './pentahedralPrism/implementations.js';
 import hexahedralCake2 from './hexahedralCake2/implementations.js';
+import hexahedralCake3 from './hexahedralCake3/implementations.js';
 import { AttachShader, LinkProgram } from './glUtils';
 
 const RENDER_VERTEX = require('./shaders/render.vert');
-
-const RENDER_PARAM_SHADER = require('./shaders/parameter.frag');
 
 export default class SpheirahedraHandler {
     constructor() {
@@ -31,13 +30,19 @@ export default class SpheirahedraHandler {
         for (const Param of hexahedralCake2) {
             this.hexahedralCake2.push(new Param(0));
         }
+        this.hexahedralCake3 = [];
+        for (const Param of hexahedralCake3) {
+            this.hexahedralCake3.push(new Param(0));
+        }
 
         this.baseTypes = { 'cube': this.spheirahedraCubes,
                            'tetrahedron': this.tetrahedron,
                            'pentahedralPyramid': this.pentahedralPyramid,
                            'pentahedralPrism': this.pentahedralPrism,
-                           'hexahedralCake2': this.hexahedralCake2 };
+                           'hexahedralCake2': this.hexahedralCake2,
+                           'hexahedralCake3': this.hexahedralCake3 };
         this.currentType = '';
+        this.currentDihedralAngleIndex = -1;
         this.currentSpheirahedra = undefined;
 
         this.spheirahedraPrograms = {};
@@ -89,9 +94,13 @@ export default class SpheirahedraHandler {
 
     getParameterProgram(gl) {
         if (this.parameterPrograms[this.currentType] === undefined) {
-            this.parameterPrograms[this.currentType] = this.buildProgramUniLocationsPair(gl, RENDER_PARAM_SHADER);
+            this.parameterPrograms[this.currentType] = new Array(50);
         }
-        return this.parameterPrograms[this.currentType];
+        if (this.parameterPrograms[this.currentType][this.currentDihedralAngleIndex] === undefined) {
+            const parameterShader = this.currentSpheirahedra.buildParameterSpaceShader();
+            this.parameterPrograms[this.currentType][this.currentDihedralAngleIndex] = this.buildProgramUniLocationsPair(gl, parameterShader);
+        }
+        return this.parameterPrograms[this.currentType][this.currentDihedralAngleIndex];
     }
 
     select(mouse, scale) {
@@ -111,6 +120,7 @@ export default class SpheirahedraHandler {
     changeDihedralAngleType(i) {
         if (this.baseTypes[this.currentType][i] !== undefined) {
             this.currentSpheirahedra = this.baseTypes[this.currentType][i];
+            this.currentDihedralAngleIndex = i;
             this.currentSpheirahedra.update();
         }
     }
@@ -119,6 +129,7 @@ export default class SpheirahedraHandler {
         if (this.baseTypes[typeName] !== undefined) {
             this.currentType = typeName;
             this.currentSpheirahedra = this.baseTypes[this.currentType][0];
+            this.currentDihedralAngleIndex = 0;
             this.currentSpheirahedra.update();
         }
     }

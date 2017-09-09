@@ -28,8 +28,9 @@ vec2 rand2n(const vec2 co, const float sampleIndex) {
                 fract(cos(dot(seed.xy ,vec2(4.898,7.23))) * 23421.631));
 }
 
+const float SQRT_3 = sqrt(3.);
 out vec4 outColor;
-const float MAX_SAMPLES = 20.;
+const float MAX_SAMPLES = 10.;
 void main() {
     vec3 sum = vec3(0);
     float ratio = u_resolution.x / u_resolution.y / 2.0;
@@ -38,30 +39,41 @@ void main() {
         position = position * u_geometry.z;
         position += u_geometry.xy;
 
-        if (distance(position, u_zbzc) < u_ui.x) {
+		float x = position.x;
+		float y = position.y;
+		float xy = x * y;
+		float xx = x * x;
+		float yy = y * y;
+		
+		if (distance(position, u_zbzc) < u_ui.x) {
             // point (zb, zc)
             sum += vec3(1, 0, 0);
-        } else if (abs(position.x * position.y - (3. / 4.)) < u_ui.y) {
-            // zb * zc = 3/4
-            sum += vec3(0, 1, 0);
-        } else if (abs(position.x * position.x - position.x * position.y - (3. / 4.)) < u_ui.y) {
-            // zc^2 - zb * zc = 3/4
-            sum += vec3(0, 1, 0);
-        } else if (abs(position.y * position.y - position.x * position.y - (3. / 4.)) < u_ui.y) {
-            // zb^2 - zb * zc = 3/4
-            sum += vec3(0, 1, 0);
-        } else if (abs(position.y - position.x * 2.) < u_ui.y) {
-            // zc = 2 * zb
-            sum += vec3(0, 0, 1);
-        } else if (abs(position.x) < u_ui.y ||
-                   abs(position.y) < u_ui.y) {
+			continue;
+        } 
+		
+		{% for n in range(0, conditions|length) %}
+		{% if n == 0 %}
+		if (abs({{ conditions[n] }}) < u_ui.y) {
+			sum += vec3(0, 1, 0);
+		}
+		{% else %}
+		else if (abs({{ conditions[n] }}) < u_ui.y) {
+			sum += vec3(0, 1, 0);
+		}
+		{% endif %}
+		{% endfor %}
+
+		if (abs(position.x) < u_ui.y ||
+			abs(position.y) < u_ui.y) {
             // z-axis and y-axis
             sum += vec3(0.7);
-        } else if(position.x > 0. && position.y > 0. &&
-                  position.y > position.x * 2. &&
-                  (position.y * position.y - position.x * position.y - (3. / 4.)) < 0.) {
+        }
+
+		{% if regionCondition %}
+		if({{ regionCondition | safe }}) {
             sum += vec3(0.3, 0.3, 0.);
         }
+		{% endif %}
     }
 
     outColor = gammaCorrect(vec4(sum / MAX_SAMPLES, 1));
