@@ -126,6 +126,18 @@ class CubeD extends SpheirahedraCube {
                                           s6.r);
         this.prismSpheres = [s2, s4, s6];
     }
+
+    getParameterSpaceContext() {
+        return {
+            'conditions': ['-3. * xx - 6. * xy - yy - 60. + 36. * SQRT_3',
+                           '-15. * xx + 6. * xy + yy - 120. + 72. * SQRT_3',
+                           '3. * xx + 6. * xy - 5. * yy - 120. + 72. * SQRT_3 '],
+            'regionCondition': 'x > 0. && ' +
+                '-3. * xx - 6. * xy - yy - 60. + 36. * SQRT_3 > 0. &&' +
+                '-15. * xx + 6. * xy + yy - 120. + 72. * SQRT_3 > 0. &&' +
+                '3. * xx + 6. * xy - 5. * yy - 120. + 72. * SQRT_3 > 0.'
+        }
+    }
 }
 
 class CubeE extends SpheirahedraCube {
@@ -147,6 +159,22 @@ class CubeE extends SpheirahedraCube {
                                           s2.center.z,
                                           s6.r);
         this.prismSpheres = [s2, s4, s6];
+    }
+
+    getParameterSpaceContext() {
+        // It may contain mistake.
+        const conditions = ['-6. * xy - yy + 9. / 4.',
+                            '(7. * xx - 6. * xy + yy + 3.)',
+                            'xy - yy - 24. + 14. * SQRT_3']
+        let regionConditions = 'x > 0.';
+        for (const cond of conditions) {
+            regionConditions += '&&'
+            regionConditions += cond + ' > 0.'
+        }
+        return {
+            'conditions': conditions,
+            'regionCondition': regionConditions
+        }
     }
 }
 
@@ -170,6 +198,21 @@ class CubeH extends SpheirahedraCube {
                                           s2.r);
         this.prismSpheres = [s2, s4, s6];
     }
+
+    getParameterSpaceContext() {
+        const conditions = ['-3. * xx - 2. * xy + 3. / 4.',
+                            '-3. * xx + 3. * xy + 2.',
+                            '2. * xx + 2. * xy - 5. * yy + 3.']
+        let regionConditions = 'x > 0.';
+        for (const cond of conditions) {
+            regionConditions += '&&'
+            regionConditions += cond + ' > 0.'
+        }
+        return {
+            'conditions': conditions,
+            'regionCondition': regionConditions
+        }
+    }
 }
 
 class CubeI extends SpheirahedraCube {
@@ -191,6 +234,21 @@ class CubeI extends SpheirahedraCube {
                                           s2.center.z,
                                           0.3);
         this.prismSpheres = [s2, s4, s6];
+    }
+
+    getParameterSpaceContext() {
+        const conditions = ['-2. * xy - yy + 1.',
+                            '-3. * xx + 2. * xy + yy + 2.',
+                            'xy - yy - 8. + 6. * SQRT_2']
+        let regionConditions = 'x > 0.';
+        for (const cond of conditions) {
+            regionConditions += '&&'
+            regionConditions += cond + ' > 0.'
+        }
+        return {
+            'conditions': conditions,
+            'regionCondition': regionConditions
+        }
     }
 }
 

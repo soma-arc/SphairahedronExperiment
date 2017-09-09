@@ -29,6 +29,7 @@ vec2 rand2n(const vec2 co, const float sampleIndex) {
 }
 
 const float SQRT_3 = sqrt(3.);
+const float SQRT_2 = sqrt(2.);
 out vec4 outColor;
 const float MAX_SAMPLES = 10.;
 void main() {

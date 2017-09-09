@@ -6,8 +6,6 @@ const LIMIT_SET_CANVAS_NAME = 'limitsetCanvas';
 const SPHEIRAHEDRA_CANVAS_NAME = 'spheirahedraCanvas';
 const PARAMETER_CANVAS_NAME = 'parameterCanvas';
 
-const RENDER_PARAM_SHADER = require('./shaders/parameter.frag');
-
 export default class CanvasHandler {
     constructor(spheirahedraHandler) {
         this.spheirahedraHandler = spheirahedraHandler;
