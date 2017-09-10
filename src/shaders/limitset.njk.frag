@@ -15,13 +15,24 @@ float g_invNum;
 
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
-	// hit = DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_convexSphere.center, g_invNum), ID_PRISM, -1, -1));
-	//hit = DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_convexSphere.center, g_invNum), ID_PRISM, -1, -1));
-	hit = DistUnion(hit, vec4(DistLimitsetTerrain(pos, g_invNum), ID_PRISM, -1, -1));
+	if(u_limitsetRenderingType == RENDER_LIMIT_SPHEIRAHEDRON) {
+		return DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_convexSphere.center, g_invNum),
+								  ID_PRISM, -1, -1));
+	}
+	if (u_limitsetRenderingType == RENDER_LIMIT_SEED_SPHERE) {
+		return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_convexSphere.center, g_invNum),
+								  ID_PRISM, -1, -1));
+	}
+	{
+		// 	// RENDER_LIMIT_TERRAIN
+		hit = DistUnion(hit, vec4(DistLimitsetTerrain(pos, g_invNum),
+								  ID_PRISM, -1, -1));
+	}
+
     return hit;
 }
 
-const vec2 NORMAL_COEFF = vec2(0.00001, 0.);
+const vec2 NORMAL_COEFF = vec2(0.0001, 0.);
 vec3 computeNormal(const vec3 p) {
     return normalize(vec3(distFunc(p + NORMAL_COEFF.xyy).x - distFunc(p - NORMAL_COEFF.xyy).x,
                           distFunc(p + NORMAL_COEFF.yxy).x - distFunc(p - NORMAL_COEFF.yxy).x,
@@ -67,7 +78,7 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
     float coeff = 1.;
     for(int depth = 0 ; depth < 8; depth++){
         march(rayPos, rayDir, isectInfo);
- 
+
         if(isectInfo.hit) {
             vec3 matColor = isectInfo.matColor;
             vec3 diffuse =  clamp(dot(isectInfo.normal, LIGHT_DIR), 0., 1.) * matColor;

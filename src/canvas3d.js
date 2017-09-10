@@ -13,7 +13,7 @@ export default class Canvas3D extends Canvas {
         super(canvasId);
         this.spheirahedra = spheirahedra;
 //        this.spheirahedra.addUpdateListener(this.render.bind(this));
-        this.pixelRatio = window.devicePixelRatio;
+        this.pixelRatio = 1.;//window.devicePixelRatio;
         this.camera = new CameraOnSphere(new Vec3(0, 0, 0), Math.PI / 3,
                                          1, new Vec3(0, 1, 0));
         this.cameraDistScale = 1.25;
@@ -31,6 +31,8 @@ export default class Canvas3D extends Canvas {
         this.marchingThreshold = 0.00001;
         this.maxIterations = 50;
         this.isRendering = false;
+
+        this.limitRenderingMode = 0;
     }
 
     /**
@@ -57,6 +59,8 @@ export default class Canvas3D extends Canvas {
                                                           'u_marchingThreshold'));
         this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_maxIterations'));
+        this.uniLocations.push(this.gl.getUniformLocation(program,
+                                                          'u_limitsetRenderingType'));
     }
 
     setRenderUniformValues(width, height) {
@@ -66,6 +70,7 @@ export default class Canvas3D extends Canvas {
         this.gl.uniform1f(this.uniLocations[i++], this.fudgeFactor);
         this.gl.uniform1f(this.uniLocations[i++], this.marchingThreshold);
         this.gl.uniform1i(this.uniLocations[i++], this.maxIterations);
+        this.gl.uniform1i(this.uniLocations[i++], this.limitRenderingMode);
 
         this.spheirahedra.setUniformValues(this.gl, this.spheirahedraUniLocations,
                                            0, this.scale);
