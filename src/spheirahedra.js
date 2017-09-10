@@ -309,8 +309,10 @@ export default class Spheirahedra {
         return RENDER_SPHEIRAHEDRA_TMPL.render(this.getShaderTemplateContext());
     }
 
-    buildLimitsetShader() {
-        return RENDER_LIMIT_SET_TMPL.render(this.getShaderTemplateContext());
+    buildLimitsetShader(limitRenderingMode) {
+        const context = this.getShaderTemplateContext();
+        context['renderMode'] = limitRenderingMode;
+        return RENDER_LIMIT_SET_TMPL.render(context);
     }
 
     buildParameterSpaceShader() {

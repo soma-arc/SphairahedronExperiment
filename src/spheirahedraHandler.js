@@ -49,6 +49,8 @@ export default class SpheirahedraHandler {
         this.limitsetPrograms = {};
         this.prismPrograms = {};
         this.parameterPrograms = {};
+
+        this.limitRenderingMode = 0;
     }
 
     static buildRenderProgram(gl, fragment) {
@@ -64,7 +66,7 @@ export default class SpheirahedraHandler {
     buildProgramUniLocationsPair(gl, shader) {
         const program = SpheirahedraHandler.buildRenderProgram(gl, shader);
         const pair = { 'program': program,
-                       'uniLocations': this.currentSpheirahedra.getUniformLocations(gl, program)};
+                       'uniLocations': this.currentSpheirahedra.getUniformLocations(gl, program) };
         return pair;
     }
 
@@ -86,10 +88,13 @@ export default class SpheirahedraHandler {
 
     getLimitsetProgram(gl) {
         if (this.limitsetPrograms[this.currentType] === undefined) {
-            const limitsetShader = this.currentSpheirahedra.buildLimitsetShader();
-            this.limitsetPrograms[this.currentType] = this.buildProgramUniLocationsPair(gl, limitsetShader);
+            this.limitsetPrograms[this.currentType] = new Array(3);
         }
-        return this.limitsetPrograms[this.currentType];
+        if (this.limitsetPrograms[this.currentType][this.limitRenderingMode] === undefined) {
+            const limitsetShader = this.currentSpheirahedra.buildLimitsetShader(this.limitRenderingMode);
+            this.limitsetPrograms[this.currentType][this.limitRenderingMode] = this.buildProgramUniLocationsPair(gl, limitsetShader);
+        }
+        return this.limitsetPrograms[this.currentType][this.limitRenderingMode];
     }
 
     getParameterProgram(gl) {

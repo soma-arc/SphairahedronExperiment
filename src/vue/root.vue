@@ -31,16 +31,16 @@
                        @change="updateRenderParameter">
     (slow) 0.1 ~ 1.0 (fast)  Large fudgeFactor may cause artifacts.<br>
     <input type="radio" value="0"
-           v-model="canvasHandler.limitsetCanvas.limitRenderingMode"
-           @change="updateRenderParameter">
+           v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
+           @change="updateLimitSetShader">
     <label>Terrain limit set </label>
     <input type="radio" value="1"
-           v-model="canvasHandler.limitsetCanvas.limitRenderingMode"
-           @change="updateRenderParameter">
+           v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
+           @change="updateLimitSetShader">
     <label>Quasi-sphere from seed spheres</label>
     <input type="radio" value="2"
-           v-model="canvasHandler.limitsetCanvas.limitRenderingMode"
-           @change="updateRenderParameter">
+           v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
+           @change="updateLimitSetShader">
     <label>Quasi-sphere from spheirahedron</label>
   </div>
 </template>
@@ -64,6 +64,9 @@
             },
             updateRenderParameter: function(event) {
                 this.canvasHandler.limitsetCanvas.render();
+            },
+            updateLimitSetShader: function(event) {
+                this.canvasHandler.changeRenderMode();
             }
         }
 }

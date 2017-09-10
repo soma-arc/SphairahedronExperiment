@@ -57,6 +57,13 @@ export default class CanvasHandler {
         this.reRenderCanvases();
     }
 
+    changeRenderMode() {
+        this.limitsetCanvas.setPrograms(
+            this.spheirahedraHandler.getLimitsetProgram(this.limitsetCanvas.gl)
+        );
+        this.limitsetCanvas.render();
+    }
+
     render() {
         if (this.limitsetCanvas.isRendering) {
             this.limitsetCanvas.render();

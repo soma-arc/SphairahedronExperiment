@@ -12,24 +12,18 @@ const int ID_PRISM = 0;
 const int ID_INI_SPHERES = 1;
 
 float g_invNum;
-
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
-	if(u_limitsetRenderingType == RENDER_LIMIT_SPHEIRAHEDRON) {
-		return DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_convexSphere.center, g_invNum),
-								  ID_PRISM, -1, -1));
-	}
-	if (u_limitsetRenderingType == RENDER_LIMIT_SEED_SPHERE) {
-		return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_convexSphere.center, g_invNum),
-								  ID_PRISM, -1, -1));
-	}
-	{
-		// 	// RENDER_LIMIT_TERRAIN
-		hit = DistUnion(hit, vec4(DistLimitsetTerrain(pos, g_invNum),
-								  ID_PRISM, -1, -1));
-	}
-
-    return hit;
+	{% if renderMode == 0 %}
+	return DistUnion(hit, vec4(DistLimitsetTerrain(pos, g_invNum),
+							   ID_PRISM, -1, -1));
+	{% elif renderMode == 1 %}
+	return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_convexSphere.center, g_invNum),
+							   ID_PRISM, -1, -1));
+	{% else %}
+	return DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_convexSphere.center, g_invNum),
+							   ID_PRISM, -1, -1));
+	{% endif %}
 }
 
 const vec2 NORMAL_COEFF = vec2(0.0001, 0.);
