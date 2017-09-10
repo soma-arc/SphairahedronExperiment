@@ -12,17 +12,7 @@
             Right Button + dragging : move camera<br>
             Wheel : zoom<br>
             <a href="https://github.com/soma-arc/SpheirahedronExperiment">Source code on GitHub</a><br>
-            <select id="sphairahedraTypeBox">
-                <option >cube</option>
-                <option >tetrahedron</option>
-                <option >pentahedralPyramid</option>
-                <option >pentahedralPrism</option>
-                <option >hexahedralCake2</option>
-                <option >hexahedralCake3</option>
-            </select><br>
-            MaxIterations<input id="maxIter" type="number" min="0">
-            MarchingThreshold <input id="marchingThreshold" style="width: 80px;" type="number" step="0.000001" min="0.0000001"> (fast) 0.0001 ~ 000001 (slow) are best parameters.<br>
-            fudgeFactor <input id="fudgeFactor" style="width: 80px;" type="number" step="0.01" min="0.001" max="1.0"> (slow) 0.1 ~ 1.0 (fast)  Large fudgeFactor may cause artifacts.<br>
+            <div id="vue-ui"></div>
             <canvas id="parameterCanvas"
                     width="256px" height="256px"></canvas>
             <canvas id="limitsetCanvas"
