@@ -26,7 +26,7 @@ vec4 distFunc(const vec3 pos) {
 	{% endif %}
 }
 
-const vec2 NORMAL_COEFF = vec2(0.0001, 0.);
+const vec2 NORMAL_COEFF = vec2(0.001, 0.);
 vec3 computeNormal(const vec3 p) {
     return normalize(vec3(distFunc(p + NORMAL_COEFF.xyy).x - distFunc(p - NORMAL_COEFF.xyy).x,
                           distFunc(p + NORMAL_COEFF.yxy).x - distFunc(p - NORMAL_COEFF.yxy).x,
@@ -60,6 +60,22 @@ void march(const vec3 rayOrg, const vec3 rayDir,
     }
 }
 
+// This function is based on FractalLab's implementation
+// http://hirnsohle.de/test/fractalLab/
+float ambientOcclusion(vec3 p, vec3 n, float eps, float aoIntensity ){
+    float o = 1.0;
+    float k = aoIntensity;
+    float d = 2.0 * eps;
+
+    for (int i = 0; i < 5; i++) {
+        o -= (d - distFunc(p + n * d).x) * k;
+        d += eps;
+        k *= 0.5;
+    }
+
+    return clamp(o, 0.0, 1.0);
+}
+
 const vec3 AMBIENT_FACTOR = vec3(0.1);
 const vec3 LIGHT_DIR = normalize(vec3(1, 1, 0));
 vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
@@ -88,7 +104,9 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 isectInfo = NewIsectInfo();
                 continue;
             } else {
-                l += (diffuse + ambient) * coeff;
+                l += (diffuse + matColor * vec3(ambientOcclusion(isectInfo.intersection,
+																 isectInfo.normal,
+                                                                 .08, 2. ))) * coeff;
             }
         }
         break;
