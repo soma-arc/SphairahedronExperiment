@@ -63,13 +63,29 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
     float coeff = 1.;
     for(int depth = 0 ; depth < 8; depth++){
         march(rayPos, rayDir, isectInfo);
-        {% for n in range(0, numSpheirahedraSpheres) %}
-        IntersectSphere(ID_INI_SPHERES, {{ n }}, -1,
-                        Hsv2rgb(float({{ n }}) * 0.3, 1., 1.),
-                        u_spheirahedraSpheres[{{ n }}].center - u_convexSphere.center,
-                        u_spheirahedraSpheres[{{ n }}].r.x*1.00001,
-                        rayPos, rayDir, isectInfo);
-        {% endfor %}
+		if (u_displaySpheirahedraSphere) {
+			{% for n in range(0, numSpheirahedraSpheres) %}
+			IntersectSphere(ID_INI_SPHERES, {{ n }}, -1,
+							Hsv2rgb(float({{ n }}) * 0.3, 1., 1.),
+							u_spheirahedraSpheres[{{ n }}].center - u_convexSphere.center,
+							u_spheirahedraSpheres[{{ n }}].r.x*1.00001,
+							rayPos, rayDir, isectInfo);
+			{% endfor %}
+		}
+		if (u_displayConvexSphere) {
+			IntersectSphere(ID_INI_SPHERES, -1, -1,
+							vec3(0.7), vec3(0),
+							u_convexSphere.r.x,
+							rayPos, rayDir, isectInfo);
+		}
+
+		if (u_displayInversionSphere) {
+			IntersectSphere(ID_INI_SPHERES, -1, -1,
+							vec3(0.7),
+							u_inversionSphere.center - u_convexSphere.center,
+							u_inversionSphere.r.x,
+							rayPos, rayDir, isectInfo);
+		}
 
         if(isectInfo.hit) {
             vec3 matColor = isectInfo.matColor;

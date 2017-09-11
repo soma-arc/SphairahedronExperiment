@@ -33,6 +33,9 @@ export default class Canvas3D extends Canvas {
         this.isRendering = false;
 
         this.limitRenderingMode = 0;
+        this.displaySpheirahedraSphere = true;
+        this.displayConvexSphere = false;
+        this.displayInversionSphere = false;
     }
 
     /**
@@ -61,6 +64,12 @@ export default class Canvas3D extends Canvas {
                                                           'u_maxIterations'));
         this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_limitsetRenderingType'));
+        this.uniLocations.push(this.gl.getUniformLocation(program,
+                                                          'u_displaySpheirahedraSphere'));
+        this.uniLocations.push(this.gl.getUniformLocation(program,
+                                                          'u_displayConvexSphere'));
+        this.uniLocations.push(this.gl.getUniformLocation(program,
+                                                          'u_displayInversionSphere'));
     }
 
     setRenderUniformValues(width, height) {
@@ -71,6 +80,9 @@ export default class Canvas3D extends Canvas {
         this.gl.uniform1f(this.uniLocations[i++], this.marchingThreshold);
         this.gl.uniform1i(this.uniLocations[i++], this.maxIterations);
         this.gl.uniform1i(this.uniLocations[i++], this.limitRenderingMode);
+        this.gl.uniform1i(this.uniLocations[i++], this.displaySpheirahedraSphere);
+        this.gl.uniform1i(this.uniLocations[i++], this.displayConvexSphere);
+        this.gl.uniform1i(this.uniLocations[i++], this.displayInversionSphere);
 
         this.spheirahedra.setUniformValues(this.gl, this.spheirahedraUniLocations,
                                            0, this.scale);

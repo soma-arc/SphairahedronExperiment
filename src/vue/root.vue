@@ -41,7 +41,29 @@
     <input type="radio" value="2"
            v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
            @change="updateLimitSetShader">
-    <label>Quasi-sphere from spheirahedron</label>
+    <label>Quasi-sphere from spheirahedron</label><br>
+    Display Spheirahedron:<br>
+    <input type="checkbox"
+           v-model="canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere"
+           @change="renderSpheirahedraCanvas">
+    <label>Spheirahedra Sphere</label>
+    <input type="checkbox"
+           v-model="canvasHandler.spheirahedraCanvas.displayConvexSphere"
+           @change="renderSpheirahedraCanvas">
+    <label>Convex Sphere</label>
+    <input type="checkbox"
+           v-model="canvasHandler.spheirahedraCanvas.displayInversionSphere"
+           @change="renderSpheirahedraCanvas">
+    <label>Inversion Sphere</label><br>
+    Display Spheirahedral Prism:<br>
+    <input type="checkbox"
+           v-model="canvasHandler.prismCanvas.displaySpheirahedraSphere"
+           @change="renderPrismCanvas">
+    <label>Spheirahedra Sphere</label>
+    <input type="checkbox"
+           v-model="canvasHandler.prismCanvas.displayInversionSphere"
+           @change="renderPrismCanvas">
+    <label>Inversion Sphere</label><br>
   </div>
 </template>
 
@@ -67,6 +89,12 @@
             },
             updateLimitSetShader: function(event) {
                 this.canvasHandler.changeRenderMode();
+            },
+            renderSpheirahedraCanvas: function(even) {
+                this.canvasHandler.spheirahedraCanvas.render();
+            },
+            renderPrismCanvas: function(event) {
+                this.canvasHandler.prismCanvas.render();
             }
         }
 }

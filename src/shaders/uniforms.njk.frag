@@ -29,6 +29,9 @@ uniform int u_maxIterations;
 uniform vec3 u_dividePlaneOrigin;
 uniform vec3 u_dividePlaneNormal;
 uniform int u_limitsetRenderingType;
+uniform bool u_displaySpheirahedraSphere;
+uniform bool u_displayConvexSphere;
+uniform bool u_displayInversionSphere;
 
 const int RENDER_LIMIT_TERRAIN = 0;
 const int RENDER_LIMIT_SEED_SPHERE = 1;

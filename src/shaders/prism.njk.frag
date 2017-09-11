@@ -63,18 +63,22 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
     float coeff = 1.;
     for(int depth = 0 ; depth < 8; depth++){
         march(rayPos, rayDir, isectInfo);
-        {% for n in range(0, numPrismSpheres) %}
-        IntersectSphere(ID_INI_SPHERES, {{ n }}, -1,
-                        Hsv2rgb(float({{ n }}) * 0.3, 1., 1.),
-                        u_prismSpheres[{{ n }}].center,
-                        u_prismSpheres[{{ n }}].r.x*1.00001,
-                        rayPos, rayDir, isectInfo);
-        {% endfor %}
-        IntersectSphere(ID_INI_SPHERES, -1, -1,
-                        vec3(0.7),
-                        u_inversionSphere.center,
-                        u_inversionSphere.r.x * 1.000001,
-                        rayPos, rayDir, isectInfo);
+		if(u_displaySpheirahedraSphere) {
+			{% for n in range(0, numPrismSpheres) %}
+			IntersectSphere(ID_INI_SPHERES, {{ n }}, -1,
+							Hsv2rgb(float({{ n }}) * 0.3, 1., 1.),
+							u_prismSpheres[{{ n }}].center,
+							u_prismSpheres[{{ n }}].r.x*1.00001,
+							rayPos, rayDir, isectInfo);
+			{% endfor %}
+		}
+		if(u_displayInversionSphere) {
+			IntersectSphere(ID_INI_SPHERES, -1, -1,
+							vec3(0.7),
+							u_inversionSphere.center,
+							u_inversionSphere.r.x * 1.000001,
+							rayPos, rayDir, isectInfo);
+		}
         if(isectInfo.hit) {
             vec3 matColor = isectInfo.matColor;
             vec3 diffuse =  clamp(dot(isectInfo.normal, LIGHT_DIR), 0., 1.) * matColor;
