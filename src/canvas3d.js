@@ -5,7 +5,6 @@ import { CameraOnSphere } from './camera.js';
 import { GetWebGL2Context, CreateSquareVbo, AttachShader,
          LinkProgram } from './glUtils';
 
-const RENDER_FRAGMENT = require('./shaders/render.frag');
 const RENDER_VERTEX = require('./shaders/render.vert');
 
 export default class Canvas3D extends Canvas {
