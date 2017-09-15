@@ -9,8 +9,7 @@ export default class Edge {
         this.n1 = n1;
         this.n2 = n2;
         this.dihedralAngleDenom = -1;
-        this.n1.addEdge(this);
-        this.n1.numFreeEdge++;
-        this.n2.addEdge(this);
+        this.n1.addFreeAngleEdge(this);
+        this.n2.addFixedAngleEdge(this);
     }
 }
