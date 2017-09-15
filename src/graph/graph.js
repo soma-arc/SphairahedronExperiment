@@ -131,71 +131,20 @@ const QUARTET_VALIDATION_FUNC = function(angles) {
 }
 
 export default class Graph {
-    constructor () {
+    constructor (jsonObj) {
         this.nodeList = [];
         this.edgeList = [];
+        this.dihedralAnglesList = [];
 
-        // for (let i = 0; i < 8; i++) {
-        //     this.nodeList.push(new Node(i));
-        // }
-
-        // this.edgeList.push(new Edge(this.nodeList[0],
-        //                             this.nodeList[1]));
-        // this.edgeList.push(new Edge(this.nodeList[0],
-        //                             this.nodeList[5]));
-        // this.edgeList.push(new Edge(this.nodeList[0],
-        //                             this.nodeList[7]));
-
-        // this.edgeList.push(new Edge(this.nodeList[1],
-        //                             this.nodeList[2]));
-        // this.edgeList.push(new Edge(this.nodeList[1],
-        //                             this.nodeList[4]));
-
-        // this.edgeList.push(new Edge(this.nodeList[2],
-        //                             this.nodeList[3]));
-        // this.edgeList.push(new Edge(this.nodeList[2],
-        //                             this.nodeList[5]));
-
-        // this.edgeList.push(new Edge(this.nodeList[3],
-        //                             this.nodeList[4]));
-        // this.edgeList.push(new Edge(this.nodeList[3],
-        //                             this.nodeList[6]));
-
-        // this.edgeList.push(new Edge(this.nodeList[4],
-        //                             this.nodeList[7]));
-
-        // this.edgeList.push(new Edge(this.nodeList[5],
-        //                             this.nodeList[6]));
-
-        // this.edgeList.push(new Edge(this.nodeList[6],
-        //                             this.nodeList[7]));
-
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < jsonObj['numVert']; i++) {
             this.nodeList.push(new Node(i));
         }
 
-        this.edgeList.push(new Edge(this.nodeList[0],
-                                    this.nodeList[1]));
-        this.edgeList.push(new Edge(this.nodeList[0],
-                                    this.nodeList[2]));
-        this.edgeList.push(new Edge(this.nodeList[0],
-                                    this.nodeList[3]));
+        for (const edgeIndexes of jsonObj['edges']) {
+            this.edgeList.push(new Edge(this.nodeList[edgeIndexes[0]],
+                                        this.nodeList[edgeIndexes[1]]));
+        }
 
-        this.edgeList.push(new Edge(this.nodeList[1],
-                                    this.nodeList[2]));
-        this.edgeList.push(new Edge(this.nodeList[1],
-                                    this.nodeList[3]));
-
-        this.edgeList.push(new Edge(this.nodeList[2],
-                                    this.nodeList[3]));
-
-        this.dihedralAnglesList = [];
-        this.initGraph();
-        this.search();
-        console.log(this.dihedralAnglesList);
-    }
-
-    initGraph () {
         for (const n of this.nodeList) {
             switch (n.numConnectedEdges) {
             case 3: {
