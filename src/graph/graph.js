@@ -102,19 +102,19 @@ const TRIPLET_VALIDATION_FUNC = function(angles) {
 const QUARTET_PATTERNS_FUNCS = {
     0: function(fixedAngles) {
         assert(fixedAngles.length === 0);
-        return [[4, 4, 4, 4]];
+        return [[2, 2, 2, 2]];
     },
     1: function(fixedAngles) {
         assert(fixedAngles.length === 1);
-        return [[4, 4, 4]];
+        return [[2, 2, 2]];
     },
     2: function(fixedAngles) {
         assert(fixedAngles.length === 2);
-        return [[4, 4]];
+        return [[2, 2]];
     },
     3: function(fixedAngles) {
         assert(fixedAngles.length === 3);
-        return [[4]];
+        return [[2]];
     },
     4: function(fixedAngles) {
         assert(fixedAngles.length === 4);
@@ -124,10 +124,10 @@ const QUARTET_PATTERNS_FUNCS = {
 
 const QUARTET_VALIDATION_FUNC = function(angles) {
     assert(angles.length === 4);
-    return (angles[0] === 4 &&
-            angles[1] === 4 &&
-            angles[2] === 4 &&
-            angles[3] === 4);
+    return (angles[0] === 2 &&
+            angles[1] === 2 &&
+            angles[2] === 2 &&
+            angles[3] === 2);
 }
 
 export default class Graph {
