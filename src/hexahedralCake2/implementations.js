@@ -66,4 +66,31 @@ class CakeB extends Cake {
     }
 }
 
-export default [CakeA, CakeB];
+class CakeC extends Cake {
+    constructor(tb) {
+        super(tb);
+        this.planes = Spheirahedra.PRISM_PLANES_2222_SQUARE;
+    }
+
+    computeSpheres() {
+        const r5 = (2 + this.zb * this.zb) / (2 * RT_6);
+        const r6 = r5;
+        const s5 = new Sphere(r5 * SIN_PI_12, this.zb, 1 - r5 * COS_PI_12, r5);
+
+        const dx = (1 - r5 / RT_2);
+        const dy = -r5 / RT_2;
+        const s6 = new Sphere(dx - r6 * COS_5_PI_12, 0, dy + r6 * SIN_5_PI_12,
+                              r6);
+        this.prismSpheres = [s5, s6];
+        const cx = -r6 / RT_2;
+        const cy = 1 - r6 / RT_2;
+        this.planes[2] = new Plane(new Vec3(cx, 4, cy),
+                                   new Vec3((cx + dx) * 0.5, 6, (cy + dy) * 0.5),
+                                   new Vec3(dx, -3, dy),
+                                   this.planes[2].normal);
+        this.inversionSphere = new Sphere(s5.center.x, s5.center.y + 1.2, s5.center.z,
+                                          0.5);
+    }
+}
+
+export default [CakeA, CakeB, CakeC];
