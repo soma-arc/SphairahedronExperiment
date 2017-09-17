@@ -42,6 +42,11 @@
            v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
            @change="updateLimitSetShader">
     <label>Quasi-sphere from spheirahedron</label><br>
+    Display Limit Set:<br>
+    <input type="checkbox"
+           v-model="canvasHandler.limitsetCanvas.displaySpheirahedraSphere"
+           @change="updateRenderParameter">
+    <label>Spheirahedra Sphere</label><br>
     Display Spheirahedron:<br>
     <input type="checkbox"
            v-model="canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere"

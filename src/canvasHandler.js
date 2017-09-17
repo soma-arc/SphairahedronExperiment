@@ -19,6 +19,7 @@ export default class CanvasHandler {
                                             spheirahedraHandler);
         this.changeSpheirahedron('cube');
 
+        this.limitsetCanvas.displaySpheirahedraSphere = false;
         this.reRenderCanvases();
     }
 

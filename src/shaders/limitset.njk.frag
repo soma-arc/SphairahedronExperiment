@@ -88,6 +88,27 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
     float coeff = 1.;
     for(int depth = 0 ; depth < 8; depth++){
         march(rayPos, rayDir, isectInfo);
+		{% if renderMode == 0 %}
+		if(u_displaySpheirahedraSphere) {
+			{% for n in range(0, numPrismSpheres) %}
+			IntersectSphere(ID_INI_SPHERES, {{ n }}, -1,
+							Hsv2rgb(float({{ n }}) * 0.3, 1., 1.),
+							u_prismSpheres[{{ n }}].center,
+							u_prismSpheres[{{ n }}].r.x,
+							rayPos, rayDir, isectInfo);
+			{% endfor %}
+		}
+		{% else %}
+		if(u_displaySpheirahedraSphere) {
+			{% for n in range(0, numSpheirahedraSpheres) %}
+			IntersectSphere(ID_INI_SPHERES, {{ n }}, -1,
+							Hsv2rgb(float({{ n }}) * 0.3, 1., 1.),
+							u_spheirahedraSpheres[{{ n }}].center - u_convexSphere.center,
+							u_spheirahedraSpheres[{{ n }}].r.x,
+							rayPos, rayDir, isectInfo);
+			{% endfor %}
+		}
+		{% endif %}
 
         if(isectInfo.hit) {
             vec3 matColor = isectInfo.matColor;
