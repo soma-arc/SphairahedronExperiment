@@ -36,13 +36,13 @@ vec3 computeNormal(const vec3 p) {
 const int MAX_MARCHING_LOOP = 3000;
 const float MARCHING_THRESHOLD = 0.001;
 void march(const vec3 rayOrg, const vec3 rayDir,
-           inout IsectInfo isectInfo) {
-    float rayLength = 0.;
+           inout IsectInfo isectInfo,
+		   float tmin, float tmax) {
+    float rayLength = tmin;
     vec3 rayPos = rayOrg + rayDir * rayLength;
     vec4 dist = vec4(-1);
     for(int i = 0 ; i < MAX_MARCHING_LOOP ; i++) {
-        if(rayLength > isectInfo.maxt ||
-           rayLength > isectInfo.mint) break;
+        if(rayLength > tmax) break;
         dist = distFunc(rayPos);
         rayLength += dist.x;
         rayPos = rayOrg + rayDir * rayLength;
@@ -84,10 +84,27 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 
     vec3 l = vec3(0);
 
+	float h = -999999.;
+	{% if renderMode == 0 %}
+	{% for n in range(0, numPrismSpheres) %}
+	h = max(h, u_prismSpheres[{{ n }}].center.y * 1.01);
+	{% endfor %}
+	{% endif %}
+
     float transparency = 0.8;
     float coeff = 1.;
     for(int depth = 0 ; depth < 8; depth++){
-        march(rayPos, rayDir, isectInfo);
+		float tmin = 0.;
+		float tmax = MAX_FLOAT;
+		bool hit = true;
+		{% if renderMode == 0 %}
+		hit = IntersectBoundingPlane(vec3(0, 1, 0), vec3(0, h, 0),
+									 rayPos, rayDir,
+									 tmin, tmax);
+		{% endif %}
+		if(hit)
+			march(rayPos, rayDir, isectInfo, tmin, tmax);
+
 		{% if renderMode == 0 %}
 		if(u_displaySpheirahedraSphere) {
 			{% for n in range(0, numPrismSpheres) %}
@@ -127,7 +144,7 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
             } else {
                 l += (diffuse + matColor * vec3(ambientOcclusion(isectInfo.intersection,
 																 isectInfo.normal,
-                                                                 .08, 2. ))) * coeff;
+                                                                 .08, 2.2 ))) * coeff;
             }
         }
         break;

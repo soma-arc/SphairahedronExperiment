@@ -61,6 +61,25 @@ bool IntersectBoundingSphere(vec3 sphereCenter, float radius,
 	return false;
 }
 
+bool IntersectBoundingPlane(const vec3 n, const vec3 p,
+							const vec3 rayOrigin, const vec3 rayDir,
+							out float t0, out float t1) {
+	float d = -dot(p, n);
+    float v = dot(n, rayDir);
+    float t = -(dot(n, rayOrigin) + d) / v;
+    if(THRESHOLD < t){
+		if(v < 0.) {
+			t0 = t;
+			t1 = MAX_FLOAT;
+		} else {
+			t0 = 0.;
+			t1 = t;
+		}
+		return true;
+    }
+	return (v < 0.);
+}
+
 bool IntersectBBox(vec3 rayOrg, vec3 rayDir, vec3 boxMin, vec3 boxMax,
                    out float hit0, out float hit1, out bool inBox) {
 	float t0 = -1000000.0, t1 = 1000000.0;
