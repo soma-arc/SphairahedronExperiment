@@ -84,50 +84,6 @@ bool IntersectBoundingPlane(const vec3 n, const vec3 p,
 	return (v < 0.);
 }
 
-bool IntersectBBox(vec3 rayOrg, vec3 rayDir, vec3 boxMin, vec3 boxMax,
-                   out float hit0, out float hit1, out bool inBox) {
-	float t0 = -1000000.0, t1 = 1000000.0;
-    hit0 = t0;
-    hit1 = t1;
-    inBox = false;
-    vec3 tNear = (boxMin - rayOrg) / rayDir;
-    vec3 tFar  = (boxMax - rayOrg) / rayDir;
-
-    if (tNear.x > tFar.x) {
-        float tmp = tNear.x;
-        tNear.x = tFar.x;
-        tFar.x = tmp;
-    }
-
-    t0 = max(tNear.x, t0);
-    t1 = min(tFar.x, t1);
-
-
-    if (tNear.y > tFar.y) {
-        float tmp = tNear.y;
-        tNear.y = tFar.y;
-        tFar.y = tmp;
-    }
-    t0 = max(tNear.y, t0);
-    t1 = min(tFar.y, t1);
-
-    if (tNear.z > tFar.z) {
-        float tmp = tNear.z;
-        tNear.z = tFar.z;
-        tFar.z = tmp;
-    }
-    t0 = max(tNear.z, t0);
-    t1 = min(tFar.z, t1);
-
-    if (t0 <= t1 && 0. < t1) {
-        if(t0 < 0.) inBox = true;
-        hit0 = t0;
-        hit1 = t1;
-        return true;
-    }
-    return false;
-}
-
 vec2 Rand2n(const vec2 co, const float sampleIndex) {
     vec2 seed = co * (sampleIndex + 1.0);
     seed+=vec2(-1,1);
@@ -212,56 +168,7 @@ void SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {
     pos = (diff * k) + center;
 }
 
-float DistLimitsetFromSeedSpheres(vec3 pos, out float invNum) {
-    float dr = 1.;
-    invNum = 0.;
-    for(int i = 0; i < 1000; i++) {
-        if(u_maxIterations <= i) break;
-        bool inFund = true;
-		{% for n in range(0, numSpheirahedraSpheres) %}
-		if(distance(pos, u_spheirahedraSpheres[{{ n }}].center) < u_spheirahedraSpheres[{{ n }}].r.x) {
-			invNum++;
-			SphereInvert(pos, dr,
-						 u_spheirahedraSpheres[{{ n }}].center,
-						 u_spheirahedraSpheres[{{ n }}].r);
-			continue;
-		}
-		{% endfor %}
-        if(inFund) break;
-    }
-
-    float minDist = 9999999.;
-
-	{% for n in range(0, numSeedSpheres) %}
-	minDist = min(minDist,
-				  (DistSphere(pos, u_seedSpheres[{{ n }}])) / abs(dr) * u_fudgeFactor);
-	{% endfor %}
-    
-    return minDist;
-}
-
-
-float DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {
-    float dr = 1.;
-    invNum = 0.;
-    for(int i = 0; i < 1000; i++) {
-        if(u_maxIterations <= i) break;
-        bool inFund = true;
-		{% for n in range(0, numSpheirahedraSpheres) %}
-		if(distance(pos, u_spheirahedraSpheres[{{ n }}].center) < u_spheirahedraSpheres[{{ n }}].r.x) {
-			invNum++;
-			SphereInvert(pos, dr,
-						 u_spheirahedraSpheres[{{ n }}].center,
-						 u_spheirahedraSpheres[{{ n }}].r);
-			continue;
-		}
-		{% endfor %}
-        if(inFund) break;
-    }
-
-    return DistSpheirahedra(pos) / abs(dr) * u_fudgeFactor;
-}
-
+{% if renderMode == 0 %}
 float DistLimitsetTerrain(vec3 pos, out float invNum) {
     float dr = 1.;
     invNum = 0.;
@@ -290,9 +197,60 @@ float DistLimitsetTerrain(vec3 pos, out float invNum) {
 		}
 		pos += u_prismPlanes[{{ n }}].origin;
 		{% endfor %}
-		
+
         if(inFund) break;
     }
 
     return DistInfSpheirahedra(pos) / abs(dr) * u_fudgeFactor;
 }
+{% elif renderMode == 1 %}
+float DistLimitsetFromSeedSpheres(vec3 pos, out float invNum) {
+    float dr = 1.;
+    invNum = 0.;
+    for(int i = 0; i < 1000; i++) {
+        if(u_maxIterations <= i) break;
+        bool inFund = true;
+		{% for n in range(0, numSpheirahedraSpheres) %}
+		if(distance(pos, u_spheirahedraSpheres[{{ n }}].center) < u_spheirahedraSpheres[{{ n }}].r.x) {
+			invNum++;
+			SphereInvert(pos, dr,
+						 u_spheirahedraSpheres[{{ n }}].center,
+						 u_spheirahedraSpheres[{{ n }}].r);
+			continue;
+		}
+		{% endfor %}
+        if(inFund) break;
+    }
+
+    float minDist = 9999999.;
+
+	{% for n in range(0, numSeedSpheres) %}
+	minDist = min(minDist,
+				  (DistSphere(pos, u_seedSpheres[{{ n }}])) / abs(dr) * u_fudgeFactor);
+	{% endfor %}
+
+    return minDist;
+}
+{% else %}
+float DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {
+    float dr = 1.;
+    invNum = 0.;
+    for(int i = 0; i < 1000; i++) {
+        if(u_maxIterations <= i) break;
+        bool inFund = true;
+		{% for n in range(0, numSpheirahedraSpheres) %}
+		if(distance(pos, u_spheirahedraSpheres[{{ n }}].center) < u_spheirahedraSpheres[{{ n }}].r.x) {
+			invNum++;
+			SphereInvert(pos, dr,
+						 u_spheirahedraSpheres[{{ n }}].center,
+						 u_spheirahedraSpheres[{{ n }}].r);
+			continue;
+		}
+		{% endfor %}
+        if(inFund) break;
+    }
+
+    return DistSpheirahedra(pos) / abs(dr) * u_fudgeFactor;
+}
+
+{% endif %}

@@ -34,6 +34,7 @@ uniform bool u_displayConvexSphere;
 uniform bool u_displayInversionSphere;
 uniform bool u_displayBoundingSphere;
 uniform float u_boundingPlaneY;
+uniform vec2 u_ao;
 uniform Sphere u_boundingSphere;
 
 const int RENDER_LIMIT_TERRAIN = 0;

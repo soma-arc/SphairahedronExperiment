@@ -76,7 +76,23 @@ float ambientOcclusion(vec3 p, vec3 n, float eps, float aoIntensity ){
     return clamp(o, 0.0, 1.0);
 }
 
-const vec3 AMBIENT_FACTOR = vec3(0.1);
+float computeShadowFactor (const vec3 rayOrg, const vec3 rayDir,
+                           const float mint, const float maxt, const float k) {
+    float shadowFactor = 1.0;
+    for(float t = mint ; t < maxt ;){
+        float d = distFunc(rayOrg + rayDir * t).x;
+        if(d < u_marchingThreshold) {
+            shadowFactor = 0.;
+            break;
+        }
+
+        shadowFactor = min(shadowFactor, k * d / t);
+        t += d;
+    }
+    return clamp(shadowFactor, 0.0, 1.0);
+}
+
+const vec3 AMBIENT_FACTOR = vec3(0.3);
 const vec3 LIGHT_DIR = normalize(vec3(1, 1, 0));
 vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
     IsectInfo isectInfo = NewIsectInfo();
@@ -147,9 +163,12 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 isectInfo = NewIsectInfo();
                 continue;
             } else {
-                l += (diffuse + matColor * vec3(ambientOcclusion(isectInfo.intersection,
-																 isectInfo.normal,
-                                                                 .08, 2.2 ))) * coeff;
+                float k = computeShadowFactor(isectInfo.intersection + 0.001 * isectInfo.normal,
+                                              LIGHT_DIR,
+                                              0.1, 5., 100.);
+                l += (diffuse * k + ambient * vec3(ambientOcclusion(isectInfo.intersection,
+                                                                    isectInfo.normal,
+                                                                    u_ao.x, u_ao.y ))) * coeff;
             }
         }
         break;
