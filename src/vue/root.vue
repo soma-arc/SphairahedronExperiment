@@ -46,7 +46,12 @@
     <input type="checkbox"
            v-model="canvasHandler.limitsetCanvas.displaySpheirahedraSphere"
            @change="updateRenderParameter">
-    <label>Spheirahedra Sphere</label><br>
+    <label>Spheirahedra Sphere</label>
+    <input type="checkbox"
+           v-model="canvasHandler.limitsetCanvas.displayBoundingSphere"
+           @change="updateRenderParameter">
+    <label>Bounding Sphere</label><br>
+
     Display Spheirahedron:<br>
     <input type="checkbox"
            v-model="canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere"

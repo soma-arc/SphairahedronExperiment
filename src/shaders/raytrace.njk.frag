@@ -48,9 +48,9 @@ bool IntersectBoundingSphere(vec3 sphereCenter, float radius,
 		float tm = -b - s;
 		t0 = tm;
 		if(tm <= EPSILON){
-			t1 = tm;
 			tm = -b + s;
-			t0 = tm;
+            t1 = tm;
+			t0 = 0.;
 		}else{
 			t1 = -b + s;
 		}
@@ -58,6 +58,8 @@ bool IntersectBoundingSphere(vec3 sphereCenter, float radius,
 			return true;
 		}
 	}
+    t0 = 0.;
+    t1 = MAX_FLOAT;
 	return false;
 }
 
@@ -77,6 +79,8 @@ bool IntersectBoundingPlane(const vec3 n, const vec3 p,
 		}
 		return true;
     }
+    t0 = 0.;
+    t1 = MAX_FLOAT;
 	return (v < 0.);
 }
 

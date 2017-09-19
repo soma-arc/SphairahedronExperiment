@@ -18,10 +18,10 @@ vec4 distFunc(const vec3 pos) {
 	return DistUnion(hit, vec4(DistLimitsetTerrain(pos, g_invNum),
 							   ID_PRISM, -1, -1));
 	{% elif renderMode == 1 %}
-	return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_convexSphere.center, g_invNum),
+	return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_boundingSphere.center, g_invNum),
 							   ID_PRISM, -1, -1));
 	{% else %}
-	return DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_convexSphere.center, g_invNum),
+	return DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_boundingSphere.center, g_invNum),
 							   ID_PRISM, -1, -1));
 	{% endif %}
 }
@@ -84,13 +84,6 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 
     vec3 l = vec3(0);
 
-	float h = -999999.;
-	{% if renderMode == 0 %}
-	{% for n in range(0, numPrismSpheres) %}
-	h = max(h, u_prismSpheres[{{ n }}].center.y * 1.01);
-	{% endfor %}
-	{% endif %}
-
     float transparency = 0.8;
     float coeff = 1.;
     for(int depth = 0 ; depth < 8; depth++){
@@ -98,12 +91,17 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 		float tmax = MAX_FLOAT;
 		bool hit = true;
 		{% if renderMode == 0 %}
-		hit = IntersectBoundingPlane(vec3(0, 1, 0), vec3(0, h, 0),
+		hit = IntersectBoundingPlane(vec3(0, 1, 0), vec3(0, u_boundingPlaneY, 0),
 									 rayPos, rayDir,
 									 tmin, tmax);
-		{% endif %}
-		if(hit)
-			march(rayPos, rayDir, isectInfo, tmin, tmax);
+		{% else %}
+		hit = IntersectBoundingSphere(u_boundingSphere.center - u_boundingSphere.center,
+                                      u_boundingSphere.r.x,
+                                      rayPos, rayDir,
+                                      tmin, tmax);
+        {% endif %}
+        if(hit)
+            march(rayPos, rayDir, isectInfo, tmin, tmax);
 
 		{% if renderMode == 0 %}
 		if(u_displaySpheirahedraSphere) {
@@ -120,11 +118,18 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 			{% for n in range(0, numSpheirahedraSpheres) %}
 			IntersectSphere(ID_INI_SPHERES, {{ n }}, -1,
 							Hsv2rgb(float({{ n }}) * 0.3, 1., 1.),
-							u_spheirahedraSpheres[{{ n }}].center - u_convexSphere.center,
+							u_spheirahedraSpheres[{{ n }}].center - u_boundingSphere.center,
 							u_spheirahedraSpheres[{{ n }}].r.x,
 							rayPos, rayDir, isectInfo);
 			{% endfor %}
 		}
+        if(u_displayBoundingSphere) {
+            IntersectSphere(ID_INI_SPHERES, 0, -1,
+                            Hsv2rgb(0.3, 1., 1.),
+                            u_boundingSphere.center - u_boundingSphere.center,
+                            u_boundingSphere.r.x,
+                            rayPos, rayDir, isectInfo);
+        }
 		{% endif %}
 
         if(isectInfo.hit) {

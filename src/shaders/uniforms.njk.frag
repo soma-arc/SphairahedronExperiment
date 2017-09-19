@@ -32,9 +32,10 @@ uniform int u_limitsetRenderingType;
 uniform bool u_displaySpheirahedraSphere;
 uniform bool u_displayConvexSphere;
 uniform bool u_displayInversionSphere;
+uniform bool u_displayBoundingSphere;
+uniform float u_boundingPlaneY;
+uniform Sphere u_boundingSphere;
 
 const int RENDER_LIMIT_TERRAIN = 0;
 const int RENDER_LIMIT_SEED_SPHERE = 1;
 const int RENDER_LIMIT_SPHEIRAHEDRON = 2;
-
-

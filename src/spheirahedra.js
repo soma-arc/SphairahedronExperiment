@@ -54,6 +54,7 @@ export default class Spheirahedra {
         this.computeVertexes();
         this.computeSeedSpheres();
         this.computeConvexSphere();
+        this.computeBoundingVolume();
 
         this.updated();
     }
@@ -94,6 +95,29 @@ export default class Spheirahedra {
 
     computeConvexSphere() {}
 
+    computeBoundingVolume () {
+        this.boundingPlaneY = Number.MIN_VALUE;
+        let boundingPlaneMinY = Number.MAX_VALUE;
+        for (const s of this.prismSpheres) {
+            this.boundingPlaneY = Math.max(this.boundingPlaneY, s.center.y)
+            boundingPlaneMinY = Math.min(boundingPlaneMinY, s.center.y)
+        }
+        if (this.inversionSphere.center.y < boundingPlaneMinY) {
+            this.boundingSphere = this.inversionSphere.invertOnPlane(new Plane(new Vec3(1, boundingPlaneMinY, -9),
+                                                                               new Vec3(-4, boundingPlaneMinY, -4),
+                                                                               new Vec3(10, boundingPlaneMinY, 3),
+                                                                               new Vec3(0, 1, 0)));
+        } else {
+            this.boundingSphere = this.inversionSphere.invertOnPlane(new Plane(new Vec3(1, this.boundingPlaneY, -9),
+                                                                               new Vec3(-4, this.boundingPlaneY, -4),
+                                                                               new Vec3(10, this.boundingPlaneY, 3),
+                                                                               new Vec3(0, 1, 0)));
+        }
+        this.boundingPlaneY += 1.01;
+        this.boundingSphere.r *= 1.01;
+        this.boundingSphere.update();
+    }
+
     getUniformLocations(gl, program) {
         const uniLocations = [];
         uniLocations.push(gl.getUniformLocation(program, 'u_zbzc'));
@@ -111,6 +135,10 @@ export default class Spheirahedra {
         uniLocations.push(gl.getUniformLocation(program, 'u_numPrismPlanes'));
         uniLocations.push(gl.getUniformLocation(program, 'u_numSeedSpheres'));
         uniLocations.push(gl.getUniformLocation(program, 'u_numGenSpheres'));
+
+        uniLocations.push(gl.getUniformLocation(program, 'u_boundingPlaneY'));
+        uniLocations.push(gl.getUniformLocation(program, 'u_boundingSphere.center'));
+        uniLocations.push(gl.getUniformLocation(program, 'u_boundingSphere.r'));
 
         for (let i = 0; i < this.numSpheres; i++) {
             uniLocations.push(gl.getUniformLocation(program, 'u_prismSpheres[' + i + '].center'));
@@ -159,6 +187,13 @@ export default class Spheirahedra {
         gl.uniform1i(uniLocations[uniI++], this.numPlanes);
         gl.uniform1i(uniLocations[uniI++], this.numVertexes);
         gl.uniform1i(uniLocations[uniI++], this.numFaces);
+
+        gl.uniform1f(uniLocations[uniI++], this.boundingPlaneY);
+        gl.uniform3f(uniLocations[uniI++],
+                     this.boundingSphere.center.x, this.boundingSphere.center.y, this.boundingSphere.center.z);
+        gl.uniform2f(uniLocations[uniI++],
+                     this.boundingSphere.r, this.boundingSphere.rSq);
+
         for (let i = 0; i < this.numSpheres; i++) {
             gl.uniform3f(uniLocations[uniI++],
                          this.prismSpheres[i].center.x, this.prismSpheres[i].center.y, this.prismSpheres[i].center.z);
