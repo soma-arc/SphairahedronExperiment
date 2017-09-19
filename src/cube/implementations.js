@@ -52,10 +52,7 @@ class CubeB extends SpheirahedraCube {
         const s2 = new Sphere((2 - SQRT_3 * r2) * 0.5, 0, r2 * 0.5, r2);
         const s4 = new Sphere(-(1 - r4) * 0.5, this.zb, SQRT_3 * (1 - r4) * 0.5, r4);
         const s6 = new Sphere(-(1 - r6) * 0.5, this.zc, -SQRT_3 * (1 - r6) * 0.5, r6);
-        this.inversionSphere = new Sphere(-s2.center.x,
-                                          -s4.center.y + 3,
-                                          s4.center.z,
-                                          s6.r);
+        this.inversionSphere = new Sphere(0.2, -2.0, 0, 1.0);
         this.prismSpheres = [s2, s4, s6];
     }
 

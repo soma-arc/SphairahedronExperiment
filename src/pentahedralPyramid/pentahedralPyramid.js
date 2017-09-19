@@ -28,6 +28,6 @@ export default class PentahedralPyramid extends Spheirahedra {
         this.convexSphere = Sphere.fromPoints(this.vertexes[0],
                                               this.vertexes[1],
                                               this.vertexes[2],
-                                              this.vertexes[3]);
+                                              this.vertexes[4]);
     }
 }
