@@ -114,12 +114,12 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 out vec4 outColor;
 void main() {
     vec3 sum = vec3(0);
-    float MAX_SAMPLES = 10.;
+    float MAX_SAMPLES = 5.;
     for (float i = 0. ; i < MAX_SAMPLES ; i++) {
         vec2 coordOffset = Rand2n(gl_FragCoord.xy, i);
         vec3 ray = CalcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,
                            u_resolution, gl_FragCoord.xy + coordOffset);
         sum += computeColor(u_camera.pos, ray);
     }
-    outColor = GammaCorrect(vec4(sum / MAX_SAMPLES, 1.0));
+    outColor = vec4(sum / MAX_SAMPLES, 1.0);
 }

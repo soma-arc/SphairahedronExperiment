@@ -28,6 +28,10 @@ export default class Canvas {
 
         this.spheirahedraProgram = undefined;
         this.spheirahedraUniLocations = undefined;
+
+        this.numSamples = 0;
+        this.maxSamples = 20;
+        this.lowResRatio = 0.5;
     }
 
     resizeCanvas() {
@@ -91,6 +95,7 @@ export default class Canvas {
     }
 
     setPrograms(programLocationsPair) {
+        this.numSamples = 0;
         this.spheirahedraProgram = programLocationsPair['program'];
         this.spheirahedraUniLocations = programLocationsPair['uniLocations'];
         this.getRenderUniformLocations(this.spheirahedraProgram);

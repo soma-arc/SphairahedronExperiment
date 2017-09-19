@@ -20,6 +20,7 @@ export default class CanvasHandler {
         this.changeSpheirahedron('cube');
 
         this.limitsetCanvas.displaySpheirahedraSphere = false;
+        this.limitsetCanvas.isKeepingSampling = true;
         this.reRenderCanvases();
     }
 
@@ -68,15 +69,19 @@ export default class CanvasHandler {
     render() {
         if (this.limitsetCanvas.isRendering) {
             this.limitsetCanvas.render();
+            this.limitsetCanvas.numSamples = 0;
         } else if (this.prismCanvas.isRendering) {
             this.prismCanvas.render();
         } else if (this.spheirahedraCanvas.isRendering) {
             this.spheirahedraCanvas.render();
         } else if (this.parameterCanvas.isTweaking) {
             this.limitsetCanvas.render();
+            this.limitsetCanvas.numSamples = 0;
             this.prismCanvas.render();
             this.parameterCanvas.render();
             this.spheirahedraCanvas.render();
+        } else if (this.limitsetCanvas.isKeepingSampling) {
+            this.limitsetCanvas.render();
         }
     }
 }

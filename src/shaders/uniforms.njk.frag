@@ -15,6 +15,9 @@ struct Plane {
     vec3 normal;
 };
 
+uniform sampler2D u_accTexture;
+uniform float u_textureWeight;
+uniform float u_numSamples;
 uniform vec2 u_resolution;
 uniform Camera u_camera;
 uniform Sphere u_prismSpheres[{{ numPrismSpheres }}];
