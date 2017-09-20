@@ -26,6 +26,7 @@ export default class CanvasHandler {
     }
 
     reRenderCanvases() {
+        this.limitsetCanvas.numSamples = 0;
         this.limitsetCanvas.render();
         this.prismCanvas.render();
         this.parameterCanvas.render();

@@ -191,7 +191,7 @@ export default class Canvas3D extends Canvas {
         }
         this.camera.update();
         this.numSamples = 0;
-        this.render();
+        this.callRender();
     }
 
     mouseDownListener(event) {
