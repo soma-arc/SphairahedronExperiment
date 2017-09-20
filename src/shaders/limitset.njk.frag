@@ -163,12 +163,12 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 isectInfo = NewIsectInfo();
                 continue;
             } else {
-                float k = computeShadowFactor(isectInfo.intersection + 0.001 * isectInfo.normal,
+                float k = u_castShadow ? computeShadowFactor(isectInfo.intersection + 0.001 * isectInfo.normal,
                                               LIGHT_DIR,
-                                              0.1, 5., 100.);
-                l += (diffuse * k + ambient * vec3(ambientOcclusion(isectInfo.intersection,
-                                                                    isectInfo.normal,
-                                                                    u_ao.x, u_ao.y ))) * coeff;
+                                                             0.1, 5., 100.) : 1.;
+                l += (diffuse * k + ambient * ambientOcclusion(isectInfo.intersection,
+                                                               isectInfo.normal,
+                                                               u_ao.x, u_ao.y )) * coeff;
             }
         }
         break;

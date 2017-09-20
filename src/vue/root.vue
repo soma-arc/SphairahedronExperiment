@@ -56,7 +56,12 @@
     <input type="checkbox"
            v-model="canvasHandler.limitsetCanvas.displayBoundingSphere"
            @change="updateRenderParameter">
-    <label>Bounding Sphere</label><br>
+    <label>Bounding Sphere</label>
+    <input type="checkbox"
+           v-model="canvasHandler.limitsetCanvas.castShadow"
+           @change="updateRenderParameter">
+    <label>Cast Shadow</label>
+    <br>
 
     Display Spheirahedron:<br>
     <input type="checkbox"

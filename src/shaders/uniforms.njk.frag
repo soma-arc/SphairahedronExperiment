@@ -36,6 +36,7 @@ uniform bool u_displaySpheirahedraSphere;
 uniform bool u_displayConvexSphere;
 uniform bool u_displayInversionSphere;
 uniform bool u_displayBoundingSphere;
+uniform bool u_castShadow;
 uniform float u_boundingPlaneY;
 uniform vec2 u_ao;
 uniform Sphere u_boundingSphere;

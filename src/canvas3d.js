@@ -48,6 +48,7 @@ export default class Canvas3D extends Canvas {
         this.displayConvexSphere = false;
         this.displayInversionSphere = false;
         this.displayBoundingSphere = false;
+        this.castShadow = true;
 
         this.isKeepingSampling = false;
         this.isRenderingLowRes = false;
@@ -106,6 +107,8 @@ export default class Canvas3D extends Canvas {
         this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_displayBoundingSphere'));
         this.uniLocations.push(this.gl.getUniformLocation(program,
+                                                          'u_castShadow'));
+        this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_ao'));
     }
 
@@ -127,6 +130,7 @@ export default class Canvas3D extends Canvas {
         this.gl.uniform1i(this.uniLocations[i++], this.displayConvexSphere);
         this.gl.uniform1i(this.uniLocations[i++], this.displayInversionSphere);
         this.gl.uniform1i(this.uniLocations[i++], this.displayBoundingSphere);
+        this.gl.uniform1i(this.uniLocations[i++], this.castShadow);
         this.gl.uniform2f(this.uniLocations[i++], this.aoEps, this.aoIntensity);
 
         this.spheirahedra.setUniformValues(this.gl, this.spheirahedraUniLocations,
