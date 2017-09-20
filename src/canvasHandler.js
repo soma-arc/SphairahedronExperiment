@@ -21,6 +21,7 @@ export default class CanvasHandler {
 
         this.limitsetCanvas.displaySpheirahedraSphere = false;
         this.limitsetCanvas.isKeepingSampling = true;
+        this.limitsetCanvas.isRenderingLowRes = true;
         this.reRenderCanvases();
     }
 
@@ -68,18 +69,18 @@ export default class CanvasHandler {
 
     render() {
         if (this.limitsetCanvas.isRendering) {
-            this.limitsetCanvas.render();
             this.limitsetCanvas.numSamples = 0;
+            this.limitsetCanvas.callRender();
         } else if (this.prismCanvas.isRendering) {
-            this.prismCanvas.render();
+            this.prismCanvas.callRender();
         } else if (this.spheirahedraCanvas.isRendering) {
-            this.spheirahedraCanvas.render();
+            this.spheirahedraCanvas.callRender();
         } else if (this.parameterCanvas.isTweaking) {
-            this.limitsetCanvas.render();
             this.limitsetCanvas.numSamples = 0;
-            this.prismCanvas.render();
+            this.limitsetCanvas.callRender();
+            this.prismCanvas.callRender();
             this.parameterCanvas.render();
-            this.spheirahedraCanvas.render();
+            this.spheirahedraCanvas.callRender();
         } else if (this.limitsetCanvas.isKeepingSampling) {
             this.limitsetCanvas.render();
         }

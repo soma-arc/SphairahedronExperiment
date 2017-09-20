@@ -50,6 +50,8 @@ export default class Canvas3D extends Canvas {
         this.displayBoundingSphere = false;
 
         this.isKeepingSampling = false;
+        this.isRenderingLowRes = false;
+        this.renderTimer = undefined;
 
         this.aoEps = 0.0968;
         this.aoIntensity = 2.0;
@@ -160,9 +162,18 @@ export default class Canvas3D extends Canvas {
         this.gl.flush();
     }
 
+    callRender() {
+        if (this.isRenderingLowRes) {
+            this.renderLowRes();
+        } else {
+            this.render();
+        }
+    }
+
     render() {
-        if (this.spheirahedraProgram === undefined) return;
-        if (this.numSamples >= this.maxSamples) return;
+        if (this.spheirahedraProgram === undefined ||
+            this.numSamples >= this.maxSamples) return;
+
         this.renderToTexture(this.renderTextures,
                              this.canvas.width, this.canvas.height);
         this.renderTexturesToCanvas(this.renderTextures);
@@ -222,6 +233,18 @@ export default class Canvas3D extends Canvas {
             this.camera.target = this.camera.prevTarget.add(xVec.scale(-d.x).add(yVec.scale(-d.y)).scale(0.005));
             this.camera.update();
             this.isRendering = true;
+        }
+    }
+
+    renderLowRes() {
+        if (this.spheirahedraProgram === undefined) return;
+        if (this.renderTimer !== undefined) window.clearTimeout(this.renderTimer);
+        this.renderToTexture(this.lowResTextures,
+                             this.canvas.width * this.lowResRatio,
+                             this.canvas.height * this.lowResRatio);
+        this.renderTexturesToCanvas(this.lowResTextures);
+        if (this.isKeepingSampling === false) {
+            this.renderTimer = window.setTimeout(this.render.bind(this), 200);
         }
     }
 }

@@ -101,6 +101,7 @@
                 this.canvasHandler.changeDihedralAngleType(this.spheirahedraHandler.currentDihedralAngleIndex);
             },
             updateRenderParameter: function(event) {
+                this.canvasHandler.limitsetCanvas.numSamples = 0;
                 this.canvasHandler.limitsetCanvas.render();
             },
             updateLimitSetShader: function(event) {
