@@ -12,7 +12,7 @@ export default class SpheirahedraHandler {
     constructor() {
         this.spheirahedraCubes = [];
         for (const Param of cubeParams) {
-            this.spheirahedraCubes.push(new Param(0.2, 0));
+            this.spheirahedraCubes.push(new Param(0, 0));
         }
         this.tetrahedron = [];
         for (const Param of tetrahedraParams) {

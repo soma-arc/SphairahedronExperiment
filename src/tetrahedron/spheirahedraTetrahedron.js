@@ -23,11 +23,4 @@ export default class SpheirahedraTetrahedron extends Spheirahedra {
         this.gSpheres[2] = this.inversionSphere.invertOnPlane(this.planes[2]);
         this.gSpheres[3] = this.inversionSphere.invertOnSphere(this.prismSpheres[0]);
     }
-
-    computeConvexSphere() {
-        this.convexSphere = Sphere.fromPoints(this.vertexes[0],
-                                              this.vertexes[1],
-                                              this.vertexes[2],
-                                              this.vertexes[3]);
-    }
 }

@@ -13,7 +13,7 @@ const int ID_INI_SPHERES = 1;
 
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
-    hit = DistUnion(hit, vec4(DistSpheirahedra(pos + u_convexSphere.center), ID_PRISM, -1, -1));
+    hit = DistUnion(hit, vec4(DistSpheirahedra(pos + u_boundingSphere.center), ID_PRISM, -1, -1));
     return hit;
 }
 
@@ -67,22 +67,24 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 			{% for n in range(0, numSpheirahedraSpheres) %}
 			IntersectSphere(ID_INI_SPHERES, {{ n }}, -1,
 							Hsv2rgb(float({{ n }}) * 0.3, 1., 1.),
-							u_spheirahedraSpheres[{{ n }}].center - u_convexSphere.center,
+							u_spheirahedraSpheres[{{ n }}].center - u_boundingSphere.center,
 							u_spheirahedraSpheres[{{ n }}].r.x*1.00001,
 							rayPos, rayDir, isectInfo);
 			{% endfor %}
 		}
 		if (u_displayConvexSphere) {
+            {% for n in range(0, numDividePlanes) %}
 			IntersectSphere(ID_INI_SPHERES, -1, -1,
-							vec3(0.7), vec3(0),
-							u_convexSphere.r.x,
+							vec3(0.7), u_convexSpheres[{{ n }}].center - u_boundingSphere.center,
+							u_convexSpheres[{{ n }}].r.x,
 							rayPos, rayDir, isectInfo);
+            {% endfor %}
 		}
 
 		if (u_displayInversionSphere) {
 			IntersectSphere(ID_INI_SPHERES, -1, -1,
 							vec3(0.7),
-							u_inversionSphere.center - u_convexSphere.center,
+							u_inversionSphere.center - u_boundingSphere.center,
 							u_inversionSphere.r.x,
 							rayPos, rayDir, isectInfo);
 		}

@@ -23,11 +23,4 @@ export default class HexahedralCake2 extends Spheirahedra {
         this.gSpheres[4] = this.inversionSphere.invertOnSphere(this.prismSpheres[0]);
         this.gSpheres[5] = this.inversionSphere.invertOnSphere(this.prismSpheres[1]);
     }
-
-    computeConvexSphere() {
-        this.convexSphere = Sphere.fromPoints(this.vertexes[0],
-                                              this.vertexes[1],
-                                              this.vertexes[2],
-                                              this.vertexes[3]);
-    }
 }

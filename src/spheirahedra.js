@@ -31,6 +31,7 @@ export default class Spheirahedra {
         this.numPlanes = 0;
         this.vertexIndexes = [];
         this.numVertexes = this.vertexIndexes.length;
+        this.numDividePlanes = 1;
 
         this.prismSpheres = new Array(3);
         this.planes = [];
@@ -52,6 +53,7 @@ export default class Spheirahedra {
         this.computeSpheres();
         this.computeGenSpheres();
         this.computeVertexes();
+        this.computeDividePlanes();
         this.computeSeedSpheres();
         this.computeConvexSphere();
         this.computeBoundingVolume();
@@ -70,16 +72,32 @@ export default class Spheirahedra {
                                                        this.gSpheres[vert[1]],
                                                        this.gSpheres[vert[2]]));
         }
-        this.p1 = this.inversionSphere.invertOnPoint(this.vertexes[0]);
-        const p2 = this.inversionSphere.invertOnPoint(this.vertexes[1]);
-        const p3 = this.inversionSphere.invertOnPoint(this.vertexes[2]);
+    }
 
-        const v1 = p2.sub(this.p1);
-        const v2 = p3.sub(this.p1);
-        this.dividePlaneNormal = Vec3.cross(v1, v2).normalize();
-        if (this.dividePlaneNormal.y < 0) {
-            this.dividePlaneNormal = this.dividePlaneNormal.scale(-1);
+    /**
+     *
+     * @param {Number} vertexIdx1
+     * @param {Number} vertexIdx2
+     * @param {Number} vertexIdx3
+     * @returns {Plane}
+     */
+    computePlane(vertexIdx1, vertexIdx2, vertexIdx3) {
+        const p1 = this.inversionSphere.invertOnPoint(this.vertexes[vertexIdx1]);
+        const p2 = this.inversionSphere.invertOnPoint(this.vertexes[vertexIdx2]);
+        const p3 = this.inversionSphere.invertOnPoint(this.vertexes[vertexIdx3]);
+
+        const v1 = p2.sub(p1);
+        const v2 = p3.sub(p1);
+        let normal = Vec3.cross(v1, v2).normalize();
+        if (normal.y < 0) {
+            normal = normal.scale(-1);
         }
+        return new Plane(p1, p2, p3, normal);
+    }
+
+    computeDividePlanes() {
+        this.dividePlanes = [];
+        this.dividePlanes.push(this.computePlane(0, 1, 2));
     }
 
     computeSeedSpheres() {
@@ -93,7 +111,12 @@ export default class Spheirahedra {
         }
     }
 
-    computeConvexSphere() {}
+    computeConvexSphere() {
+        this.convexSpheres = [];
+        for (let i = 0; i < this.numDividePlanes; i++) {
+            this.convexSpheres.push(this.inversionSphere.invertOnPlane(this.dividePlanes[i]));
+        }
+    }
 
     computeBoundingVolume () {
         this.boundingPlaneY = Number.MIN_VALUE;
@@ -125,11 +148,14 @@ export default class Spheirahedra {
 
         uniLocations.push(gl.getUniformLocation(program, 'u_inversionSphere.center'));
         uniLocations.push(gl.getUniformLocation(program, 'u_inversionSphere.r'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_convexSphere.center'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_convexSphere.r'));
 
-        uniLocations.push(gl.getUniformLocation(program, 'u_dividePlaneOrigin'));
-        uniLocations.push(gl.getUniformLocation(program, 'u_dividePlaneNormal'));
+        for (let i = 0; i < this.numDividePlanes; i++) {
+            uniLocations.push(gl.getUniformLocation(program, 'u_dividePlanes[' + i + '].origin'));
+            uniLocations.push(gl.getUniformLocation(program, 'u_dividePlanes[' + i + '].normal'));
+
+            uniLocations.push(gl.getUniformLocation(program, 'u_convexSpheres[' + i + '].center'));
+            uniLocations.push(gl.getUniformLocation(program, 'u_convexSpheres[' + i + '].r'));
+        }
 
         uniLocations.push(gl.getUniformLocation(program, 'u_numPrismSpheres'));
         uniLocations.push(gl.getUniformLocation(program, 'u_numPrismPlanes'));
@@ -173,15 +199,17 @@ export default class Spheirahedra {
                      this.inversionSphere.center.x, this.inversionSphere.center.y, this.inversionSphere.center.z);
         gl.uniform2f(uniLocations[uniI++],
                      this.inversionSphere.r, this.inversionSphere.rSq);
-        gl.uniform3f(uniLocations[uniI++],
-                     this.convexSphere.center.x, this.convexSphere.center.y, this.convexSphere.center.z);
-        gl.uniform2f(uniLocations[uniI++],
-                     this.convexSphere.r, this.convexSphere.rSq);
 
-        gl.uniform3f(uniLocations[uniI++],
-                     this.p1.x, this.p1.y, this.p1.z);
-        gl.uniform3f(uniLocations[uniI++],
-                     this.dividePlaneNormal.x, this.dividePlaneNormal.y, this.dividePlaneNormal.z);
+        for (let i = 0; i < this.numDividePlanes; i++) {
+            gl.uniform3f(uniLocations[uniI++],
+                         this.dividePlanes[i].p1.x, this.dividePlanes[i].p1.y, this.dividePlanes[i].p1.z);
+            gl.uniform3f(uniLocations[uniI++],
+                         this.dividePlanes[i].normal.x, this.dividePlanes[i].normal.y, this.dividePlanes[i].normal.z);
+            gl.uniform3f(uniLocations[uniI++],
+                         this.convexSpheres[i].center.x, this.convexSpheres[i].center.y, this.convexSpheres[i].center.z);
+            gl.uniform2f(uniLocations[uniI++],
+                         this.convexSpheres[i].r, this.convexSpheres[i].rSq);
+        }
 
         gl.uniform1i(uniLocations[uniI++], this.numSpheres);
         gl.uniform1i(uniLocations[uniI++], this.numPlanes);
@@ -327,6 +355,7 @@ export default class Spheirahedra {
             'numPrismPlanes': this.numPlanes,
             'numSpheirahedraSpheres': this.numFaces,
             'numSeedSpheres': this.numVertexes,
+            'numDividePlanes': this.numDividePlanes
         }
     }
 

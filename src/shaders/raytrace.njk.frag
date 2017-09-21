@@ -132,9 +132,11 @@ float DistPrism(const vec3 pos) {
 					  u_prismPlanes[{{ n }}].normal),
 			d);
 	{% endfor %}
-    d = max(DistPlane(pos, u_dividePlaneOrigin,
-					  u_dividePlaneNormal),
+    {% for n in range(0, numDividePlanes) %}
+    d = max(DistPlane(pos, u_dividePlanes[{{ n }}].origin,
+					  u_dividePlanes[{{ n }}].normal),
 			d);
+    {% endfor %}
     return d;
 }
 
@@ -152,7 +154,10 @@ float DistInfSpheirahedra(const vec3 pos) {
 }
 
 float DistSpheirahedra(vec3 pos) {
-    float d = DistSphere(pos, u_convexSphere);
+    float d = -1.0;
+    {% for n in range(0, numDividePlanes) %}
+    d = max(d, DistSphere(pos, u_convexSpheres[{{ n }}]));
+    {% endfor %}
 	{% for n in range(0, numSpheirahedraSpheres) %}
     d = max(-DistSphere(pos, u_spheirahedraSpheres[{{ n }}]),
 			d);

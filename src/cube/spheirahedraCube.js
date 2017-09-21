@@ -22,11 +22,4 @@ export default class SpheirahedraCube extends Spheirahedra {
         this.gSpheres[4] = this.inversionSphere.invertOnPlane(this.planes[2]); // O5
         this.gSpheres[5] = this.inversionSphere.invertOnSphere(this.prismSpheres[2]); // O6
     }
-
-    computeConvexSphere() {
-        this.convexSphere = Sphere.fromPoints(this.vertexes[0],
-                                              this.vertexes[2],
-                                              this.vertexes[4],
-                                              this.vertexes[6]);
-    }
 }

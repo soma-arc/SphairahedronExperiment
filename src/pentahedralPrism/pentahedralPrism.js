@@ -12,7 +12,7 @@ export default class PentahedralPrism extends Spheirahedra {
                               [1, 2, 3], [0, 1, 3], [0, 2, 4]];
         this.numVertexes = this.vertexIndexes.length;
 
-        this.inversionSphere = new Sphere(0.5, -2, 0, 1.0);
+        this.inversionSphere = new Sphere(0.1, -2, -0.1, 0.5);
     }
 
     computeGenSpheres() {
@@ -22,12 +22,5 @@ export default class PentahedralPrism extends Spheirahedra {
         this.gSpheres[2] = this.inversionSphere.invertOnPlane(this.planes[1]);
         this.gSpheres[3] = this.inversionSphere.invertOnSphere(this.prismSpheres[1]);
         this.gSpheres[4] = this.inversionSphere.invertOnPlane(this.planes[2]);
-    }
-
-    computeConvexSphere() {
-        this.convexSphere = Sphere.fromPoints(this.vertexes[0],
-                                              this.vertexes[1],
-                                              this.vertexes[2],
-                                              this.vertexes[4]);
     }
 }

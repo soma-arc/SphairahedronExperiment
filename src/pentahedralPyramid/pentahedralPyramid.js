@@ -23,11 +23,4 @@ export default class PentahedralPyramid extends Spheirahedra {
         this.gSpheres[3] = this.inversionSphere.invertOnPlane(this.planes[3]);
         this.gSpheres[4] = this.inversionSphere.invertOnSphere(this.prismSpheres[0]);
     }
-
-    computeConvexSphere() {
-        this.convexSphere = Sphere.fromPoints(this.vertexes[0],
-                                              this.vertexes[1],
-                                              this.vertexes[2],
-                                              this.vertexes[4]);
-    }
 }
