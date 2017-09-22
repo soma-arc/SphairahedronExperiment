@@ -2,6 +2,7 @@ import cubeParams from './cube/implementations.js';
 import tetrahedraParams from './tetrahedron/implementations.js';
 import pentahedralPyramid from './pentahedralPyramid/implementations.js';
 import pentahedralPrism from './pentahedralPrism/implementations.js';
+import hexahedralCake1 from './hexahedralCake1/implementations.js';
 import hexahedralCake2 from './hexahedralCake2/implementations.js';
 import hexahedralCake3 from './hexahedralCake3/implementations.js';
 import { AttachShader, LinkProgram } from './glUtils';
@@ -26,6 +27,10 @@ export default class SpheirahedraHandler {
         for (const Param of pentahedralPrism) {
             this.pentahedralPrism.push(new Param(0));
         }
+        this.hexahedralCake1 = [];
+        for (const Param of hexahedralCake1) {
+            this.hexahedralCake1.push(new Param(0, 0));
+        }
         this.hexahedralCake2 = [];
         for (const Param of hexahedralCake2) {
             this.hexahedralCake2.push(new Param(0));
@@ -39,6 +44,7 @@ export default class SpheirahedraHandler {
                            'tetrahedron': this.tetrahedron,
                            'pentahedralPyramid': this.pentahedralPyramid,
                            'pentahedralPrism': this.pentahedralPrism,
+                           'hexahedralCake1': this.hexahedralCake1,
                            'hexahedralCake2': this.hexahedralCake2,
                            'hexahedralCake3': this.hexahedralCake3 };
         this.currentType = '';
