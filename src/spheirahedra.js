@@ -474,6 +474,21 @@ export default class Spheirahedra {
                           new Vec3(-1, 0, RT_3_INV).normalize())];
     }
 
+    static get PRISM_PLANES_362 () {
+        // AB - CA - BC
+        return [new Plane(new Vec3(1, 5, 0),
+                          new Vec3(0, 1, 0),
+                          new Vec3(-1, -2, 0),
+                          new Vec3(0, 0, 1).normalize()),
+                new Plane(new Vec3(1, 3, 0),
+                          new Vec3(0.5, -10, -RT_3 * 0.5),
+                          new Vec3(0.75, 3, -RT_3 * 0.25),
+                          new Vec3(1.5, 0, -RT_3 * 0.5).normalize()),
+                new Plane(new Vec3(-1, 4, 0),
+                          new Vec3(-0.25, -5, -RT_3 * 0.25),
+                          new Vec3(0.5, 2, -RT_3 * 0.5),
+                          new Vec3(-0.5, 0, -RT_3 * 0.5).normalize())];
+    }
     static get PRISM_PLANES_244 () {
         // AB - CA - BC
         return [new Plane(new Vec3(0, 5, 1),
