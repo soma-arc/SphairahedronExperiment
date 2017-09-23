@@ -1,5 +1,6 @@
 import Spheirahedra from '../spheirahedra.js';
 import Sphere from '../sphere.js';
+import { SIN_TABLE } from '../constants.js';
 
 export default class HexahedralCake1 extends Spheirahedra {
     constructor(tb, tc) {
@@ -13,16 +14,41 @@ export default class HexahedralCake1 extends Spheirahedra {
                               [2, 4, 5], [0, 2, 4]];
         this.numVertexes = this.vertexIndexes.length;
 
-        this.inversionSphere = new Sphere(0, 4, 0,
+        this.inversionSphere = new Sphere(0, 3, 0,
                                           0.8);
 
         this.numDividePlanes = 1;
+        this.numExcavationSpheres = 1;
+    }
+
+    computeR6(bc, theta56Denom) {
+        return bc / (2 * SIN_TABLE[theta56Denom]);
+    }
+
+    computeR2(ac, r6, theta36Denom, theta23Denom) {
+        return (ac * ac + this.zb * this.zb - 2 * r6 * ac * SIN_TABLE[theta36Denom]) / (2 * ac * SIN_TABLE[theta23Denom]);
     }
 
     computeDividePlanes() {
         this.dividePlanes = [];
         this.dividePlanes.push(this.computePlane(0, 3, 6));
         this.dividePlanes.push(this.computePlane(1, 2, 4));
+    }
+
+    computeExcavationSpheres() {
+        this.excavationPrismSpheres = [];
+        this.excavationPrismSpheres.push(
+            Sphere.fromPoints(this.inversionSphere.invertOnPoint(this.vertexes[1]),
+                              this.inversionSphere.invertOnPoint(this.vertexes[2]),
+                              this.inversionSphere.invertOnPoint(this.vertexes[4]),
+                              this.inversionSphere.invertOnPoint(this.computeIdealVertex(this.gSpheres[3],
+                                                                                         this.gSpheres[1],
+                                                                                         this.gSpheres[5]))));
+
+        this.excavationSpheres = [];
+        for (const s of this.excavationPrismSpheres) {
+            this.excavationSpheres.push(this.inversionSphere.invertOnSphere(s));
+        }
     }
 
     computeGenSpheres() {
@@ -52,19 +78,12 @@ export default class HexahedralCake1 extends Spheirahedra {
         const D = (-2 * z4 + zb);
         const D2 = D * D;
         const AB = A * B;
-        // console.log('compite');
-        // console.log(A);
-        // console.log(B);
-        // console.log(C);
-        // console.log(D);
-        // console.log(AB);
-        // console.log(AB * (r2 + r6) + 2 * (r2 - r6) * z4 * zb + (-r2 + r6) * zb * zb);
-        // console.log(Math.sqrt(C2 * (AB + zb * zb) * (AB + D2)));
-        return (-AB * (r2 + r6) + 2 * (-r2 + r6) * z4 * zb + (r2 - r6) * zb * zb +
-                Math.sqrt(C2 * (AB + zb * zb) * (AB + D2))) / 2 * AB;
 
-        // return -(AB * (r2 + r6) + 2 * (r2 - r6) * z4 * zb + (-r2 + r6) * zb * zb +
-        //          Math.sqrt(C2 * (AB + zb * zb) * (AB + D2))) / 2 * AB;
+        // return (-AB * (r2 + r6) + 2 * (-r2 + r6) * z4 * zb + (r2 - r6) * zb * zb +
+        //         Math.sqrt(C2 * (AB + zb * zb) * (AB + D2))) / (2 * AB);
+
+        return -(AB * (r2 + r6) + 2 * (r2 - r6) * z4 * zb + (-r2 + r6) * zb * zb +
+                 Math.sqrt(C2 * (AB + zb * zb) * (AB + D2))) / (2 * AB);
     }
 
     /**
@@ -84,9 +103,11 @@ export default class HexahedralCake1 extends Spheirahedra {
         const zb2 = zb * zb;
         const D = -ac + r2 + r6;
         const D2 = D * D;
+
         // return (zb * (ac * ac + 2 * r2 * (r2 + r4) + 2 * r6 * (r2 - r4) - 2 * ac * (r2 + r6) + zb2) +
         //         Math.sqrt(-D2 * (AB + zb2) * ((ac + 2 * r4) * (ac - 2 * (r2 + r4 + r6)) + zb2))) / 2 * (D2 + zb2);
+
         return (zb * (ac * ac + 2 * r2 * (r2 + r4) + 2 * r6 * (r2 - r4) - 2 * ac * (r2 + r6) + zb2) -
-                Math.sqrt(-D2 * (AB + zb2) * ((ac + 2 * r4) * (ac - 2 * (r2 + r4 + r6)) + zb2))) / 2 * (D2 + zb2);
+                Math.sqrt(-D2 * (AB + zb2) * ((ac + 2 * r4) * (ac - 2 * (r2 + r4 + r6)) + zb2))) / (2 * (D2 + zb2));
     }
 }

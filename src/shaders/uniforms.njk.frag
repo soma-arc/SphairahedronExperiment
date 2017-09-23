@@ -27,6 +27,10 @@ uniform Sphere u_spheirahedraSpheres[{{ numSpheirahedraSpheres }}];
 uniform Sphere u_seedSpheres[{{ numSeedSpheres }}];
 uniform Plane u_dividePlanes[{{ numDividePlanes }}];
 uniform Sphere u_convexSpheres[{{ numDividePlanes }}];
+{% if numExcavationSpheres > 0 %}
+uniform Sphere u_excavationPrismSpheres[{{ numExcavationSpheres }}];
+uniform Sphere u_excavationSpheres[{{ numExcavationSpheres }}];
+{% endif %}
 uniform float u_fudgeFactor;
 uniform float u_marchingThreshold;
 uniform int u_maxIterations;

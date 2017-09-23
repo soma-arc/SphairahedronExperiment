@@ -32,6 +32,7 @@ export default class Spheirahedra {
         this.vertexIndexes = [];
         this.numVertexes = this.vertexIndexes.length;
         this.numDividePlanes = 1;
+        this.numExcavationSpheres = 0;
 
         this.prismSpheres = new Array(3);
         this.planes = [];
@@ -54,6 +55,7 @@ export default class Spheirahedra {
         this.computeGenSpheres();
         this.computeVertexes();
         this.computeDividePlanes();
+        this.computeExcavationSpheres();
         this.computeSeedSpheres();
         this.computeConvexSphere();
         this.computeBoundingVolume();
@@ -98,6 +100,11 @@ export default class Spheirahedra {
     computeDividePlanes() {
         this.dividePlanes = [];
         this.dividePlanes.push(this.computePlane(0, 1, 2));
+    }
+
+    computeExcavationSpheres() {
+        this.excavationPrismSpheres = [];
+        this.excavationSpheres = [];
     }
 
     computeSeedSpheres() {
@@ -157,6 +164,14 @@ export default class Spheirahedra {
             uniLocations.push(gl.getUniformLocation(program, 'u_convexSpheres[' + i + '].r'));
         }
 
+        for (let i = 0; i < this.numExcavationSpheres; i++) {
+            uniLocations.push(gl.getUniformLocation(program, 'u_excavationPrismSpheres[' + i + '].center'));
+            uniLocations.push(gl.getUniformLocation(program, 'u_excavationPrismSpheres[' + i + '].r'));
+
+            uniLocations.push(gl.getUniformLocation(program, 'u_excavationSpheres[' + i + '].center'));
+            uniLocations.push(gl.getUniformLocation(program, 'u_excavationSpheres[' + i + '].r'));
+        }
+
         uniLocations.push(gl.getUniformLocation(program, 'u_numPrismSpheres'));
         uniLocations.push(gl.getUniformLocation(program, 'u_numPrismPlanes'));
         uniLocations.push(gl.getUniformLocation(program, 'u_numSeedSpheres'));
@@ -209,6 +224,18 @@ export default class Spheirahedra {
                          this.convexSpheres[i].center.x, this.convexSpheres[i].center.y, this.convexSpheres[i].center.z);
             gl.uniform2f(uniLocations[uniI++],
                          this.convexSpheres[i].r, this.convexSpheres[i].rSq);
+        }
+
+        for (let i = 0; i < this.numExcavationSpheres; i++) {
+            gl.uniform3f(uniLocations[uniI++],
+                         this.excavationPrismSpheres[i].center.x, this.excavationPrismSpheres[i].center.y, this.excavationPrismSpheres[i].center.z);
+            gl.uniform2f(uniLocations[uniI++],
+                         this.excavationPrismSpheres[i].r, this.excavationPrismSpheres[i].rSq);
+
+            gl.uniform3f(uniLocations[uniI++],
+                         this.excavationSpheres[i].center.x, this.excavationSpheres[i].center.y, this.excavationSpheres[i].center.z);
+            gl.uniform2f(uniLocations[uniI++],
+                         this.excavationSpheres[i].r, this.excavationSpheres[i].rSq);
         }
 
         gl.uniform1i(uniLocations[uniI++], this.numSpheres);
@@ -349,13 +376,19 @@ export default class Spheirahedra {
         return false;
     }
 
-    getShaderTemplateContext() {
+    getShaderTemplateContext(shaderType) {
         return {
+            'shaderType': shaderType,
             'numPrismSpheres': this.numSpheres,
             'numPrismPlanes': this.numPlanes,
             'numSpheirahedraSpheres': this.numFaces,
             'numSeedSpheres': this.numVertexes,
-            'numDividePlanes': this.numDividePlanes
+            'numDividePlanes': this.numDividePlanes,
+            'numExcavationSpheres': this.numExcavationSpheres,
+            'SHADER_TYPE_PRISM': Spheirahedra.SHADER_TYPE_PRISM,
+            'SHADER_TYPE_SPHAIRAHEDRA': Spheirahedra.SHADER_TYPE_SPHAIRAHEDRA,
+            'SHADER_TYPE_LIMITSET': Spheirahedra.SHADER_TYPE_LIMITSET,
+            'SHADER_TYPE_PARAMETER': Spheirahedra.SHADER_TYPE_PARAMETER
         }
     }
 
@@ -366,21 +399,43 @@ export default class Spheirahedra {
     }
 
     buildPrismShader() {
-        return RENDER_PRISM_TMPL.render(this.getShaderTemplateContext());
+        return RENDER_PRISM_TMPL.render(
+            this.getShaderTemplateContext(
+                Spheirahedra.SHADER_TYPE_PRISM));
     }
 
     buildSpheirahedraShader() {
-        return RENDER_SPHEIRAHEDRA_TMPL.render(this.getShaderTemplateContext());
+        return RENDER_SPHEIRAHEDRA_TMPL.render(
+            this.getShaderTemplateContext(
+                Spheirahedra.SHADER_TYPE_SPHAIRAHEDRA));
     }
 
     buildLimitsetShader(limitRenderingMode) {
-        const context = this.getShaderTemplateContext();
+        const context = this.getShaderTemplateContext(Spheirahedra.SHADER_TYPE_LIMITSET);
         context['renderMode'] = limitRenderingMode;
         return RENDER_LIMIT_SET_TMPL.render(context);
     }
 
     buildParameterSpaceShader() {
-        return RENDER_PARAMETER_SPACE_TMPL.render(this.getParameterSpaceContext());
+        return RENDER_PARAMETER_SPACE_TMPL.render(
+            this.getParameterSpaceContext(
+                Spheirahedra.SHADER_TYPE_PARAMETER));
+    }
+
+    static get SHADER_TYPE_PRISM() {
+        return 0;
+    }
+
+    static get SHADER_TYPE_SPHAIRAHEDRA() {
+        return 1;
+    }
+
+    static get SHADER_TYPE_LIMITSET() {
+        return 2;
+    }
+
+    static get SHADER_TYPE_PARAMETER() {
+        return 3;
     }
 
     static get POINT_ZB_ZC() {

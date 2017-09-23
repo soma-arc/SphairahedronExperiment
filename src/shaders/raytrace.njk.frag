@@ -125,6 +125,10 @@ void IntersectSphere(const int objId, const int objIndex, const int objComponent
     }
 }
 
+float DistSphere(const vec3 pos, const Sphere sphere) {
+    return distance(pos, sphere.center) - sphere.r.x;
+}
+
 float DistPrism(const vec3 pos) {
     float d = -1.;
 	{% for n in range(0, numPrismPlanes) %}
@@ -137,11 +141,11 @@ float DistPrism(const vec3 pos) {
 					  u_dividePlanes[{{ n }}].normal),
 			d);
     {% endfor %}
+    {% for n in range(0, numExcavationSpheres) %}
+	d = max(-DistSphere(pos, u_excavationPrismSpheres[{{ n }}]),
+			d);
+	{% endfor %}
     return d;
-}
-
-float DistSphere(const vec3 pos, const Sphere sphere) {
-    return distance(pos, sphere.center) - sphere.r.x;
 }
 
 float DistInfSpheirahedra(const vec3 pos) {
@@ -158,6 +162,10 @@ float DistSpheirahedra(vec3 pos) {
     {% for n in range(0, numDividePlanes) %}
     d = max(d, DistSphere(pos, u_convexSpheres[{{ n }}]));
     {% endfor %}
+    {% for n in range(0, numExcavationSpheres) %}
+	d = max(-DistSphere(pos, u_excavationSpheres[{{ n }}]),
+			d);
+	{% endfor %}
 	{% for n in range(0, numSpheirahedraSpheres) %}
     d = max(-DistSphere(pos, u_spheirahedraSpheres[{{ n }}]),
 			d);
