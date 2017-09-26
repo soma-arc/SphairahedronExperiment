@@ -9,6 +9,18 @@ vec3 CalcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,
     return normalize(origin + (xaxis * coord.x) + (yaxis * (resolution.y - coord.y)));
 }
 
+vec3 CalcRayOrtho (const vec3 eye, const vec3 target, const vec3 up, const float orthoWidth,
+                   const vec2 resolution, const vec2 coord,
+                   out vec3 rayOrigin){
+    vec3 v = normalize(target - eye);
+    vec3 xaxis = normalize(cross(v, up));
+    vec3 yaxis =  normalize(cross(v, xaxis));
+    vec2 orthoPlane = vec2(orthoWidth, orthoWidth * resolution.y / resolution.x);
+    vec3 planeOrigin = eye - (xaxis * (orthoPlane.x * .5)) - (yaxis * (orthoPlane.y * .5));
+    rayOrigin = planeOrigin + (xaxis * orthoPlane.x * coord.x / resolution.x) + (yaxis * orthoPlane.y * coord.y / resolution.y);
+    return v;
+}
+
 struct IsectInfo {
     int objId;
     int objIndex;
