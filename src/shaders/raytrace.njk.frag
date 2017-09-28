@@ -170,9 +170,9 @@ float DistInfSpheirahedra(const vec3 pos) {
 }
 
 float DistSpheirahedra(vec3 pos) {
-    float d = -1.0;
+    float d = MAX_FLOAT;
     {% for n in range(0, numDividePlanes) %}
-    d = max(d, DistSphere(pos, u_convexSpheres[{{ n }}]));
+    d = min(d, DistSphere(pos, u_convexSpheres[{{ n }}]));
     {% endfor %}
     {% for n in range(0, numExcavationSpheres) %}
 	d = max(-DistSphere(pos, u_excavationSpheres[{{ n }}]),
