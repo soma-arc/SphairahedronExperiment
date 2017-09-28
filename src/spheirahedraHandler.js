@@ -57,6 +57,8 @@ export default class SpheirahedraHandler {
         this.parameterPrograms = {};
 
         this.limitRenderingMode = 0;
+
+        this.constrainsInversionSphere = true;
     }
 
     static buildRenderProgram(gl, fragment) {

@@ -20,22 +20,37 @@
     <br>
     Max Iterations<input v-model="canvasHandler.limitsetCanvas.maxIterations"
                          type="number" min="0"
-                         @change="updateRenderParameter"><br>
+                         @input="updateRenderParameter"><br>
     MarchingThreshold<input v-model="canvasHandler.limitsetCanvas.marchingThreshold"
                             type="number" step="0.000001" min="0.0000001"
-                            @change="updateRenderParameter">
+                            @input="updateRenderParameter">
     (fast) 0.0001 ~ 000001 (slow) are best parameters.<br>
     FudgeFactor <input v-model="canvasHandler.limitsetCanvas.fudgeFactor"
                        style="width: 80px;" type="number"
                        step="0.01" min="0.001" max="1.0"
-                       @change="updateRenderParameter">
+                       @input="updateRenderParameter">
     (slow) 0.1 ~ 1.0 (fast)  Large fudgeFactor may cause artifacts.<br>
     AO Epsilon<input v-model="canvasHandler.limitsetCanvas.aoEps"
                      type="number" min="0" step="0.0001"
-                     @change="updateRenderParameter">
+                     @input="updateRenderParameter">
     AO Intensity<input v-model="canvasHandler.limitsetCanvas.aoIntensity"
                        type="number" step="0.0001" min="0.0000001"
-                       @change="updateRenderParameter"><br>
+                       @input="updateRenderParameter"><br>
+    Inversion Sphere<br>
+    <input type="checkbox"
+           v-model="canvasHandler.spheirahedraHandler.constrainsInversionSphere"
+           @change="updateLimitSetShader">
+    <label>Constrains Inversion Sphere</label>
+    X <input v-model.number="canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x"
+             type="number" step="0.01"
+             @input="reRenderAll">
+    Y <input v-model.number="canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y"
+             type="number" step="0.01"
+             @input="reRenderAll">
+    Z <input v-model.number="canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z"
+             type="number" step="0.01"
+             @input="reRenderAll">
+    <br>
     <input type="radio" value="0"
            v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
            @change="updateLimitSetShader">
@@ -106,8 +121,7 @@
                 this.canvasHandler.changeDihedralAngleType(this.spheirahedraHandler.currentDihedralAngleIndex);
             },
             updateRenderParameter: function(event) {
-                this.canvasHandler.limitsetCanvas.numSamples = 0;
-                this.canvasHandler.limitsetCanvas.render();
+                this.canvasHandler.reRenderLimitsetCanvas();
             },
             updateLimitSetShader: function(event) {
                 this.canvasHandler.changeRenderMode();
@@ -117,6 +131,10 @@
             },
             renderPrismCanvas: function(event) {
                 this.canvasHandler.prismCanvas.render();
+            },
+            reRenderAll: function(event) {
+                this.canvasHandler.spheirahedraHandler.currentSpheirahedra.update();
+                this.canvasHandler.reRenderCanvases();
             }
         }
 }

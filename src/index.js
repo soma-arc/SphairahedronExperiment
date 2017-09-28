@@ -25,13 +25,5 @@ window.addEventListener('load', () => {
         requestAnimationFrame(renderLoop);
     }
 
-    window.addEventListener('keydown', (event) => {
-        console.log(event.key);
-        const n = Number(event.key);
-        if (n <= 9) {
-            canvasHandler.changeDihedralAngleType(n);
-        }
-    });
-
     renderLoop();
 });

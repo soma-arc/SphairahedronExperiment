@@ -23,14 +23,30 @@ export default class CanvasHandler {
         this.limitsetCanvas.isKeepingSampling = true;
         this.limitsetCanvas.isRenderingLowRes = true;
         this.reRenderCanvases();
+        this.limitsetSamplingTimer = undefined;
     }
 
     reRenderCanvases() {
+        if (this.limitsetSamplingTimer !== undefined) window.clearTimeout(this.limitsetSamplingTimer);
+        this.limitsetCanvas.isKeepingSampling = false;
         this.limitsetCanvas.numSamples = 0;
         this.limitsetCanvas.render();
         this.prismCanvas.render();
         this.parameterCanvas.render();
         this.spheirahedraCanvas.render();
+        this.limitsetSamplingTimer = window.setTimeout(() => {
+            this.limitsetCanvas.isKeepingSampling = true;
+        }, 500);
+    }
+
+    reRenderLimitsetCanvas() {
+        if (this.limitsetSamplingTimer !== undefined) window.clearTimeout(this.limitsetSamplingTimer);
+        this.limitsetCanvas.isKeepingSampling = false;
+        this.limitsetCanvas.numSamples = 0;
+        this.limitsetCanvas.callRender();
+        this.limitsetSamplingTimer = window.setTimeout(() => {
+            this.limitsetCanvas.isKeepingSampling = true;
+        }, 500);
     }
 
     changeSpheirahedron(typeName) {
