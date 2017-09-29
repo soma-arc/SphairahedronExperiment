@@ -6,6 +6,8 @@
     "author": "soma_arc",
     "license": "GPL-3.0",
     "devDependencies": {
+        "@jscad/csg": "^0.3.1",
+        "@jscad/io": "^0.2.0",
         "babel-core": "^6.24.0",
         "babel-loader": "^6.4.1",
         "babel-plugin-jsdoc-to-assert": "^3.0.4",
