@@ -95,20 +95,5 @@ class PrismF extends Prism {
     }
 }
 
-class PrismG extends Prism {
-    constructor(tb) {
-        super(tb, 0);
-        this.planes = Spheirahedra.PRISM_PLANES_362;
-    }
-
-    computeSpheres() {
-        const r4 = 1;
-        const r2 = (this.zb * this.zb) * 0.5;
-        const s2 = new Sphere(1 - r2 * 0.5, 0, -RT_3 * 0.5 * r2, r2);
-        const s4 = new Sphere(0, this.zb, 0, r4);
-        this.prismSpheres = [s2, s4];
-    }
-}
-
 export default [PrismA, PrismB, PrismC, PrismD,
-                PrismE, PrismF, PrismG];
+                PrismE, PrismF];
