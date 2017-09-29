@@ -100,6 +100,7 @@
            v-model="canvasHandler.prismCanvas.displayInversionSphere"
            @change="renderPrismCanvas">
     <label>Inversion Sphere</label><br>
+    <button @click="saveSphairahedraPrism">Export Sphairahedral Prism</button>
   </div>
 </template>
 
@@ -135,6 +136,9 @@
             reRenderAll: function(event) {
                 this.canvasHandler.spheirahedraHandler.currentSpheirahedra.update();
                 this.canvasHandler.reRenderCanvases();
+            },
+            saveSphairahedraPrism: function(event) {
+                this.spheirahedraHandler.saveSphairahedraPrism();
             }
         }
 }

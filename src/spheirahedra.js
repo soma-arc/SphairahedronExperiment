@@ -3,7 +3,6 @@ import Plane from './plane.js';
 import Vec3 from './vector3d.js';
 import Vec2 from './vector2d.js';
 
-const CSG_IO = require('@jscad/io');
 const CSG = require('@jscad/csg').CSG;
 
 const RT_3 = Math.sqrt(3);
@@ -54,11 +53,16 @@ export default class Spheirahedra {
                 [p.normal.x, p.normal.y, p.normal.z],
                 [p.p1.x, p.p1.y, p.p1.z]));
         }
+        for (const p of this.dividePlanes) {
+            sphairahedralPrism = sphairahedralPrism.cutByPlane(CSG.Plane.fromNormalAndPoint(
+                [p.normal.x, p.normal.y, p.normal.z],
+                [p.p1.x, p.p1.y, p.p1.z]));
+        }
         for (const s of this.prismSpheres) {
             sphairahedralPrism = sphairahedralPrism.subtract(CSG.sphere({
                 center: [s.center.x, s.center.y, s.center.z],
                 radius: s.r,
-                resolution: 32
+                resolution: 64
             }));
         }
         return sphairahedralPrism;

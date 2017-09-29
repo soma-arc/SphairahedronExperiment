@@ -8,6 +8,7 @@ import hexahedralCake3 from './hexahedralCake3/implementations.js';
 import { AttachShader, LinkProgram } from './glUtils';
 
 const RENDER_VERTEX = require('./shaders/render.vert');
+const CSG_IO = require('@jscad/io');
 
 export default class SpheirahedraHandler {
     constructor() {
@@ -145,5 +146,16 @@ export default class SpheirahedraHandler {
             this.currentDihedralAngleIndex = 0;
             this.currentSpheirahedra.update();
         }
+    }
+
+    saveSphairahedraPrism() {
+        const mesh = this.currentSpheirahedra.buildPrismMeshWithCSG();
+        const binary = CSG_IO.stlSerializer.serialize(mesh, { 'binary': true });
+        const blob = new Blob(binary);
+
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'sphairahedralPrism.stl';
+        a.click();
     }
 }
