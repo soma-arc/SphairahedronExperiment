@@ -148,7 +148,7 @@ export default class SpheirahedraHandler {
         }
     }
 
-    saveSphairahedraPrism() {
+    saveSphairahedraPrismMesh() {
         const mesh = this.currentSpheirahedra.buildPrismMeshWithCSG();
         const binary = CSG_IO.stlSerializer.serialize(mesh, { 'binary': true });
         const blob = new Blob(binary);
@@ -156,6 +156,18 @@ export default class SpheirahedraHandler {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = 'sphairahedralPrism.stl';
+        a.click();
+    }
+
+    saveSphairahedronMesh() {
+        const mesh = this.currentSpheirahedra.buildSpheirahedronMeshWithCSG();
+        const binary = CSG_IO.stlSerializer.serialize(mesh,
+                                                      { 'binary': true });
+        const blob = new Blob(binary);
+
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'sphairahedron.stl';
         a.click();
     }
 }

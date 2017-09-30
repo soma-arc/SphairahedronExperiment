@@ -42,6 +42,41 @@ export default class Spheirahedra {
 //        this.update();
     }
 
+    buildSpheirahedronMeshWithCSG() {
+        let sphairahedra;
+        const k = 5;
+        for (const s of this.convexSpheres) {
+            // When the radius of convex sphere is large,
+            // the computation of sphairahedron may be failed
+            if (s.r > 9999999) return;
+            if (sphairahedra === undefined) {
+                const c = s.center.sub(this.boundingSphere.center).scale(k);
+                sphairahedra = CSG.sphere({
+                    center: [c.x, c.y, c.z],
+                    radius: s.r * k,
+                    resolution: 64
+                });
+            } else {
+                const c = s.center.sub(this.boundingSphere.center).scale(k);
+                sphairahedra = sphairahedra.union(CSG.sphere({
+                    center: [c.x, c.y, c.z],
+                    radius: s.r * k,
+                    resolution: 64
+                }));
+            }
+        }
+
+        for (const s of this.gSpheres) {
+            const c = s.center.sub(this.boundingSphere.center).scale(k);
+            sphairahedra = sphairahedra.subtract(CSG.sphere({
+                center: [c.x, c.y, c.z],
+                radius: s.r * k * 1.001,
+                resolution: 64
+            }));
+        }
+        return sphairahedra;
+    }
+
     buildPrismMeshWithCSG() {
         const cube = CSG.cube({
             center: [0, 0, 0],
