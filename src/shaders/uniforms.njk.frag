@@ -31,15 +31,17 @@ uniform Sphere u_convexSpheres[{{ numDividePlanes }}];
 uniform Sphere u_excavationPrismSpheres[{{ numExcavationSpheres }}];
 uniform Sphere u_excavationSpheres[{{ numExcavationSpheres }}];
 {% endif %}
+{% if shaderType == SHADER_TYPE_LIMITSET %}
 uniform float u_fudgeFactor;
 uniform float u_marchingThreshold;
 uniform int u_maxIterations;
-uniform int u_limitsetRenderingType;
+{% endif %}
 uniform bool u_displaySpheirahedraSphere;
 uniform bool u_displayConvexSphere;
 uniform bool u_displayInversionSphere;
 uniform bool u_displayBoundingSphere;
 uniform bool u_castShadow;
+uniform bool u_displeyRawSpheirahedralPrism;
 uniform float u_boundingPlaneY;
 uniform vec2 u_ao;
 uniform Sphere u_boundingSphere;

@@ -148,6 +148,26 @@ float DistPrism(const vec3 pos) {
 					  u_prismPlanes[{{ n }}].normal),
 			d);
 	{% endfor %}
+    return d;
+}
+
+{% if shaderType == SHADER_TYPE_PRISM %}
+float DistInfSpheirahedraAll(const vec3 pos) {
+    float d = DistPrism(pos);
+    {% for n in range(0, numExcavationSpheres) %}
+	d = max(-DistSphere(pos, u_excavationPrismSpheres[{{ n }}]),
+			d);
+	{% endfor %}
+	{% for n in range(0, numPrismSpheres) %}
+	d = max(-DistSphere(pos, u_prismSpheres[{{ n }}]),
+			d);
+	{% endfor %}
+    return d;
+}
+{% endif %}
+
+float DistInfSpheirahedra(const vec3 pos) {
+    float d = DistPrism(pos);
     {% for n in range(0, numDividePlanes) %}
     d = max(DistPlane(pos, u_dividePlanes[{{ n }}].origin,
 					  u_dividePlanes[{{ n }}].normal),
@@ -157,11 +177,6 @@ float DistPrism(const vec3 pos) {
 	d = max(-DistSphere(pos, u_excavationPrismSpheres[{{ n }}]),
 			d);
 	{% endfor %}
-    return d;
-}
-
-float DistInfSpheirahedra(const vec3 pos) {
-    float d = DistPrism(pos);
 	{% for n in range(0, numPrismSpheres) %}
 	d = max(-DistSphere(pos, u_prismSpheres[{{ n }}]),
 			d);
@@ -185,6 +200,7 @@ float DistSpheirahedra(vec3 pos) {
     return d;
 }
 
+{% if shaderType == SHADER_TYPE_LIMITSET %}
 void SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {
     vec3 diff = pos - center;
     float lenSq = dot(diff, diff);
@@ -278,4 +294,5 @@ float DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {
     return DistSpheirahedra(pos) / abs(dr) * u_fudgeFactor;
 }
 
+{% endif %}
 {% endif %}
