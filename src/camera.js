@@ -7,13 +7,14 @@ export class Camera {
      * @param {Vec3} pos
      * @param {Vec3} target
      * @param {number} fov
+     * @param {Vec3} up
      */
-    constructor(pos, target, fov) {
+    constructor(pos, target, fov, up) {
         this.pos = pos;
         this.target = target;
         this.prevTarget = target;
         this.fov = fov; // radians
-        this.up = new Vec3(0, 1, 0);
+        this.up = up;
     }
 
     /**
@@ -105,11 +106,9 @@ export class Camera {
 
     /**
      *
-     * @param {number} screenWidth
-     * @param {number} screenHeight
      * @return {[Vec3, Vec3]}
      */
-    getFocalXYVector(screenWidth, screenHeight) {
+    getFocalXYVector() {
         const v = Vec3.normalize(this.target.sub(this.pos));
         const focalXAxis = Vec3.normalize(Vec3.cross(v, this.up));
         const focalYAxis = Vec3.normalize(Vec3.cross(v, focalXAxis));
@@ -149,27 +148,109 @@ export class Camera {
                      this.up.x, this.up.y, this.up.z);
         return uniI;
     }
+
+    /**
+     *
+     * @param {Vec2} mouse
+     */
+    mouseLeftDown(mouse) {}
+
+    /**
+     *
+     * @param {Vec2} mouse
+     */
+    mouseRightDown(mouse) {}
+
+    /**
+     *
+     * @param {Number} deltaY
+     */
+    mouseWheel(deltaY) {}
+
+    /**
+     *
+     * @param {Vec2} mouse
+     * @param {Vec2} prevMouse
+     */
+    mouseLeftMove(mosue, prevMouse) {}
+
+    /**
+     *
+     * @param {Vec2} mouse
+     * @param {Vec2} prevMouse
+     */
+    mouseRightMove(mouse, prevMouse) {}
 }
 
 export class CameraOnSphere extends Camera {
     /**
      *
+     * @param {Vec3} pos
      * @param {Vec3} target
      * @param {number} fov
-     * @param {number} cameraDistance
      * @param {Vec3} up
      */
-    constructor(target, fov, cameraDistance, up) {
-        super(new Vec3(0, 0, 0), target, fov);
-        this.target = target;
-        this.fov = fov;
-        this.cameraDistance = cameraDistance;
-        this.up = up;
-        this.theta = 0;
-        this.phi = 0;
+    constructor(pos, target, fov, up) {
+        super(pos, target, fov, up);
+        this.cameraDistance = Vec3.distance(pos, target);
+        const d = pos.sub(target).normalize();
+        this.theta = Math.atan2(d.z, d.x);
+        this.phi = Math.asin(d.y);
 
         this.prevThetaPhi = new Vec2(this.theta, this.phi);
+        this.cameraDistScale = 1.25;
+        this.update();
+    }
 
+    /**
+     *
+     * @param {Vec2} mouse
+     */
+    mouseLeftDown(mouse) {
+        this.prevThetaPhi = new Vec2(this.theta, this.phi);
+    }
+
+    /**
+     *
+     * @param {Vec2} mouse
+     */
+    mouseRightDown(mouse) {
+        this.prevTarget = this.target;
+    }
+
+    /**
+     *
+     * @param {Number} deltaY
+     */
+    mouseWheel(deltaY) {
+        if (deltaY < 0) {
+            this.cameraDistance /= this.cameraDistScale;
+        } else {
+            this.cameraDistance *= this.cameraDistScale;
+        }
+        this.update();
+    }
+
+    /**
+     *
+     * @param {Vec2} mouse
+     * @param {Vec2} prevMouse
+     */
+    mouseLeftMove(mouse, prevMouse) {
+        this.theta = this.prevThetaPhi.x + (prevMouse.x - mouse.x) * 0.01;
+        this.phi = this.prevThetaPhi.y - (prevMouse.y - mouse.y) * 0.01;
+        this.update();
+    }
+
+    /**
+     *
+     * @param {Vec2} mouse
+     * @param {Vec2} prevMouse
+     */
+    mouseRightMove(mouse, prevMouse) {
+        const d = mouse.sub(prevMouse);
+        const [xVec, yVec] = this.getFocalXYVector();
+        this.target = this.prevTarget.add(xVec.scale(-d.x).add(yVec.scale(-d.y)).scale(0.005));
         this.update();
     }
 
@@ -187,5 +268,89 @@ export class CameraOnSphere extends Camera {
         } else {
             this.up = new Vec3(0, 1, 0);
         }
+    }
+}
+
+export class FlyCamera extends Camera {
+    /**
+     *
+     * @param {Vec3} pos
+     * @param {Vec3} dir
+     * @param {number} fov
+     * @param {Vec3} up
+     */
+    constructor(pos, dir, fov, up) {
+        dir = dir.normalize();
+        super(pos, pos.add(dir), fov, up);
+        this.theta = Math.atan2(dir.z, dir.x);
+        this.phi = Math.acos(dir.y);
+
+        this.prevThetaPhi = new Vec2(this.theta, this.phi);
+
+        this.update();
+    }
+
+    /**
+     *
+     * @param {Vec2} mouse
+     */
+    mouseLeftDown(mouse) {
+        this.prevThetaPhi = new Vec2(this.theta, this.phi);
+    }
+
+    /**
+     *
+     * @param {Vec2} mouse
+     */
+    mouseRightDown(mouse) {
+    }
+
+    /**
+     *
+     * @param {Vec2} mouse
+     * @param {Vec2} prevMouse
+     */
+    mouseLeftMove(mouse, prevMouse) {
+        this.theta = (prevMouse.x - mouse.x) * 0.01 + this.prevThetaPhi.x;
+        this.phi = (prevMouse.y - mouse.y) * 0.01 + this.prevThetaPhi.y;
+        this.update();
+    }
+
+    goForward() {
+        const d = this.target.sub(this.pos);
+        this.pos = this.pos.add(d.scale(0.1));
+        this.target = this.pos.add(d);
+    }
+
+    goBackward() {
+        const d = this.target.sub(this.pos);
+        this.pos = this.pos.sub(d.scale(0.1));
+        this.target = this.pos.add(d);
+    }
+
+    goRight() {
+        const x = this.getFocalXYVector()[0].scale(0.1);
+        this.pos = this.pos.add(x);
+        this.target = this.target.add(x);
+    }
+
+    goLeft() {
+        const x = this.getFocalXYVector()[0].scale(0.1);
+        this.pos = this.pos.sub(x);
+        this.target = this.target.sub(x);
+    }
+
+    /**
+     * TODO: compute up vector using quaternion
+     */
+    update() {
+        // this.lnglat[1] = Math.max(-85, Math.min(85, this.lnglat[1]));
+        // const phi = DegToRad(90 - this.lnglat[1]);
+        // const theta = DegToRad(this.lnglat[0]);
+
+        const dir = new Vec3(Math.sin(this.phi) * Math.cos(this.theta),
+                             Math.cos(this.phi),
+                             Math.sin(this.phi) * Math.sin(this.theta));
+        this.target = this.pos.add(dir);
     }
 }

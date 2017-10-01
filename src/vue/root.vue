@@ -63,6 +63,16 @@
            v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
            @change="updateLimitSetShader">
     <label>Quasi-sphere from spheirahedron</label><br>
+    Camera Mode:
+    <input type="radio" value="0"
+           v-model.number="canvasHandler.limitsetCanvas.cameraMode"
+           @change="changeCameraMode">
+    <label>Camera on Sphere</label>
+    <input type="radio" value="1"
+           v-model.number="canvasHandler.limitsetCanvas.cameraMode"
+           @change="changeCameraMode">
+    <label>Fly</label>
+    <br>
     Display Limit Set:<br>
     <input type="checkbox"
            v-model="canvasHandler.limitsetCanvas.displaySpheirahedraSphere"
@@ -99,7 +109,12 @@
     <input type="checkbox"
            v-model="canvasHandler.prismCanvas.displayInversionSphere"
            @change="renderPrismCanvas">
-    <label>Inversion Sphere</label><br>
+    <label>Inversion Sphere</label>
+    <input type="checkbox"
+           v-model="canvasHandler.prismCanvas.displayRawSpheirahedralPrism"
+           @change="renderPrismCanvas">
+    <label>Display Raw Prism</label>
+    <br>
     <button @click="saveSphairahedraPrismMesh">Export Sphairahedral Prism</button>
     <button @click="saveSphairahedronMesh">Export Sphairahedron</button>
   </div>
@@ -143,6 +158,10 @@
             },
             saveSphairahedronMesh: function(event) {
                 this.spheirahedraHandler.saveSphairahedronMesh();
+            },
+            changeCameraMode: function(event) {
+                this.canvasHandler.limitsetCanvas.changeCamera();
+                this.canvasHandler.reRenderLimitsetCanvas();
             }
         }
 }

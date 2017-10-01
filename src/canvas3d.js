@@ -1,7 +1,7 @@
 import Canvas from './canvas.js';
 import Vec2 from './vector2d.js';
 import Vec3 from './vector3d.js';
-import { CameraOnSphere } from './camera.js';
+import { CameraOnSphere, FlyCamera } from './camera.js';
 import { GetWebGL2Context, CreateSquareVbo, AttachShader,
          LinkProgram, CreateRGBTextures } from './glUtils';
 
@@ -14,9 +14,7 @@ export default class Canvas3D extends Canvas {
         this.spheirahedra = spheirahedra;
 //        this.spheirahedra.addUpdateListener(this.render.bind(this));
 //        this.pixelRatio = 1.0; //window.devicePixelRatio;
-        this.camera = new CameraOnSphere(new Vec3(0, 0, 0), Math.PI / 3,
-                                         1, new Vec3(0, 1, 0));
-        this.cameraDistScale = 1.25;
+        this.resetCamera();
 
         this.gl = GetWebGL2Context(this.canvas);
         this.vertexBuffer = CreateSquareVbo(this.gl);
@@ -188,27 +186,22 @@ export default class Canvas3D extends Canvas {
 
     mouseWheelListener(event) {
         event.preventDefault();
-        if (event.deltaY < 0) {
-            this.camera.cameraDistance /= this.cameraDistScale;
-        } else {
-            this.camera.cameraDistance *= this.cameraDistScale;
-        }
-        this.camera.update();
+        this.camera.mouseWheel(event.deltaY);
         this.numSamples = 0;
         this.callRender();
     }
 
     mouseDownListener(event) {
         event.preventDefault();
+        this.canvas.focus();
         this.mouseState.isPressing = true;
         const mouse = this.calcCanvasCoord(event.clientX, event.clientY);
         this.mouseState.prevPosition = mouse
         this.mouseState.button = event.button;
         if (event.button === Canvas.MOUSE_BUTTON_LEFT) {
-            this.camera.prevThetaPhi = new Vec2(this.camera.theta,
-                                                this.camera.phi);
+            this.camera.mouseLeftDown(mouse);
         } else if (event.button === Canvas.MOUSE_BUTTON_RIGHT) {
-            this.camera.prevTarget = this.camera.target;
+            this.camera.mouseRightDown(mouse);
         }
     }
 
@@ -225,17 +218,10 @@ export default class Canvas3D extends Canvas {
         if (!this.mouseState.isPressing) return;
         const mouse = this.calcCanvasCoord(event.clientX, event.clientY);
         if (this.mouseState.button === Canvas.MOUSE_BUTTON_LEFT) {
-            const prevThetaPhi = this.camera.prevThetaPhi;
-            this.camera.theta = prevThetaPhi.x + (this.mouseState.prevPosition.x - mouse.x) * 0.01;
-            this.camera.phi = prevThetaPhi.y - (this.mouseState.prevPosition.y - mouse.y) * 0.01;
-            this.camera.update();
+            this.camera.mouseLeftMove(mouse, this.mouseState.prevPosition);
             this.isRendering = true;
         } else if (this.mouseState.button === Canvas.MOUSE_BUTTON_RIGHT) {
-            const d = mouse.sub(this.mouseState.prevPosition);
-            const [xVec, yVec] = this.camera.getFocalXYVector(this.canvas.width,
-                                                              this.canvas.height);
-            this.camera.target = this.camera.prevTarget.add(xVec.scale(-d.x).add(yVec.scale(-d.y)).scale(0.005));
-            this.camera.update();
+            this.camera.mouseRightMove(mouse, this.mouseState.prevPosition);
             this.isRendering = true;
         }
     }
@@ -250,5 +236,84 @@ export default class Canvas3D extends Canvas {
         if (this.isKeepingSampling === false) {
             this.renderTimer = window.setTimeout(this.render.bind(this), 200);
         }
+    }
+
+    keydownListener(event) {
+        switch (event.key) {
+        case 'w': {
+            if (this.camera instanceof FlyCamera) {
+                this.camera.goForward();
+                this.isRendering = true;
+            }
+            break;
+        }
+        case 's': {
+            if (this.camera instanceof FlyCamera) {
+                this.camera.goBackward();
+                this.isRendering = true;
+            }
+            break;
+        }
+        case 'a': {
+            if (this.camera instanceof FlyCamera) {
+                this.camera.goLeft();
+                this.isRendering = true;
+            }
+            break;
+        }
+        case 'd': {
+            if (this.camera instanceof FlyCamera) {
+                this.camera.goRight();
+                this.isRendering = true;
+            }
+            break;
+        }
+        }
+    }
+
+    changeToCameraOnSphere() {
+        if (!(this.camera instanceof CameraOnSphere)) {
+            this.cameraMode = Canvas3D.CAMERA_MODE_SPHERE;
+            this.camera = new CameraOnSphere(this.camera.pos, new Vec3(0, 0, 0),
+                                             Math.PI / 3,
+                                             this.camera.up);
+        }
+    }
+
+    changeToFlyCamera() {
+        if (!(this.camera instanceof FlyCamera)) {
+            this.cameraMode = Canvas3D.CAMERA_MODE_FLY;
+            this.camera = new FlyCamera(this.camera.pos,
+                                        this.camera.target.sub(this.camera.pos),
+                                        Math.PI / 3,
+                                        this.camera.up);
+        }
+    }
+
+    changeCamera() {
+        if (this.cameraMode === Canvas3D.CAMERA_MODE_SPHERE) {
+            this.changeToCameraOnSphere();
+        } else if (this.cameraMode === Canvas3D.CAMERA_MODE_FLY) {
+            this.changeToFlyCamera();
+        }
+    }
+
+    resetCamera() {
+        this.cameraMode = Canvas3D.CAMERA_MODE_SPHERE;
+        this.camera = new CameraOnSphere(new Vec3(2, 1, 0), new Vec3(0, 0, 0),
+                                         Math.PI / 3,
+                                         new Vec3(0, 1, 0));
+    }
+
+    keyupListener(event) {
+        this.isRendering = false;
+    }
+
+    static get CAMERA_MODE_SPHERE() {
+        return 0;
+    }
+
+    static get CAMERA_MODE_FLY() {
+        return 1;
     }
 }
