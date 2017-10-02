@@ -49,3 +49,5 @@ uniform Sphere u_boundingSphere;
 const int RENDER_LIMIT_TERRAIN = 0;
 const int RENDER_LIMIT_SEED_SPHERE = 1;
 const int RENDER_LIMIT_SPHEIRAHEDRON = 2;
+
+const float PI = 3.14159265359;
