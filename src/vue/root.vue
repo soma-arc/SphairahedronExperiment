@@ -20,7 +20,11 @@
     <br>
     Max Iterations<input v-model="canvasHandler.limitsetCanvas.maxIterations"
                          type="number" min="0"
-                         @input="updateRenderParameter"><br>
+                         @input="updateRenderParameter">
+    Max Samples<input v-model.number="canvasHandler.limitsetCanvas.maxSamples"
+                      type="number" min="0">
+    {{ canvasHandler.limitsetCanvas.numSamples }} / {{ canvasHandler.limitsetCanvas.maxSamples }}
+    <br>
     MarchingThreshold<input v-model="canvasHandler.limitsetCanvas.marchingThreshold"
                             type="number" step="0.000001" min="0.0000001"
                             @input="updateRenderParameter">
