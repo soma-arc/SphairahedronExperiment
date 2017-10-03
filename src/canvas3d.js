@@ -3,10 +3,11 @@ import Vec2 from './vector2d.js';
 import Vec3 from './vector3d.js';
 import { CameraOnSphere, FlyCamera } from './camera.js';
 import { GetWebGL2Context, CreateSquareVbo, AttachShader,
-         LinkProgram, CreateRGBTextures } from './glUtils';
+         LinkProgram, CreateRGBATextures } from './glUtils';
 
 const RENDER_VERTEX = require('./shaders/render.vert');
 const RENDER_FRAGMENT = require('./shaders/render.frag');
+const RENDER_FLIPPED_VERTEX = require('./shaders/renderFlipped.vert');
 
 export default class Canvas3D extends Canvas {
     constructor(canvasId, spheirahedra) {
@@ -55,14 +56,23 @@ export default class Canvas3D extends Canvas {
 
         this.aoEps = 0.0968;
         this.aoIntensity = 2.0;
+
+        this.productRenderProgram = this.gl.createProgram();
+        AttachShader(this.gl, RENDER_FLIPPED_VERTEX,
+                     this.productRenderProgram, this.gl.VERTEX_SHADER);
+        AttachShader(this.gl, RENDER_FRAGMENT,
+                     this.productRenderProgram, this.gl.FRAGMENT_SHADER);
+        LinkProgram(this.gl, this.productRenderProgram);
+        this.productRenderVAttrib = this.gl.getAttribLocation(this.productRenderProgram,
+                                                              'a_vertex');
     }
 
     initRenderTextures() {
-        this.renderTextures = CreateRGBTextures(this.gl, this.canvas.width,
-                                                this.canvas.height, 2);
-        this.lowResTextures = CreateRGBTextures(this.gl,
+        this.renderTextures = CreateRGBATextures(this.gl, this.canvas.width,
+                                                 this.canvas.height, 2);
+        this.lowResTextures = CreateRGBATextures(this.gl,
                                                 this.canvas.width * this.lowResRatio,
-                                                this.canvas.height * this.lowResRatio, 2);
+                                                 this.canvas.height * this.lowResRatio, 2);
     }
 
     /**
@@ -311,6 +321,29 @@ export default class Canvas3D extends Canvas {
 
     keyupListener(event) {
         this.isRendering = false;
+    }
+
+    renderFlippedTex(textures) {
+        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        this.gl.useProgram(this.productRenderProgram);
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, textures[0]);
+        const tex = this.gl.getUniformLocation(this.productRenderProgram, 'u_texture');
+        this.gl.uniform1i(tex, textures[0]);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.vertexAttribPointer(this.renderVAttrib, 2,
+                                    this.gl.FLOAT, false, 0, 0);
+        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+        this.gl.flush();
+    }
+
+    saveCanvas(filename) {
+        this.renderFlippedTex(this.renderTextures);
+        this.saveImage(this.gl,
+                       this.canvas.width,
+                       this.canvas.height,
+                       filename);
+        this.renderTexturesToCanvas(this.renderTextures);
     }
 
     static get CAMERA_MODE_SPHERE() {

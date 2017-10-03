@@ -90,6 +90,7 @@
            v-model="canvasHandler.limitsetCanvas.castShadow"
            @change="updateRenderParameter">
     <label>Cast Shadow</label>
+    <button @click="saveLimitsetImage">Save Image</button>
     <br>
 
     Display Spheirahedron:<br>
@@ -166,6 +167,9 @@
             changeCameraMode: function(event) {
                 this.canvasHandler.limitsetCanvas.changeCamera();
                 this.canvasHandler.reRenderLimitsetCanvas();
+            },
+            saveLimitsetImage: function(event) {
+                this.canvasHandler.limitsetCanvas.saveCanvas('limitset.png');
             }
         }
 }
