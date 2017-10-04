@@ -150,7 +150,7 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 
         if(isectInfo.hit) {
             vec3 matColor = isectInfo.matColor;
-            vec3 diffuse =  clamp(dot(isectInfo.normal, LIGHT_DIR), 0., 1.) * matColor;
+            vec3 diffuse =  clamp((dot(isectInfo.normal, LIGHT_DIR)), 0., 1.) * matColor;
             vec3 ambient = matColor * AMBIENT_FACTOR;
             bool transparent = false;
             transparent =  (isectInfo.objId == ID_INI_SPHERES) ?
