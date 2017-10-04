@@ -73,7 +73,7 @@ export function CreateRGBATexture2D(gl, width, height,
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height,
-                  0, gl.RGBA, type, null);
+                  0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     gl.bindTexture(gl.TEXTURE_2D, null);
     return texture;
 }
@@ -81,8 +81,8 @@ export function CreateRGBATexture2D(gl, width, height,
 export function CreateRGBATextures(gl, width, height, num) {
     const textures = [];
     for (let i = 0; i < num; i++) {
-        textures.push(CreateRGBTexture2D(gl, width, height,
-                                         gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, num));
+        textures.push(CreateRGBATexture2D(gl, width, height,
+                                          gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, num));
     }
     return textures;
 }
