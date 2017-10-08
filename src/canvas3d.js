@@ -13,8 +13,42 @@ export default class Canvas3D extends Canvas {
     constructor(canvasId, spheirahedra) {
         super(canvasId);
         this.spheirahedra = spheirahedra;
-//        this.spheirahedra.addUpdateListener(this.render.bind(this));
-//        this.pixelRatio = 1.0; //window.devicePixelRatio;
+
+        this.fudgeFactor = 0.2;
+        this.marchingThreshold = 0.00001;
+        this.maxIterations = 50;
+        this.isRendering = false;
+
+        this.limitRenderingMode = 0;
+        this.displaySpheirahedraSphere = true;
+        this.displayConvexSphere = false;
+        this.displayInversionSphere = false;
+        this.displayBoundingSphere = false;
+        this.displayRawSpheirahedralPrism = false;
+        this.castShadow = true;
+
+        this.isKeepingSampling = false;
+        this.isRenderingLowRes = false;
+        this.renderTimer = undefined;
+
+        this.aoEps = 0.0968;
+        this.aoIntensity = 2.0;
+    }
+
+    init() {
+        this.canvas = document.getElementById(this.canvasId);
+        //        this.spheirahedra.addUpdateListener(this.render.bind(this));
+        //        this.pixelRatio = 1.0; //window.devicePixelRatio;
+
+        this.canvas.addEventListener('mousedown', this.boundMouseDownListener);
+        this.canvas.addEventListener('mouseup', this.boundMouseUpListener);
+        this.canvas.addEventListener('wheel', this.boundMouseWheelListener);
+        this.canvas.addEventListener('mousemove', this.boundMouseMoveListener);
+        this.canvas.addEventListener('dblclick', this.boundDblClickLisntener);
+        this.canvas.addEventListener('keydown', this.boundKeydown);
+        this.canvas.addEventListener('keyup', this.boundKeyup);
+        this.canvas.addEventListener('contextmenu', event => event.preventDefault());
+
         this.resetCamera();
 
         this.gl = GetWebGL2Context(this.canvas);
@@ -36,26 +70,6 @@ export default class Canvas3D extends Canvas {
                                                        'a_vertex');
         this.texturesFrameBuffer = this.gl.createFramebuffer();
         this.initRenderTextures();
-
-        this.fudgeFactor = 0.2;
-        this.marchingThreshold = 0.00001;
-        this.maxIterations = 50;
-        this.isRendering = false;
-
-        this.limitRenderingMode = 0;
-        this.displaySpheirahedraSphere = true;
-        this.displayConvexSphere = false;
-        this.displayInversionSphere = false;
-        this.displayBoundingSphere = false;
-        this.displayRawSpheirahedralPrism = false;
-        this.castShadow = true;
-
-        this.isKeepingSampling = false;
-        this.isRenderingLowRes = false;
-        this.renderTimer = undefined;
-
-        this.aoEps = 0.0968;
-        this.aoIntensity = 2.0;
 
         this.productRenderProgram = this.gl.createProgram();
         AttachShader(this.gl, RENDER_FLIPPED_VERTEX,

@@ -15,10 +15,12 @@ window.addEventListener('load', () => {
         el: '#vue-ui',
         data: d,
         render: (h) => {
-            return h('root', { 'props': d })
+            return h('root', { 'props': d });
         },
         components: { 'root': Root }
     });
+
+    canvasHandler.initCanvases();
 
     function renderLoop() {
         canvasHandler.render();

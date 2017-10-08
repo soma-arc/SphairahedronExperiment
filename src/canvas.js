@@ -1,8 +1,6 @@
 export default class Canvas {
     constructor(canvasId) {
         this.canvasId = canvasId;
-        this.canvas = document.getElementById(canvasId);
-        console.log(this.canvas);
         this.pixelRatio = 1.0;//window.devicePixelRatio;
 //        this.resizeCanvas();
 
@@ -15,14 +13,6 @@ export default class Canvas {
         this.boundDblClickLisntener = this.mouseDblClickListener.bind(this);
         this.boundKeydown = this.keydownListener.bind(this);
         this.boundKeyup = this.keyupListener.bind(this);
-        this.canvas.addEventListener('mousedown', this.boundMouseDownListener);
-        this.canvas.addEventListener('mouseup', this.boundMouseUpListener);
-        this.canvas.addEventListener('wheel', this.boundMouseWheelListener);
-        this.canvas.addEventListener('mousemove', this.boundMouseMoveListener);
-        this.canvas.addEventListener('dblclick', this.boundDblClickLisntener);
-        this.canvas.addEventListener('keydown', this.boundKeydown);
-        this.canvas.addEventListener('keyup', this.boundKeyup);
-        this.canvas.addEventListener('contextmenu', event => event.preventDefault());
 
         this.renderCallback = this.render.bind(this);
 

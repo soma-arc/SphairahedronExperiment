@@ -6,11 +6,7 @@ import { GetWebGL2Context, CreateSquareVbo, AttachShader,
 export default class Canvas2D extends Canvas {
     constructor(canvasId, spheirahedra) {
         super(canvasId);
-        this.canvasRatio = this.canvas.width / this.canvas.height / 2;
         this.spheirahedra = spheirahedra;
-
-        this.gl = GetWebGL2Context(this.canvas);
-        this.vertexBuffer = CreateSquareVbo(this.gl);
 
         this.mouseState = {
             isPressing: false,
@@ -22,6 +18,22 @@ export default class Canvas2D extends Canvas {
         this.scaleFactor = 1.25;
         this.translate = new Vec2(0, 0);
         this.isTweaking = false;
+    }
+
+    init() {
+        this.canvas = document.getElementById(this.canvasId);
+        this.canvasRatio = this.canvas.width / this.canvas.height / 2;
+        this.gl = GetWebGL2Context(this.canvas);
+        this.vertexBuffer = CreateSquareVbo(this.gl);
+
+        this.canvas.addEventListener('mousedown', this.boundMouseDownListener);
+        this.canvas.addEventListener('mouseup', this.boundMouseUpListener);
+        this.canvas.addEventListener('wheel', this.boundMouseWheelListener);
+        this.canvas.addEventListener('mousemove', this.boundMouseMoveListener);
+        this.canvas.addEventListener('dblclick', this.boundDblClickLisntener);
+        this.canvas.addEventListener('keydown', this.boundKeydown);
+        this.canvas.addEventListener('keyup', this.boundKeindeyup);
+        this.canvas.addEventListener('contextmenu', event => event.preventDefault());
     }
 
     /**

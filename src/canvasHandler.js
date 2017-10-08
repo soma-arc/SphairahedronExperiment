@@ -10,20 +10,41 @@ export default class CanvasHandler {
     constructor(spheirahedraHandler) {
         this.spheirahedraHandler = spheirahedraHandler;
         this.prismCanvas = new Canvas3D(PRISM_CANVAS_NAME,
-                                        spheirahedraHandler);
+                                        this.spheirahedraHandler);
         this.limitsetCanvas = new Canvas3D(LIMIT_SET_CANVAS_NAME,
-                                           spheirahedraHandler);
+                                           this.spheirahedraHandler);
         this.spheirahedraCanvas = new Canvas3D(SPHEIRAHEDRA_CANVAS_NAME,
-                                               spheirahedraHandler);
+                                               this.spheirahedraHandler);
         this.parameterCanvas = new Canvas2D(PARAMETER_CANVAS_NAME,
-                                            spheirahedraHandler);
-        this.changeSpheirahedron('cube');
-
+                                            this.spheirahedraHandler);
         this.limitsetCanvas.displaySpheirahedraSphere = false;
         this.limitsetCanvas.isKeepingSampling = true;
         this.limitsetCanvas.isRenderingLowRes = true;
-        this.reRenderCanvases();
+
         this.limitsetSamplingTimer = undefined;
+
+        this.spheirahedraHandler.changeSpheirahedron('cube');
+    }
+
+    initCanvases() {
+        this.prismCanvas.init();
+        this.limitsetCanvas.init();
+        this.spheirahedraCanvas.init();
+        this.parameterCanvas.init();
+
+        this.spheirahedraCanvas.setPrograms(
+            this.spheirahedraHandler.getSpheirahedraProgram(this.spheirahedraCanvas.gl));
+        this.limitsetCanvas.setPrograms(
+            this.spheirahedraHandler.getLimitsetProgram(this.limitsetCanvas.gl)
+        );
+        this.prismCanvas.setPrograms(
+            this.spheirahedraHandler.getPrismProgram(this.prismCanvas.gl)
+        );
+        this.parameterCanvas.setPrograms(
+            this.spheirahedraHandler.getParameterProgram(this.parameterCanvas.gl)
+        );
+
+        this.reRenderCanvases();
     }
 
     reRenderCanvases() {
