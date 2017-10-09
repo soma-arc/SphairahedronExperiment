@@ -20,7 +20,7 @@ vec4 distFunc(const vec3 pos) {
     return hit;
 }
 
-const vec2 NORMAL_COEFF = vec2(0.00001, 0.);
+const vec2 NORMAL_COEFF = vec2(0.0001, 0.);
 vec3 computeNormal(const vec3 p) {
     return normalize(vec3(distFunc(p + NORMAL_COEFF.xyy).x - distFunc(p - NORMAL_COEFF.xyy).x,
                           distFunc(p + NORMAL_COEFF.yxy).x - distFunc(p - NORMAL_COEFF.yxy).x,
@@ -52,6 +52,22 @@ void march(const vec3 rayOrg, const vec3 rayDir,
             break;
         }
     }
+}
+
+float computeShadowFactor (const vec3 rayOrg, const vec3 rayDir,
+                           const float mint, const float maxt, const float k) {
+    float shadowFactor = 1.0;
+    for(float t = mint ; t < maxt ;){
+        float d = distFunc(rayOrg + rayDir * t).x;
+        if(d < MARCHING_THRESHOLD) {
+            shadowFactor = 0.;
+            break;
+        }
+
+        shadowFactor = min(shadowFactor, k * d / t);
+        t += d;
+    }
+    return clamp(shadowFactor, 0.0, 1.0);
 }
 
 const vec3 AMBIENT_FACTOR = vec3(0.1);
@@ -97,6 +113,9 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 isectInfo = NewIsectInfo();
                 continue;
             } else {
+                // float k = computeShadowFactor(isectInfo.intersection + 0.001 * isectInfo.normal,
+                //                               LIGHT_DIR,
+                //                               0.001, 30., 60.);
                 l += (diffuse + ambient) * coeff;
             }
         }
