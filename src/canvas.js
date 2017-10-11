@@ -2,7 +2,6 @@ export default class Canvas {
     constructor(canvasId) {
         this.canvasId = canvasId;
         this.pixelRatio = 1.0;//window.devicePixelRatio;
-//        this.resizeCanvas();
 
         this.isRendering = false;
 
@@ -20,7 +19,7 @@ export default class Canvas {
         this.spheirahedraUniLocations = undefined;
 
         this.numSamples = 0;
-        this.maxSamples = 20;
+        this.maxSamples = 5;
         this.lowResRatio = 0.5;
     }
 

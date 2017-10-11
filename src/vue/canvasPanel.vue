@@ -1,25 +1,34 @@
 <template>
   <div id="rootPanel">
     <div class="subPanel">
-      <canvas id="prismCanvas"
-              width="512px" height="512px"
-              tabIndex="1003"></canvas>
-      <canvas id="limitsetCanvas"
-              width="512px" height="512px"
-              tabIndex="1002"></canvas><br>
+      <div class="canvasParent">
+        <canvas id="prismCanvas"
+                tabIndex="1003"></canvas>
+      </div>
+      <div class="canvasParent">
+        <canvas id="limitsetCanvas"
+                tabIndex="1002"></canvas>
+      </div>
     </div>
     <div class="subPanel">
-      <canvas id="parameterCanvas"
-              width="256px" height="256px"
-              tabIndex="1001"></canvas>
-      <canvas id="spheirahedraCanvas"
-              width="256px" height="256px"
-              tabIndex="1004"></canvas><br>
-      <div>
+      <div class="subPanel">
+        <div class="canvasParent">
+          <canvas id="parameterCanvas"
+                  tabIndex="1001"></canvas>
+        </div>
+        <div class="canvasParent">
+          <canvas id="spheirahedraCanvas"
+                  tabIndex="1004"></canvas>
+        </div>
+      </div>
+      <div class="subPanel">
+        <div id="infoPanel">
         Left Button + dragging : rotate camera / tweak parameter (parameter view)<br>
         Right Button + dragging : move camera<br>
         Wheel : zoom<br>
+
         <a href="https://github.com/soma-arc/SpheirahedronExperiment">Source code on GitHub</a><br>
+        </div>
       </div>
     </div>
   </div>
@@ -33,12 +42,36 @@
 
 <style>
 #rootPanel {
+    width: 100%;
+    flex: 1;
     display: flex;
     flex-direction: column;
+    border-style: ridge;
+    border-color: gray;
 }
 
 .subPanel {
-    display:flex;
+    display: flex;
     flex-direction: row;
+    flex: 1;
 }
+
+.canvasParent {
+    flex: 1;
+    border-style: ridge;
+    border-color: gray;
+}
+
+#infoPanel {
+    flex: 1;
+    border-style: ridge;
+    border-color: gray;
+    padding: 5px;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+}
+
 </style>

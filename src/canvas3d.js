@@ -37,6 +37,8 @@ export default class Canvas3D extends Canvas {
 
     init() {
         this.canvas = document.getElementById(this.canvasId);
+        this.resizeCanvas();
+
         //        this.spheirahedra.addUpdateListener(this.render.bind(this));
         //        this.pixelRatio = 1.0; //window.devicePixelRatio;
 

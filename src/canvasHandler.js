@@ -24,6 +24,8 @@ export default class CanvasHandler {
         this.limitsetSamplingTimer = undefined;
 
         this.spheirahedraHandler.changeSpheirahedron('cube');
+
+        this.resizeCallback = this.resize.bind(this);
     }
 
     initCanvases() {
@@ -45,6 +47,23 @@ export default class CanvasHandler {
         );
 
         this.reRenderCanvases();
+    }
+
+    resize() {
+        this.prismCanvas.resizeCanvas();
+        this.limitsetCanvas.resizeCanvas();
+        this.spheirahedraCanvas.resizeCanvas();
+        this.parameterCanvas.resizeCanvas();
+
+        this.prismCanvas.initRenderTextures();
+        this.limitsetCanvas.initRenderTextures();
+        this.limitsetCanvas.numSamples = 0;
+        this.spheirahedraCanvas.initRenderTextures();
+
+        this.prismCanvas.render();
+        this.limitsetCanvas.render();
+        this.spheirahedraCanvas.render();
+        this.parameterCanvas.render();
     }
 
     reRenderCanvases() {

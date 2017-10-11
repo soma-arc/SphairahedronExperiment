@@ -1,5 +1,6 @@
 <template>
   <div id="controlPanel">
+    <div id="control">
     Polyhedron:
     <select id="sphairahedraTypeBox"
             @change="changeSpheirahedron"
@@ -20,9 +21,9 @@
     <br>
     Max Iterations<input v-model="canvasHandler.limitsetCanvas.maxIterations"
                          type="number" min="0"
-                         @input="updateRenderParameter">
+                         @input="updateRenderParameter"><br>
     Max Samples<input v-model.number="canvasHandler.limitsetCanvas.maxSamples"
-                      type="number" min="0">
+                      type="number" min="0"><br>
     {{ canvasHandler.limitsetCanvas.numSamples }} / {{ canvasHandler.limitsetCanvas.maxSamples }}
     <br>
     MarchingThreshold<input v-model="canvasHandler.limitsetCanvas.marchingThreshold"
@@ -44,13 +45,13 @@
     <input type="checkbox"
            v-model="canvasHandler.spheirahedraHandler.constrainsInversionSphere"
            @change="updateLimitSetShader">
-    <label>Constrains Inversion Sphere</label>
+    <label>Constrains Inversion Sphere</label><br>
     X <input v-model.number="canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x"
              type="number" step="0.01"
-             @input="reRenderAll">
+             @input="reRenderAll"><br>
     Y <input v-model.number="canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y"
              type="number" step="0.01"
-             @input="reRenderAll">
+             @input="reRenderAll"><br>
     Z <input v-model.number="canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z"
              type="number" step="0.01"
              @input="reRenderAll">
@@ -58,11 +59,11 @@
     <input type="radio" value="0"
            v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
            @change="updateLimitSetShader">
-    <label>Terrain limit set </label>
+    <label>Terrain limit set </label><br>
     <input type="radio" value="1"
            v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
            @change="updateLimitSetShader">
-    <label>Quasi-sphere from seed spheres</label>
+    <label>Quasi-sphere from seed spheres</label><br>
     <input type="radio" value="2"
            v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
            @change="updateLimitSetShader">
@@ -81,15 +82,15 @@
     <input type="checkbox"
            v-model="canvasHandler.limitsetCanvas.displaySpheirahedraSphere"
            @change="updateRenderParameter">
-    <label>Spheirahedra Sphere</label>
+    <label>Spheirahedra Sphere</label><br>
     <input type="checkbox"
            v-model="canvasHandler.limitsetCanvas.displayBoundingSphere"
            @change="updateRenderParameter">
-    <label>Bounding Sphere</label>
+    <label>Bounding Sphere</label><br>
     <input type="checkbox"
            v-model="canvasHandler.limitsetCanvas.castShadow"
            @change="updateRenderParameter">
-    <label>Cast Shadow</label>
+    <label>Cast Shadow</label><br>
     <button @click="saveLimitsetImage">Save Image</button>
     <br>
 
@@ -97,11 +98,11 @@
     <input type="checkbox"
            v-model="canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere"
            @change="renderSpheirahedraCanvas">
-    <label>Spheirahedra Sphere</label>
+    <label>Spheirahedra Sphere</label><br>
     <input type="checkbox"
            v-model="canvasHandler.spheirahedraCanvas.displayConvexSphere"
            @change="renderSpheirahedraCanvas">
-    <label>Convex Sphere</label>
+    <label>Convex Sphere</label><br>
     <input type="checkbox"
            v-model="canvasHandler.spheirahedraCanvas.displayInversionSphere"
            @change="renderSpheirahedraCanvas">
@@ -110,11 +111,11 @@
     <input type="checkbox"
            v-model="canvasHandler.prismCanvas.displaySpheirahedraSphere"
            @change="renderPrismCanvas">
-    <label>Spheirahedra Sphere</label>
+    <label>Spheirahedra Sphere</label><br>
     <input type="checkbox"
            v-model="canvasHandler.prismCanvas.displayInversionSphere"
            @change="renderPrismCanvas">
-    <label>Inversion Sphere</label>
+    <label>Inversion Sphere</label><br>
     <input type="checkbox"
            v-model="canvasHandler.prismCanvas.displayRawSpheirahedralPrism"
            @change="renderPrismCanvas">
@@ -122,6 +123,7 @@
     <br>
     <button @click="saveSphairahedraPrismMesh">Export Sphairahedral Prism</button>
     <button @click="saveSphairahedronMesh">Export Sphairahedron</button><br>
+    </div>
   </div>
 </template>
 
@@ -176,6 +178,15 @@
 
 <style>
 #controlPanel {
-  width: 300px;
+    border-style: ridge;
+    width: 300px;
+    flex-basis: 300px;
+    overflow-y: scroll;
+    border-color: gray;
+    display: flex;
+}
+
+#control {
+    width: 100%;
 }
 </style>

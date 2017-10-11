@@ -22,6 +22,7 @@ export default class Canvas2D extends Canvas {
 
     init() {
         this.canvas = document.getElementById(this.canvasId);
+        this.resizeCanvas();
         this.canvasRatio = this.canvas.width / this.canvas.height / 2;
         this.gl = GetWebGL2Context(this.canvas);
         this.vertexBuffer = CreateSquareVbo(this.gl);

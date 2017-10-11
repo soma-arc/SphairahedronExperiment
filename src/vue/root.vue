@@ -1,9 +1,11 @@
 <template>
-  <div id="body">
-    <canvas-panel :canvasHandler="canvasHandler"
-                  :spheirahedraHandler="spheirahedraHandler"/>
-    <control-panel :canvasHandler="canvasHandler"
-                   :spheirahedraHandler="spheirahedraHandler"/>
+  <div id="root">
+    <div id="content">
+      <canvas-panel :canvasHandler="canvasHandler"
+                    :spheirahedraHandler="spheirahedraHandler"/>
+      <control-panel :canvasHandler="canvasHandler"
+                     :spheirahedraHandler="spheirahedraHandler"/>
+    </div>
   </div>
 </template>
 
@@ -62,10 +64,27 @@
 </script>
 
 <style>
-#body {
+#root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#content {
+    flex:1;
+	margin: 0; 
     display: flex;
     flex-direction: row;
-    margin-right:0;
-    overflow: hidden;
+    height: 100%;
+}
+
+canvas-panel {
+    flex: 1;
+    display: flex;
+}
+
+control-panel {
+    width: 300px;
+    display: flex;
 }
 </style>
