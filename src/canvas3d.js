@@ -46,6 +46,7 @@ export default class Canvas3D extends Canvas {
         this.canvas.addEventListener('mouseup', this.boundMouseUpListener);
         this.canvas.addEventListener('wheel', this.boundMouseWheelListener);
         this.canvas.addEventListener('mousemove', this.boundMouseMoveListener);
+        this.canvas.addEventListener('mouseout', this.boundMouseOutListener);
         this.canvas.addEventListener('dblclick', this.boundDblClickLisntener);
         this.canvas.addEventListener('keydown', this.boundKeydown);
         this.canvas.addEventListener('keyup', this.boundKeyup);
@@ -239,6 +240,11 @@ export default class Canvas3D extends Canvas {
     }
 
     mouseUpListener(event) {
+        this.mouseState.isPressing = false;
+        this.isRendering = false;
+    }
+
+    mouseOutListener(event) {
         this.mouseState.isPressing = false;
         this.isRendering = false;
     }

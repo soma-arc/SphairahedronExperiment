@@ -9,6 +9,7 @@ export default class Canvas {
         this.boundMouseUpListener = this.mouseUpListener.bind(this);
         this.boundMouseWheelListener = this.mouseWheelListener.bind(this);
         this.boundMouseMoveListener = this.mouseMoveListener.bind(this);
+        this.boundMouseOutListener = this.mouseOutListener.bind(this);
         this.boundDblClickLisntener = this.mouseDblClickListener.bind(this);
         this.boundKeydown = this.keydownListener.bind(this);
         this.boundKeyup = this.keyupListener.bind(this);
@@ -39,6 +40,8 @@ export default class Canvas {
     mouseUpListener(event) {}
 
     mouseMoveListener(event) {}
+
+    mouseOutListener(event) {}
 
     keydownListener(event) {}
 
