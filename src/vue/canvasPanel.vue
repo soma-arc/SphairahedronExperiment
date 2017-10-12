@@ -1,6 +1,6 @@
 <template>
   <div id="rootPanel">
-    <div class="subPanel">
+    <div class="subPanel" id="abovePanel">
       <div class="canvasParent">
         <canvas id="prismCanvas"
                 tabIndex="1003"></canvas>
@@ -10,7 +10,7 @@
                 tabIndex="1002"></canvas>
       </div>
     </div>
-    <div class="subPanel">
+    <div class="subPanel" id="belowPanel">
       <div class="subPanel">
         <div class="canvasParent">
           <canvas id="parameterCanvas"
@@ -50,6 +50,14 @@
     border-color: gray;
 }
 
+#abovePanel {
+    flex: 2;
+}
+
+#belowPanel {
+    flex: 1;
+}
+
 .subPanel {
     display: flex;
     flex-direction: row;
@@ -72,6 +80,10 @@
 canvas {
     width: 100%;
     height: 100%;
+}
+
+canvas:focus {
+    outline: none;
 }
 
 </style>

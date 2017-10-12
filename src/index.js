@@ -22,6 +22,12 @@ window.addEventListener('load', () => {
 
     canvasHandler.initCanvases();
 
+    let resizeTimer = setTimeout(canvasHandler.resizeCallback, 500);
+    window.addEventListener('resize', () => {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(canvasHandler.resizeCallback, 500);
+    });
+
     function renderLoop() {
         canvasHandler.render();
         requestAnimationFrame(renderLoop);
