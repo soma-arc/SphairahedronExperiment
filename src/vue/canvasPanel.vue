@@ -1,24 +1,20 @@
 <template>
   <div id="rootPanel">
-    <div class="subPanel" id="abovePanel">
+    <div class="subPanel" id="topPanel">
       <div class="canvasParent">
-        <canvas id="prismCanvas"
-                tabIndex="1003"></canvas>
+        <component v-bind:is="topLeftCanvas"/>
       </div>
       <div class="canvasParent">
-        <canvas id="limitsetCanvas"
-                tabIndex="1002"></canvas>
+        <component v-bind:is="topRightCanvas"/>
       </div>
     </div>
-    <div class="subPanel" id="belowPanel">
+    <div class="subPanel" id="bottomPanel">
       <div class="subPanel">
         <div class="canvasParent">
-          <canvas id="parameterCanvas"
-                  tabIndex="1001"></canvas>
+          <component v-bind:is="bottomLeftCanvas"/>
         </div>
         <div class="canvasParent">
-          <canvas id="spheirahedraCanvas"
-                  tabIndex="1004"></canvas>
+          <component v-bind:is="bottomRightCanvas"/>
         </div>
       </div>
       <div class="subPanel">
@@ -26,7 +22,7 @@
         Left Button + dragging : rotate camera / tweak parameter (parameter view)<br>
         Right Button + dragging : move camera<br>
         Wheel : zoom<br>
-
+        <button @click="changeLayout">changeLayout</button>
         <a href="https://github.com/soma-arc/SpheirahedronExperiment">Source code on GitHub</a><br>
         </div>
       </div>
@@ -35,9 +31,35 @@
 </template>
 
 <script>
-    export default {
-        props: ['canvasHandler', 'spheirahedraHandler'],
+import LimitsetCanvas from './limitsetCanvas.vue';
+import PrismCanvas from './prismCanvas.vue';
+import ParameterCanvas from './parameterCanvas.vue';
+import SphairahedraCanvas from './sphaiahedraCanvas.vue';
+
+export default {
+    props: ['canvasHandler', 'spheirahedraHandler'],
+    data: function() {
+        return {
+            topRightCanvas: 'limitset-canvas',
+            topLeftCanvas: 'prism-canvas',
+            bottomLeftCanvas: 'parameter-canvas',
+            bottomRightCanvas: 'sphairahedra-canvas'
+        }
+    },
+    components: {
+        LimitsetCanvas, PrismCanvas, ParameterCanvas, SphairahedraCanvas
+    },
+    methods: {
+        changeLayout: function(evnet) {
+            const tmp = this.topRightCanvas;
+            console.log(tmp);
+            this.topRightCanvas = this.topLeftCanvas;
+            this.topLeftCanvas = 'limitsetCanvas';
+            this.canvasHandler.reRenderCanvases();
+            console.log(this.canvasHandler.reRenderCanvases)
+        }
     }
+}
 </script>
 
 <style>
@@ -50,11 +72,11 @@
     border-color: gray;
 }
 
-#abovePanel {
+#topPanel {
     flex: 2;
 }
 
-#belowPanel {
+#bottomPanel {
     flex: 1;
 }
 
