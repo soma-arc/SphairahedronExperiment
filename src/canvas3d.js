@@ -33,6 +33,7 @@ export default class Canvas3D extends Canvas {
 
         this.aoEps = 0.0968;
         this.aoIntensity = 2.0;
+        this.colorWeight = 0.0;
     }
 
     init() {
@@ -137,6 +138,8 @@ export default class Canvas3D extends Canvas {
         this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_castShadow'));
         this.uniLocations.push(this.gl.getUniformLocation(program,
+                                                          'u_colorWeight'));
+        this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_ao'));
     }
 
@@ -160,6 +163,7 @@ export default class Canvas3D extends Canvas {
         this.gl.uniform1i(this.uniLocations[i++], this.displayBoundingSphere);
         this.gl.uniform1i(this.uniLocations[i++], this.displayRawSpheirahedralPrism);
         this.gl.uniform1i(this.uniLocations[i++], this.castShadow);
+        this.gl.uniform1f(this.uniLocations[i++], this.colorWeight);
         this.gl.uniform2f(this.uniLocations[i++], this.aoEps, this.aoIntensity);
 
         this.spheirahedra.setUniformValues(this.gl, this.spheirahedraUniLocations,

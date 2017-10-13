@@ -35,6 +35,7 @@ uniform Sphere u_excavationSpheres[{{ numExcavationSpheres }}];
 uniform float u_fudgeFactor;
 uniform float u_marchingThreshold;
 uniform int u_maxIterations;
+uniform float u_colorWeight;
 {% endif %}
 uniform bool u_displaySpheirahedraSphere;
 uniform bool u_displayConvexSphere;

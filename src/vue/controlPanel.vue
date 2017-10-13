@@ -91,6 +91,11 @@
              v-model="canvasHandler.limitsetCanvas.castShadow"
              @change="updateRenderParameter">
       <label>Cast Shadow</label><br>
+      <input v-model="canvasHandler.limitsetCanvas.colorWeight"
+             style="width: 80px;" type="number"
+             step="0.01"
+             @change="updateRenderParameter">
+      <label>Color Weight</label><br>
       <button @click="saveLimitsetImage">Save Image</button>
       <br>
 
