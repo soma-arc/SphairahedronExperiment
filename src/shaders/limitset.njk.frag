@@ -15,7 +15,8 @@ float g_invNum;
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
 	{% if renderMode == 0 %}
-	return DistUnion(hit, vec4(DistLimitsetTerrain(pos, g_invNum),
+    hit = (u_displayPrism) ? DistUnion(hit, vec4(DistInfSpheirahedraAll(pos), ID_PRISM, -1, -1)) : hit;
+    return DistUnion(hit, vec4(DistLimitsetTerrain(pos, g_invNum),
 							   ID_PRISM, -1, -1));
 	{% elif renderMode == 1 %}
 	return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_boundingSphere.center, g_invNum),

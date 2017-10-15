@@ -36,6 +36,7 @@ uniform float u_fudgeFactor;
 uniform float u_marchingThreshold;
 uniform int u_maxIterations;
 uniform float u_colorWeight;
+uniform bool u_displayPrism;
 {% endif %}
 uniform bool u_displaySpheirahedraSphere;
 uniform bool u_displayConvexSphere;

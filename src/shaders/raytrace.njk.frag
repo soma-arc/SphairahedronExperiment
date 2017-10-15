@@ -151,7 +151,7 @@ float DistPrism(const vec3 pos) {
     return d;
 }
 
-{% if shaderType == SHADER_TYPE_PRISM %}
+{% if shaderType == SHADER_TYPE_PRISM or renderMode == 0 %}
 float DistInfSpheirahedraAll(const vec3 pos) {
     float d = DistPrism(pos);
     {% for n in range(0, numExcavationSpheres) %}

@@ -88,6 +88,10 @@
              @change="updateRenderParameter">
       <label>Bounding Sphere</label><br>
       <input type="checkbox"
+             v-model="canvasHandler.limitsetCanvas.displayPrismWithLimitSet"
+             @change="updateRenderParameter">
+      <label>Prism</label><br>
+      <input type="checkbox"
              v-model="canvasHandler.limitsetCanvas.castShadow"
              @change="updateRenderParameter">
       <label>Cast Shadow</label><br>
