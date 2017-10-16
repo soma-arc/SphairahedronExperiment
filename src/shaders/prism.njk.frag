@@ -72,11 +72,12 @@ float computeShadowFactor (const vec3 rayOrg, const vec3 rayDir,
 
 const vec3 AMBIENT_FACTOR = vec3(0.1);
 const vec3 LIGHT_DIR = normalize(vec3(1, 1, 0));
-vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
+vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
     IsectInfo isectInfo = NewIsectInfo();
     vec3 rayPos = rayOrg;
 
     vec3 l = vec3(0);
+    float alpha = 1.;
 
     float transparency = 0.8;
     float coeff = 1.;
@@ -117,17 +118,19 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 //                               LIGHT_DIR,
                 //                               0.001, 30., 60.);
                 l += (diffuse + ambient) * coeff;
+                break;
             }
         }
+        //        alpha = 0.;
         break;
     }
 
-    return l;
+    return vec4(l, alpha);
 }
 
 out vec4 outColor;
 void main() {
-    vec3 sum = vec3(0);
+    vec4 sum = vec4(0);
     float MAX_SAMPLES = 5.;
     for (float i = 0. ; i < MAX_SAMPLES ; i++) {
         vec2 coordOffset = Rand2n(gl_FragCoord.xy, i);
@@ -135,5 +138,5 @@ void main() {
                            u_resolution, gl_FragCoord.xy + coordOffset);
         sum += computeColor(u_camera.pos, ray);
     }
-    outColor = vec4(sum / MAX_SAMPLES, 1.0);
+    outColor = sum / MAX_SAMPLES;
 }

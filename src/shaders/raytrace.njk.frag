@@ -281,11 +281,11 @@ float DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {
         bool inFund = true;
 		{% for n in range(0, numSpheirahedraSpheres) %}
 		if(distance(pos, u_spheirahedraSpheres[{{ n }}].center) < u_spheirahedraSpheres[{{ n }}].r.x) {
-            invNum += float({{ (n + 1) *  n }}) * u_colorWeight + 1.;
+            invNum += (float({{ (n + 1) *  10 }}) + invNum) * u_colorWeight + 1.;
 			SphereInvert(pos, dr,
 						 u_spheirahedraSpheres[{{ n }}].center,
 						 u_spheirahedraSpheres[{{ n }}].r);
-			continue;
+            continue;
 		}
 		{% endfor %}
         if(inFund) break;

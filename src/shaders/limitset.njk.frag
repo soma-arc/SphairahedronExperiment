@@ -51,7 +51,7 @@ void march(const vec3 rayOrg, const vec3 rayDir,
             isectInfo.objId = int(dist.y);
             //isectInfo.objIndex = int(dist.z);
             //isectInfo.objComponentId = int(dist.w);
-			isectInfo.matColor = Hsv2rgb(min(1., -0.13 + (g_invNum) * 0.01), 1., 1.);
+			isectInfo.matColor = Hsv2rgb((1., -0.13 + (g_invNum) * 0.01), 1., 1.);
             isectInfo.intersection = rayPos;
             isectInfo.normal = computeNormal(rayPos);
             isectInfo.mint = rayLength;
@@ -94,12 +94,13 @@ float computeShadowFactor (const vec3 rayOrg, const vec3 rayDir,
 }
 
 const vec3 AMBIENT_FACTOR = vec3(0.3);
-const vec3 LIGHT_DIR = normalize(vec3(1, 1, 0));
-vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
+const vec3 LIGHT_DIR = normalize(vec3(0, 1, 0));
+vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
     IsectInfo isectInfo = NewIsectInfo();
     vec3 rayPos = rayOrg;
 
     vec3 l = vec3(0);
+    float alpha = 1.;
 
     float transparency = 0.8;
     float coeff = 1.;
@@ -165,17 +166,19 @@ vec3 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 continue;
             } else {
                 float k = u_castShadow ? computeShadowFactor(isectInfo.intersection + 0.001 * isectInfo.normal,
-                                              LIGHT_DIR,
+                                                             LIGHT_DIR,
                                                              0.1, 5., 100.) : 1.;
                 l += (diffuse * k + ambient * ambientOcclusion(isectInfo.intersection,
                                                                isectInfo.normal,
                                                                u_ao.x, u_ao.y )) * coeff;
+                break;
             }
         }
+        //        alpha = 0.;
         break;
     }
 
-    return l;
+    return vec4(l, alpha);
 }
 
 out vec4 outColor;
@@ -184,6 +187,10 @@ void main() {
     vec2 coordOffset = Rand2n(gl_FragCoord.xy, u_numSamples);
     vec3 ray = CalcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,
                        u_resolution, gl_FragCoord.xy + coordOffset);
-    vec3 texCol = texture(u_accTexture, gl_FragCoord.xy / u_resolution).rgb;
-	outColor = vec4(mix(computeColor(u_camera.pos, ray), texCol, u_textureWeight), 1.0);
+    vec3 org = u_camera.pos;
+    // vec3 rayOrtho = CalcRayOrtho(u_camera.pos, u_camera.target, u_camera.up, 1.0,
+    //                              u_resolution, gl_FragCoord.xy + coordOffset, org);
+    vec4 texCol = texture(u_accTexture, gl_FragCoord.xy / u_resolution);
+
+	outColor = vec4(mix(computeColor(org, ray), texCol, u_textureWeight));
 }
