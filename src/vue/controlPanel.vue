@@ -100,6 +100,12 @@
              step="0.01"
              @change="updateRenderParameter">
       <label>Color Weight</label><br>
+      <input v-model.number="productRenderWidth"
+             style="width: 80px;" type="number" min="0">
+      <input v-model.number="productRenderHeight"
+             style="width: 80px;" type="number" min="0">
+      <input v-model.number="productRenderMaxSamples"
+             style="width: 80px;" type="number" min="0">
       <button @click="saveLimitsetImage">Save Image</button>
       <br>
 
@@ -130,19 +136,24 @@
              @change="renderPrismCanvas">
       <label>Display Raw Prism</label>
       <br>
-      <button @click="saveSphairahedraPrismMesh">Export Sphairahedral Prism</button>
+      <button @click="saveSphairahedraPrismMesh">Export Sphairahedral Prism</button><br>
       <button @click="saveSphairahedronMesh">Export Sphairahedron</button><br>
+      <button @click="saveSphairahedralPrismImage">Save Sphairahedral Prism</button><br>
+      <button @click="saveSphairahedronImage">Save Sphairahedron</button><br>
     </div>
   </div>
 </template>
 
 <script>
-    export default {
+  export default {
         props: ['canvasHandler', 'spheirahedraHandler'],
         data: function() {
             return {
                 selectedSpheirahedron: 'cube',
-                currentRoute: window.location.pathname
+                currentRoute: window.location.pathname,
+                productRenderWidth: 1024,
+                productRenderHeight: 1024,
+                productRenderMaxSamples: 1
             }
         },
         methods: {
@@ -179,11 +190,24 @@
                 this.canvasHandler.reRenderLimitsetCanvas();
             },
             saveLimitsetImage: function(event) {
-                this.canvasHandler.limitsetCanvas.saveCanvas('limitset.png');
-            }
+                this.canvasHandler.limitsetCanvas.startProductRendering(this.productRenderWidth,
+                                                                        this.productRenderHeight,
+                                                                        this.productRenderMaxSamples,
+                                                                        'limitset.png');
+            },
+            saveSphairahedralPrismImage: function(event) {
+                this.canvasHandler.prismCanvas.saveCanvas(this.productRenderWidth,
+                                                          this.productRenderHeight,
+                                                          'sphairahedralPrism.png');
+            },
+            saveSphairahedronImage: function(event) {
+                this.canvasHandler.spheirahedraCanvas.saveCanvas(this.productRenderWidth,
+                                                                 this.productRenderHeight,
+                                                                 'sphairahedron.png');
+            },
         }
     }
-  </script>
+</script>
 
 <style>
 #controlPanel {
@@ -194,9 +218,9 @@
       border-color: gray;
       display: flex;
   }
-  
+
   #control {
       width: 100%;
       padding: 5px;
   }
-  </style>
+</style>

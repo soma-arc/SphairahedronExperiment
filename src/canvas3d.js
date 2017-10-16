@@ -85,14 +85,24 @@ export default class Canvas3D extends Canvas {
         LinkProgram(this.gl, this.productRenderProgram);
         this.productRenderVAttrib = this.gl.getAttribLocation(this.productRenderProgram,
                                                               'a_vertex');
+        this.productRenderTextures = [];
+        this.isProductRendering = false;
+        this.productRenderResolution = new Vec2(0, 0);
+        this.productRenderFramebuffer = this.gl.createFramebuffer();
     }
 
     initRenderTextures() {
         this.renderTextures = CreateRGBATextures(this.gl, this.canvas.width,
                                                  this.canvas.height, 2);
         this.lowResTextures = CreateRGBATextures(this.gl,
-                                                this.canvas.width * this.lowResRatio,
+                                                 this.canvas.width * this.lowResRatio,
                                                  this.canvas.height * this.lowResRatio, 2);
+    }
+
+    initProductRenderTextures(width, height) {
+        this.productRenderTextures = CreateRGBATextures(this.gl,
+                                                        width, height, 2);
+        this.productRenderResultTexture = CreateRGBATextures(this.gl, width, height, 1)[0];
     }
 
     /**
@@ -222,6 +232,33 @@ export default class Canvas3D extends Canvas {
         if (this.isKeepingSampling) {
             this.numSamples++;
         }
+    }
+
+    renderProduct() {
+        if (this.spheirahedraProgram === undefined) return;
+
+        this.renderToTexture(this.productRenderTextures,
+                             this.productRenderResolution.x,
+                             this.productRenderResolution.y);
+        this.numSamples++;
+
+        if (this.numSamples === this.productRenderMaxSamples) {
+            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.productRenderFramebuffer);
+            this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER,
+                                         this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D,
+                                         this.productRenderResultTexture, 0);
+            this.renderFlippedTex(this.productRenderTextures,
+                                  this.productRenderResolution.x,
+                                  this.productRenderResolution.y);
+            this.saveImage(this.gl,
+                           this.productRenderResolution.x,
+                           this.productRenderResolution.y,
+                           this.productRenderFilename);
+            this.isProductRendering = false;
+            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+        }
+
+        this.renderTexturesToCanvas(this.productRenderTextures);
     }
 
     mouseWheelListener(event) {
@@ -354,8 +391,9 @@ export default class Canvas3D extends Canvas {
         this.isRendering = false;
     }
 
-    renderFlippedTex(textures) {
-        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    renderFlippedTex(textures, width, height) {
+        console.log(width);
+        this.gl.viewport(0, 0, width, height);
         this.gl.useProgram(this.productRenderProgram);
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, textures[0]);
@@ -368,13 +406,23 @@ export default class Canvas3D extends Canvas {
         this.gl.flush();
     }
 
-    saveCanvas(filename) {
-        this.renderFlippedTex(this.renderTextures);
-        this.saveImage(this.gl,
-                       this.canvas.width,
-                       this.canvas.height,
-                       filename);
-        this.renderTexturesToCanvas(this.renderTextures);
+    startProductRendering(width, height, maxSamples, filename) {
+        this.isProductRendering = true;
+        this.initProductRenderTextures(width, height);
+        this.numSamples = 0;
+        this.productRenderMaxSamples = maxSamples;
+        this.productRenderResolution = new Vec2(width, height);
+        this.productRenderFilename = filename;
+    }
+
+    saveCanvas(width, height, filename) {
+        this.initProductRenderTextures(width, height);
+        this.numSamples = 0;
+        this.productRenderMaxSamples = 1;
+        this.productRenderResolution = new Vec2(width, height);
+        this.productRenderFilename = filename;
+
+        this.renderProduct();
     }
 
     static get CAMERA_MODE_SPHERE() {

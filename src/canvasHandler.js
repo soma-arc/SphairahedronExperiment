@@ -125,7 +125,9 @@ export default class CanvasHandler {
     }
 
     render() {
-        if (this.limitsetCanvas.isRendering) {
+        if (this.limitsetCanvas.isProductRendering) {
+            this.limitsetCanvas.renderProduct();
+        } else if (this.limitsetCanvas.isRendering) {
             this.limitsetCanvas.numSamples = 0;
             this.limitsetCanvas.callRender();
         } else if (this.prismCanvas.isRendering) {
