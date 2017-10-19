@@ -79,20 +79,30 @@ export default class SpheirahedraHandler {
         return pair;
     }
 
-    getSpheirahedraProgram(gl) {
+    getSpheirahedraProgram(gl, canvas) {
         if (this.spheirahedraPrograms[this.currentType] === undefined) {
-            const spheirahedraShader = this.currentSpheirahedra.buildSpheirahedraShader();
-            this.spheirahedraPrograms[this.currentType] = this.buildProgramUniLocationsPair(gl, spheirahedraShader);
+            this.spheirahedraPrograms[this.currentType] = new Array(2);
         }
-        return this.spheirahedraPrograms[this.currentType];
+
+        if (this.spheirahedraPrograms[this.currentType][canvas] === undefined) {
+            const spheirahedraShader = this.currentSpheirahedra.buildSpheirahedraShader();
+            this.spheirahedraPrograms[this.currentType][canvas] = this.buildProgramUniLocationsPair(gl, spheirahedraShader);
+        }
+
+        return this.spheirahedraPrograms[this.currentType][canvas];
     }
 
-    getPrismProgram(gl) {
+    getPrismProgram(gl, canvas) {
         if (this.prismPrograms[this.currentType] === undefined) {
-            const prismShader = this.currentSpheirahedra.buildPrismShader();
-            this.prismPrograms[this.currentType] = this.buildProgramUniLocationsPair(gl, prismShader);
+            this.prismPrograms[this.currentType] = new Array(2);
         }
-        return this.prismPrograms[this.currentType];
+
+        if (this.prismPrograms[this.currentType][canvas] === undefined) {
+            const prismShader = this.currentSpheirahedra.buildPrismShader();
+            this.prismPrograms[this.currentType][canvas] = this.buildProgramUniLocationsPair(gl, prismShader);
+        }
+
+        return this.prismPrograms[this.currentType][canvas];
     }
 
     getLimitsetProgram(gl) {

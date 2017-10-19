@@ -26,6 +26,31 @@ export default class CanvasHandler {
         this.spheirahedraHandler.changeSpheirahedron('cube');
 
         this.resizeCallback = this.resize.bind(this);
+
+        this.topRightCanvas = 'limitset-canvas';
+        this.topLeftCanvas = 'prism-canvas';
+        this.bottomLeftCanvas = 'sphairahedra-canvas';
+        this.bottomRightCanvas = 'parameter-canvas';
+    }
+
+    replacePrismAndSpharahedron(topLeft, bottomLeft) {
+        this.topLeftCanvas = topLeft;
+        this.bottomLeftCanvas = bottomLeft;
+
+        window.setTimeout(() => {
+            this.spheirahedraCanvas.init();
+            this.prismCanvas.init();
+            this.spheirahedraCanvas.setPrograms(
+                this.spheirahedraHandler.getSpheirahedraProgram(this.spheirahedraCanvas.gl,
+                                                                this.topLeftCanvas)
+            );
+            this.prismCanvas.setPrograms(
+                this.spheirahedraHandler.getPrismProgram(this.prismCanvas.gl,
+                                                         this.bottomLeftCanvas)
+            );
+            this.spheirahedraCanvas.render();
+            this.prismCanvas.render();
+        }, 1);
     }
 
     initCanvases() {
@@ -35,12 +60,14 @@ export default class CanvasHandler {
         this.parameterCanvas.init();
 
         this.spheirahedraCanvas.setPrograms(
-            this.spheirahedraHandler.getSpheirahedraProgram(this.spheirahedraCanvas.gl));
+            this.spheirahedraHandler.getSpheirahedraProgram(this.spheirahedraCanvas.gl,
+                                                            this.topLeftCanvas));
         this.limitsetCanvas.setPrograms(
             this.spheirahedraHandler.getLimitsetProgram(this.limitsetCanvas.gl)
         );
         this.prismCanvas.setPrograms(
-            this.spheirahedraHandler.getPrismProgram(this.prismCanvas.gl)
+            this.spheirahedraHandler.getPrismProgram(this.prismCanvas.gl,
+                                                     this.bottomRightCanvas)
         );
         this.parameterCanvas.setPrograms(
             this.spheirahedraHandler.getParameterProgram(this.parameterCanvas.gl)
@@ -122,6 +149,11 @@ export default class CanvasHandler {
             this.spheirahedraHandler.getLimitsetProgram(this.limitsetCanvas.gl)
         );
         this.limitsetCanvas.render();
+        if (this.spheirahedraHandler.limitRenderingMode === 0) {
+            this.replacePrismAndSpharahedron('prism-canvas', 'sphairahedra-canvas');
+        } else {
+            this.replacePrismAndSpharahedron('sphairahedra-canvas', 'prism-canvas');
+        }
     }
 
     render() {

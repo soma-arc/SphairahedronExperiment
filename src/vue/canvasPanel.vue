@@ -2,19 +2,23 @@
   <div id="rootPanel">
     <div class="subPanel" id="topPanel">
       <div class="canvasParent">
-        <component v-bind:is="topLeftCanvas"/>
+        <keep-alive>
+          <component v-bind:is="canvasHandler.topLeftCanvas"/>
+        </keep-alive>
       </div>
       <div class="canvasParent">
-        <component v-bind:is="topRightCanvas"/>
+        <component v-bind:is="canvasHandler.topRightCanvas"/>
       </div>
     </div>
     <div class="subPanel" id="bottomPanel">
       <div class="subPanel">
         <div class="canvasParent">
-          <component v-bind:is="bottomLeftCanvas"/>
+          <keep-alive>
+              <component v-bind:is="canvasHandler.bottomLeftCanvas"/>
+            </keep-alive>
         </div>
         <div class="canvasParent">
-          <component v-bind:is="bottomRightCanvas"/>
+            <component v-bind:is="canvasHandler.bottomRightCanvas"/>
         </div>
       </div>
       <div class="subPanel">
@@ -37,26 +41,8 @@ import SphairahedraCanvas from './sphaiahedraCanvas.vue';
 
 export default {
     props: ['canvasHandler', 'spheirahedraHandler'],
-    data: function() {
-        return {
-            topRightCanvas: 'limitset-canvas',
-            topLeftCanvas: 'prism-canvas',
-            bottomLeftCanvas: 'parameter-canvas',
-            bottomRightCanvas: 'sphairahedra-canvas'
-        }
-    },
     components: {
         LimitsetCanvas, PrismCanvas, ParameterCanvas, SphairahedraCanvas
-    },
-    methods: {
-        changeLayout: function(evnet) {
-            const tmp = this.topRightCanvas;
-            console.log(tmp);
-            this.topRightCanvas = this.topLeftCanvas;
-            this.topLeftCanvas = 'limitsetCanvas';
-            this.canvasHandler.reRenderCanvases();
-            console.log(this.canvasHandler.reRenderCanvases)
-        }
     }
 }
 </script>
