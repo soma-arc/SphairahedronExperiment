@@ -2500,10 +2500,10 @@ exports.default = Spheirahedra;
 /***/ (function(module, exports, __webpack_require__) {
 
 const {fnNumberSort} = __webpack_require__(24)
-const FuzzyCSGFactory = __webpack_require__(116)
-const Tree = __webpack_require__(122)
+const FuzzyCSGFactory = __webpack_require__(118)
+const Tree = __webpack_require__(124)
 const {EPS} = __webpack_require__(0)
-const {reTesselateCoplanarPolygons} = __webpack_require__(119)
+const {reTesselateCoplanarPolygons} = __webpack_require__(121)
 const Polygon = __webpack_require__(15)
 const Plane = __webpack_require__(14)
 const Vertex = __webpack_require__(16)
@@ -8620,9 +8620,9 @@ const Vector3D = __webpack_require__(3)
 const Polygon = __webpack_require__(15)
 const Path2D = __webpack_require__(73)
 const Side = __webpack_require__(44)
-const {linesIntersect} = __webpack_require__(118)
+const {linesIntersect} = __webpack_require__(120)
 const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(55)
-const FuzzyCAGFactory = __webpack_require__(115)
+const FuzzyCAGFactory = __webpack_require__(117)
 /**
  * Class CAG
  * Holds a solid area geometry like CSG but 2D.
@@ -16837,7 +16837,7 @@ for solid CAD anyway.
 
 */
 
-const {addTransformationMethodsToPrototype, addCenteringToPrototype} = __webpack_require__(120)
+const {addTransformationMethodsToPrototype, addCenteringToPrototype} = __webpack_require__(122)
 let CSG = __webpack_require__(11)
 let CAG = __webpack_require__(23)
 
@@ -16893,7 +16893,7 @@ CAG.Side = __webpack_require__(44)
 CSG.Connector = __webpack_require__(53)
 CSG.Properties = __webpack_require__(71)
 
-const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(121)
+const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(123)
 const {sphere, cube, roundedCube, cylinder, roundedCylinder, cylinderElliptic, polyhedron} = __webpack_require__(92)
 
 CSG.sphere = sphere
@@ -16910,12 +16910,12 @@ CAG.rectangle = rectangle
 CAG.roundedRectangle = roundedRectangle
 
 //
-const {fromCompactBinary, fromObject, fromSlices} = __webpack_require__(114)
+const {fromCompactBinary, fromObject, fromSlices} = __webpack_require__(116)
 CSG.fromCompactBinary = fromCompactBinary
 CSG.fromObject = fromObject
 CSG.fromSlices = fromSlices
 
-CSG.toPointCloud = __webpack_require__(117).toPointCloud
+CSG.toPointCloud = __webpack_require__(119).toPointCloud
 
 const CAGMakers = __webpack_require__(70)
 CAG.fromObject = CAGMakers.fromObject
@@ -24949,6 +24949,227 @@ SafeBuffer.allocUnsafeSlow = function (size) {
 /* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/*
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
+  Modified by Evan You @yyx990803
+*/
+
+var hasDocument = typeof document !== 'undefined'
+
+if (typeof DEBUG !== 'undefined' && DEBUG) {
+  if (!hasDocument) {
+    throw new Error(
+    'vue-style-loader cannot be used in a non-browser environment. ' +
+    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
+  ) }
+}
+
+var listToStyles = __webpack_require__(227)
+
+/*
+type StyleObject = {
+  id: number;
+  parts: Array<StyleObjectPart>
+}
+
+type StyleObjectPart = {
+  css: string;
+  media: string;
+  sourceMap: ?string
+}
+*/
+
+var stylesInDom = {/*
+  [id: number]: {
+    id: number,
+    refs: number,
+    parts: Array<(obj?: StyleObjectPart) => void>
+  }
+*/}
+
+var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
+var singletonElement = null
+var singletonCounter = 0
+var isProduction = false
+var noop = function () {}
+
+// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+// tags it will allow on a page
+var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
+
+module.exports = function (parentId, list, _isProduction) {
+  isProduction = _isProduction
+
+  var styles = listToStyles(parentId, list)
+  addStylesToDom(styles)
+
+  return function update (newList) {
+    var mayRemove = []
+    for (var i = 0; i < styles.length; i++) {
+      var item = styles[i]
+      var domStyle = stylesInDom[item.id]
+      domStyle.refs--
+      mayRemove.push(domStyle)
+    }
+    if (newList) {
+      styles = listToStyles(parentId, newList)
+      addStylesToDom(styles)
+    } else {
+      styles = []
+    }
+    for (var i = 0; i < mayRemove.length; i++) {
+      var domStyle = mayRemove[i]
+      if (domStyle.refs === 0) {
+        for (var j = 0; j < domStyle.parts.length; j++) {
+          domStyle.parts[j]()
+        }
+        delete stylesInDom[domStyle.id]
+      }
+    }
+  }
+}
+
+function addStylesToDom (styles /* Array<StyleObject> */) {
+  for (var i = 0; i < styles.length; i++) {
+    var item = styles[i]
+    var domStyle = stylesInDom[item.id]
+    if (domStyle) {
+      domStyle.refs++
+      for (var j = 0; j < domStyle.parts.length; j++) {
+        domStyle.parts[j](item.parts[j])
+      }
+      for (; j < item.parts.length; j++) {
+        domStyle.parts.push(addStyle(item.parts[j]))
+      }
+      if (domStyle.parts.length > item.parts.length) {
+        domStyle.parts.length = item.parts.length
+      }
+    } else {
+      var parts = []
+      for (var j = 0; j < item.parts.length; j++) {
+        parts.push(addStyle(item.parts[j]))
+      }
+      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
+    }
+  }
+}
+
+function createStyleElement () {
+  var styleElement = document.createElement('style')
+  styleElement.type = 'text/css'
+  head.appendChild(styleElement)
+  return styleElement
+}
+
+function addStyle (obj /* StyleObjectPart */) {
+  var update, remove
+  var styleElement = document.querySelector('style[data-vue-ssr-id~="' + obj.id + '"]')
+
+  if (styleElement) {
+    if (isProduction) {
+      // has SSR styles and in production mode.
+      // simply do nothing.
+      return noop
+    } else {
+      // has SSR styles but in dev mode.
+      // for some reason Chrome can't handle source map in server-rendered
+      // style tags - source maps in <style> only works if the style tag is
+      // created and inserted dynamically. So we remove the server rendered
+      // styles and inject new ones.
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  if (isOldIE) {
+    // use singleton mode for IE9.
+    var styleIndex = singletonCounter++
+    styleElement = singletonElement || (singletonElement = createStyleElement())
+    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
+    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
+  } else {
+    // use multi-style-tag mode in all other cases
+    styleElement = createStyleElement()
+    update = applyToTag.bind(null, styleElement)
+    remove = function () {
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  update(obj)
+
+  return function updateStyle (newObj /* StyleObjectPart */) {
+    if (newObj) {
+      if (newObj.css === obj.css &&
+          newObj.media === obj.media &&
+          newObj.sourceMap === obj.sourceMap) {
+        return
+      }
+      update(obj = newObj)
+    } else {
+      remove()
+    }
+  }
+}
+
+var replaceText = (function () {
+  var textStore = []
+
+  return function (index, replacement) {
+    textStore[index] = replacement
+    return textStore.filter(Boolean).join('\n')
+  }
+})()
+
+function applyToSingletonTag (styleElement, index, remove, obj) {
+  var css = remove ? '' : obj.css
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = replaceText(index, css)
+  } else {
+    var cssNode = document.createTextNode(css)
+    var childNodes = styleElement.childNodes
+    if (childNodes[index]) styleElement.removeChild(childNodes[index])
+    if (childNodes.length) {
+      styleElement.insertBefore(cssNode, childNodes[index])
+    } else {
+      styleElement.appendChild(cssNode)
+    }
+  }
+}
+
+function applyToTag (styleElement, obj) {
+  var css = obj.css
+  var media = obj.media
+  var sourceMap = obj.sourceMap
+
+  if (media) {
+    styleElement.setAttribute('media', media)
+  }
+
+  if (sourceMap) {
+    // https://developer.chrome.com/devtools/docs/javascript-debugging
+    // this makes source maps inside style tags work properly in Chrome
+    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
+    // http://stackoverflow.com/a/26603875
+    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
+  }
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = css
+  } else {
+    while (styleElement.firstChild) {
+      styleElement.removeChild(styleElement.firstChild)
+    }
+    styleElement.appendChild(document.createTextNode(css))
+  }
+}
+
+
+/***/ }),
+/* 89 */
+/***/ (function(module, exports, __webpack_require__) {
+
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -25169,227 +25390,6 @@ function utf16DetectIncompleteChar(buffer) {
 function base64DetectIncompleteChar(buffer) {
   this.charReceived = buffer.length % 3;
   this.charLength = this.charReceived ? 3 : 0;
-}
-
-
-/***/ }),
-/* 89 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/*
-  MIT License http://www.opensource.org/licenses/mit-license.php
-  Author Tobias Koppers @sokra
-  Modified by Evan You @yyx990803
-*/
-
-var hasDocument = typeof document !== 'undefined'
-
-if (typeof DEBUG !== 'undefined' && DEBUG) {
-  if (!hasDocument) {
-    throw new Error(
-    'vue-style-loader cannot be used in a non-browser environment. ' +
-    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
-  ) }
-}
-
-var listToStyles = __webpack_require__(227)
-
-/*
-type StyleObject = {
-  id: number;
-  parts: Array<StyleObjectPart>
-}
-
-type StyleObjectPart = {
-  css: string;
-  media: string;
-  sourceMap: ?string
-}
-*/
-
-var stylesInDom = {/*
-  [id: number]: {
-    id: number,
-    refs: number,
-    parts: Array<(obj?: StyleObjectPart) => void>
-  }
-*/}
-
-var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
-var singletonElement = null
-var singletonCounter = 0
-var isProduction = false
-var noop = function () {}
-
-// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
-// tags it will allow on a page
-var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
-
-module.exports = function (parentId, list, _isProduction) {
-  isProduction = _isProduction
-
-  var styles = listToStyles(parentId, list)
-  addStylesToDom(styles)
-
-  return function update (newList) {
-    var mayRemove = []
-    for (var i = 0; i < styles.length; i++) {
-      var item = styles[i]
-      var domStyle = stylesInDom[item.id]
-      domStyle.refs--
-      mayRemove.push(domStyle)
-    }
-    if (newList) {
-      styles = listToStyles(parentId, newList)
-      addStylesToDom(styles)
-    } else {
-      styles = []
-    }
-    for (var i = 0; i < mayRemove.length; i++) {
-      var domStyle = mayRemove[i]
-      if (domStyle.refs === 0) {
-        for (var j = 0; j < domStyle.parts.length; j++) {
-          domStyle.parts[j]()
-        }
-        delete stylesInDom[domStyle.id]
-      }
-    }
-  }
-}
-
-function addStylesToDom (styles /* Array<StyleObject> */) {
-  for (var i = 0; i < styles.length; i++) {
-    var item = styles[i]
-    var domStyle = stylesInDom[item.id]
-    if (domStyle) {
-      domStyle.refs++
-      for (var j = 0; j < domStyle.parts.length; j++) {
-        domStyle.parts[j](item.parts[j])
-      }
-      for (; j < item.parts.length; j++) {
-        domStyle.parts.push(addStyle(item.parts[j]))
-      }
-      if (domStyle.parts.length > item.parts.length) {
-        domStyle.parts.length = item.parts.length
-      }
-    } else {
-      var parts = []
-      for (var j = 0; j < item.parts.length; j++) {
-        parts.push(addStyle(item.parts[j]))
-      }
-      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
-    }
-  }
-}
-
-function createStyleElement () {
-  var styleElement = document.createElement('style')
-  styleElement.type = 'text/css'
-  head.appendChild(styleElement)
-  return styleElement
-}
-
-function addStyle (obj /* StyleObjectPart */) {
-  var update, remove
-  var styleElement = document.querySelector('style[data-vue-ssr-id~="' + obj.id + '"]')
-
-  if (styleElement) {
-    if (isProduction) {
-      // has SSR styles and in production mode.
-      // simply do nothing.
-      return noop
-    } else {
-      // has SSR styles but in dev mode.
-      // for some reason Chrome can't handle source map in server-rendered
-      // style tags - source maps in <style> only works if the style tag is
-      // created and inserted dynamically. So we remove the server rendered
-      // styles and inject new ones.
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  if (isOldIE) {
-    // use singleton mode for IE9.
-    var styleIndex = singletonCounter++
-    styleElement = singletonElement || (singletonElement = createStyleElement())
-    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
-    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
-  } else {
-    // use multi-style-tag mode in all other cases
-    styleElement = createStyleElement()
-    update = applyToTag.bind(null, styleElement)
-    remove = function () {
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  update(obj)
-
-  return function updateStyle (newObj /* StyleObjectPart */) {
-    if (newObj) {
-      if (newObj.css === obj.css &&
-          newObj.media === obj.media &&
-          newObj.sourceMap === obj.sourceMap) {
-        return
-      }
-      update(obj = newObj)
-    } else {
-      remove()
-    }
-  }
-}
-
-var replaceText = (function () {
-  var textStore = []
-
-  return function (index, replacement) {
-    textStore[index] = replacement
-    return textStore.filter(Boolean).join('\n')
-  }
-})()
-
-function applyToSingletonTag (styleElement, index, remove, obj) {
-  var css = remove ? '' : obj.css
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = replaceText(index, css)
-  } else {
-    var cssNode = document.createTextNode(css)
-    var childNodes = styleElement.childNodes
-    if (childNodes[index]) styleElement.removeChild(childNodes[index])
-    if (childNodes.length) {
-      styleElement.insertBefore(cssNode, childNodes[index])
-    } else {
-      styleElement.appendChild(cssNode)
-    }
-  }
-}
-
-function applyToTag (styleElement, obj) {
-  var css = obj.css
-  var media = obj.media
-  var sourceMap = obj.sourceMap
-
-  if (media) {
-    styleElement.setAttribute('media', media)
-  }
-
-  if (sourceMap) {
-    // https://developer.chrome.com/devtools/docs/javascript-debugging
-    // this makes source maps inside style tags work properly in Chrome
-    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
-    // http://stackoverflow.com/a/26603875
-    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
-  }
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = css
-  } else {
-    while (styleElement.firstChild) {
-      styleElement.removeChild(styleElement.firstChild)
-    }
-    styleElement.appendChild(document.createTextNode(css))
-  }
 }
 
 
@@ -26038,8 +26038,8 @@ module.exports = {
 /* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const makeBlob = __webpack_require__(129)
-const BinaryReader = __webpack_require__(128)
+const makeBlob = __webpack_require__(128)
+const BinaryReader = __webpack_require__(127)
 
 module.exports = {makeBlob, BinaryReader}
 
@@ -27681,7 +27681,7 @@ function ReadableState(options, stream) {
   this.decoder = null;
   this.encoding = null;
   if (options.encoding) {
-    if (!StringDecoder) StringDecoder = __webpack_require__(88).StringDecoder;
+    if (!StringDecoder) StringDecoder = __webpack_require__(89).StringDecoder;
     this.decoder = new StringDecoder(options.encoding);
     this.encoding = options.encoding;
   }
@@ -27837,7 +27837,7 @@ Readable.prototype.isPaused = function () {
 
 // backwards compatibility.
 Readable.prototype.setEncoding = function (enc) {
-  if (!StringDecoder) StringDecoder = __webpack_require__(88).StringDecoder;
+  if (!StringDecoder) StringDecoder = __webpack_require__(89).StringDecoder;
   this._readableState.decoder = new StringDecoder(enc);
   this._readableState.encoding = enc;
   return this;
@@ -29067,7 +29067,7 @@ module.exports = __webpack_require__(84).EventEmitter;
       typeof Buffer.isBuffer === 'function' &&
       Buffer.isBuffer(data)) {
       if (!this._decoder) {
-        var SD = __webpack_require__(88).StringDecoder
+        var SD = __webpack_require__(89).StringDecoder
         this._decoder = new SD('utf8')
       }
       data = this._decoder.write(data)
@@ -31710,25 +31710,26 @@ var CanvasHandler = function () {
 
         this.topRightCanvas = 'limitset-canvas';
         this.topLeftCanvas = 'prism-canvas';
-        this.bottomLeftCanvas = 'parameter-canvas';
-        this.bottomRightCanvas = 'sphairahedra-canvas';
+        this.bottomLeftCanvas = 'sphairahedra-canvas';
+        this.bottomRightCanvas = 'parameter-canvas';
     }
 
     _createClass(CanvasHandler, [{
         key: 'replacePrismAndSpharahedron',
-        value: function replacePrismAndSpharahedron() {
+        value: function replacePrismAndSpharahedron(topLeft, bottomLeft) {
             var _this = this;
 
-            var tmp = this.topLeftCanvas;
-            this.topLeftCanvas = this.bottomRightCanvas;
-            this.bottomRightCanvas = tmp;
+            this.topLeftCanvas = topLeft;
+            this.bottomLeftCanvas = bottomLeft;
 
             window.setTimeout(function () {
                 _this.spheirahedraCanvas.init();
                 _this.prismCanvas.init();
-                _this.limitsetCanvas.setPrograms(_this.spheirahedraHandler.getLimitsetProgram(_this.limitsetCanvas.gl));
-                _this.prismCanvas.setPrograms(_this.spheirahedraHandler.getPrismProgram(_this.prismCanvas.gl));
-            }, 500);
+                _this.spheirahedraCanvas.setPrograms(_this.spheirahedraHandler.getSpheirahedraProgram(_this.spheirahedraCanvas.gl, _this.topLeftCanvas));
+                _this.prismCanvas.setPrograms(_this.spheirahedraHandler.getPrismProgram(_this.prismCanvas.gl, _this.bottomLeftCanvas));
+                _this.spheirahedraCanvas.render();
+                _this.prismCanvas.render();
+            }, 1);
         }
     }, {
         key: 'initCanvases',
@@ -31738,9 +31739,9 @@ var CanvasHandler = function () {
             this.spheirahedraCanvas.init();
             this.parameterCanvas.init();
 
-            this.spheirahedraCanvas.setPrograms(this.spheirahedraHandler.getSpheirahedraProgram(this.spheirahedraCanvas.gl));
+            this.spheirahedraCanvas.setPrograms(this.spheirahedraHandler.getSpheirahedraProgram(this.spheirahedraCanvas.gl, this.topLeftCanvas));
             this.limitsetCanvas.setPrograms(this.spheirahedraHandler.getLimitsetProgram(this.limitsetCanvas.gl));
-            this.prismCanvas.setPrograms(this.spheirahedraHandler.getPrismProgram(this.prismCanvas.gl));
+            this.prismCanvas.setPrograms(this.spheirahedraHandler.getPrismProgram(this.prismCanvas.gl, this.bottomRightCanvas));
             this.parameterCanvas.setPrograms(this.spheirahedraHandler.getParameterProgram(this.parameterCanvas.gl));
 
             this.reRenderCanvases();
@@ -31818,6 +31819,11 @@ var CanvasHandler = function () {
         value: function changeRenderMode() {
             this.limitsetCanvas.setPrograms(this.spheirahedraHandler.getLimitsetProgram(this.limitsetCanvas.gl));
             this.limitsetCanvas.render();
+            if (this.spheirahedraHandler.limitRenderingMode === 0) {
+                this.replacePrismAndSpharahedron('prism-canvas', 'sphairahedra-canvas');
+            } else {
+                this.replacePrismAndSpharahedron('sphairahedra-canvas', 'prism-canvas');
+            }
         }
     }, {
         key: 'render',
@@ -31896,7 +31902,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var RENDER_VERTEX = __webpack_require__(108);
-var CSG_IO = __webpack_require__(123);
+var CSG_IO = __webpack_require__(129);
 
 var SpheirahedraHandler = function () {
     function SpheirahedraHandler() {
@@ -32115,21 +32121,31 @@ var SpheirahedraHandler = function () {
         }
     }, {
         key: 'getSpheirahedraProgram',
-        value: function getSpheirahedraProgram(gl) {
+        value: function getSpheirahedraProgram(gl, canvas) {
             if (this.spheirahedraPrograms[this.currentType] === undefined) {
-                var spheirahedraShader = this.currentSpheirahedra.buildSpheirahedraShader();
-                this.spheirahedraPrograms[this.currentType] = this.buildProgramUniLocationsPair(gl, spheirahedraShader);
+                this.spheirahedraPrograms[this.currentType] = new Array(2);
             }
-            return this.spheirahedraPrograms[this.currentType];
+
+            if (this.spheirahedraPrograms[this.currentType][canvas] === undefined) {
+                var spheirahedraShader = this.currentSpheirahedra.buildSpheirahedraShader();
+                this.spheirahedraPrograms[this.currentType][canvas] = this.buildProgramUniLocationsPair(gl, spheirahedraShader);
+            }
+
+            return this.spheirahedraPrograms[this.currentType][canvas];
         }
     }, {
         key: 'getPrismProgram',
-        value: function getPrismProgram(gl) {
+        value: function getPrismProgram(gl, canvas) {
             if (this.prismPrograms[this.currentType] === undefined) {
-                var prismShader = this.currentSpheirahedra.buildPrismShader();
-                this.prismPrograms[this.currentType] = this.buildProgramUniLocationsPair(gl, prismShader);
+                this.prismPrograms[this.currentType] = new Array(2);
             }
-            return this.prismPrograms[this.currentType];
+
+            if (this.prismPrograms[this.currentType][canvas] === undefined) {
+                var prismShader = this.currentSpheirahedra.buildPrismShader();
+                this.prismPrograms[this.currentType][canvas] = this.buildProgramUniLocationsPair(gl, prismShader);
+            }
+
+            return this.prismPrograms[this.currentType][canvas];
         }
     }, {
         key: 'getLimitsetProgram',
@@ -40028,1496 +40044,6 @@ Vue$3.nextTick(function () {
 /* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Vector3D = __webpack_require__(3)
-const Vertex = __webpack_require__(16)
-const Plane = __webpack_require__(14)
-const Polygon2D = __webpack_require__(91)
-const Polygon3D = __webpack_require__(15)
-
-/** Construct a CSG solid from a list of pre-generated slices.
- * See Polygon.prototype.solidFromSlices() for details.
- * @param {Object} options - options passed to solidFromSlices()
- * @returns {CSG} new CSG object
- */
-function fromSlices (options) {
-  return (new Polygon2D.createFromPoints([
-        [0, 0, 0],
-        [1, 0, 0],
-        [1, 1, 0],
-        [0, 1, 0]
-  ])).solidFromSlices(options)
-}
-
-/** Reconstruct a CSG solid from an object with identical property names.
- * @param {Object} obj - anonymous object, typically from JSON
- * @returns {CSG} new CSG object
- */
-function fromObject (obj) {
-  const CSG = __webpack_require__(11)
-  let polygons = obj.polygons.map(function (p) {
-    return Polygon3D.fromObject(p)
-  })
-  let csg = CSG.fromPolygons(polygons)
-  csg.isCanonicalized = obj.isCanonicalized
-  csg.isRetesselated = obj.isRetesselated
-  return csg
-}
-
-/** Reconstruct a CSG from the output of toCompactBinary().
- * @param {CompactBinary} bin - see toCompactBinary().
- * @returns {CSG} new CSG object
- */
-function fromCompactBinary (bin) {
-  const CSG = __webpack_require__(11) // FIXME: circular dependency ??
-
-  if (bin['class'] !== 'CSG') throw new Error('Not a CSG')
-  let planes = []
-  let planeData = bin.planeData
-  let numplanes = planeData.length / 4
-  let arrayindex = 0
-  let x, y, z, w, normal, plane
-  for (let planeindex = 0; planeindex < numplanes; planeindex++) {
-    x = planeData[arrayindex++]
-    y = planeData[arrayindex++]
-    z = planeData[arrayindex++]
-    w = planeData[arrayindex++]
-    normal = Vector3D.Create(x, y, z)
-    plane = new Plane(normal, w)
-    planes.push(plane)
-  }
-
-  let vertices = []
-  const vertexData = bin.vertexData
-  const numvertices = vertexData.length / 3
-  let pos
-  let vertex
-  arrayindex = 0
-  for (let vertexindex = 0; vertexindex < numvertices; vertexindex++) {
-    x = vertexData[arrayindex++]
-    y = vertexData[arrayindex++]
-    z = vertexData[arrayindex++]
-    pos = Vector3D.Create(x, y, z)
-    vertex = new Vertex(pos)
-    vertices.push(vertex)
-  }
-
-  let shareds = bin.shared.map(function (shared) {
-    return Polygon3D.Shared.fromObject(shared)
-  })
-
-  let polygons = []
-  let numpolygons = bin.numPolygons
-  let numVerticesPerPolygon = bin.numVerticesPerPolygon
-  let polygonVertices = bin.polygonVertices
-  let polygonPlaneIndexes = bin.polygonPlaneIndexes
-  let polygonSharedIndexes = bin.polygonSharedIndexes
-  let numpolygonvertices
-  let polygonvertices
-  let shared
-  let polygon // already defined plane,
-  arrayindex = 0
-  for (let polygonindex = 0; polygonindex < numpolygons; polygonindex++) {
-    numpolygonvertices = numVerticesPerPolygon[polygonindex]
-    polygonvertices = []
-    for (let i = 0; i < numpolygonvertices; i++) {
-      polygonvertices.push(vertices[polygonVertices[arrayindex++]])
-    }
-    plane = planes[polygonPlaneIndexes[polygonindex]]
-    shared = shareds[polygonSharedIndexes[polygonindex]]
-    polygon = new Polygon3D(polygonvertices, shared, plane)
-    polygons.push(polygon)
-  }
-  let csg = CSG.fromPolygons(polygons)
-  csg.isCanonicalized = true
-  csg.isRetesselated = true
-  return csg
-}
-
-module.exports = {
-  //fromPolygons,
-  fromSlices,
-  fromObject,
-  fromCompactBinary
-}
-
-
-/***/ }),
-/* 115 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const FuzzyFactory = __webpack_require__(90)
-const {EPS} = __webpack_require__(0)
-const Side = __webpack_require__(44)
-
-const FuzzyCAGFactory = function () {
-  this.vertexfactory = new FuzzyFactory(2, EPS)
-}
-
-FuzzyCAGFactory.prototype = {
-  getVertex: function (sourcevertex) {
-    let elements = [sourcevertex.pos._x, sourcevertex.pos._y]
-    let result = this.vertexfactory.lookupOrCreate(elements, function (els) {
-      return sourcevertex
-    })
-    return result
-  },
-
-  getSide: function (sourceside) {
-    let vertex0 = this.getVertex(sourceside.vertex0)
-    let vertex1 = this.getVertex(sourceside.vertex1)
-    return new Side(vertex0, vertex1)
-  }
-}
-
-module.exports = FuzzyCAGFactory
-
-
-/***/ }),
-/* 116 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const {EPS} = __webpack_require__(0)
-const Polygon = __webpack_require__(15)
-const FuzzyFactory = __webpack_require__(90)
-
-// ////////////////////////////////////
-const FuzzyCSGFactory = function () {
-  this.vertexfactory = new FuzzyFactory(3, EPS)
-  this.planefactory = new FuzzyFactory(4, EPS)
-  this.polygonsharedfactory = {}
-}
-
-FuzzyCSGFactory.prototype = {
-  getPolygonShared: function (sourceshared) {
-    let hash = sourceshared.getHash()
-    if (hash in this.polygonsharedfactory) {
-      return this.polygonsharedfactory[hash]
-    } else {
-      this.polygonsharedfactory[hash] = sourceshared
-      return sourceshared
-    }
-  },
-
-  getVertex: function (sourcevertex) {
-    let elements = [sourcevertex.pos._x, sourcevertex.pos._y, sourcevertex.pos._z]
-    let result = this.vertexfactory.lookupOrCreate(elements, function (els) {
-      return sourcevertex
-    })
-    return result
-  },
-
-  getPlane: function (sourceplane) {
-    let elements = [sourceplane.normal._x, sourceplane.normal._y, sourceplane.normal._z, sourceplane.w]
-    let result = this.planefactory.lookupOrCreate(elements, function (els) {
-      return sourceplane
-    })
-    return result
-  },
-
-  getPolygon: function (sourcepolygon) {
-    let newplane = this.getPlane(sourcepolygon.plane)
-    let newshared = this.getPolygonShared(sourcepolygon.shared)
-    let _this = this
-    let newvertices = sourcepolygon.vertices.map(function (vertex) {
-      return _this.getVertex(vertex)
-    })
-        // two vertices that were originally very close may now have become
-        // truly identical (referring to the same Vertex object).
-        // Remove duplicate vertices:
-    let newverticesDedup = []
-    if (newvertices.length > 0) {
-      let prevvertextag = newvertices[newvertices.length - 1].getTag()
-      newvertices.forEach(function (vertex) {
-        let vertextag = vertex.getTag()
-        if (vertextag !== prevvertextag) {
-          newverticesDedup.push(vertex)
-        }
-        prevvertextag = vertextag
-      })
-    }
-        // If it's degenerate, remove all vertices:
-    if (newverticesDedup.length < 3) {
-      newverticesDedup = []
-    }
-    return new Polygon(newverticesDedup, newshared, newplane)
-  }
-}
-
-module.exports = FuzzyCSGFactory
-
-
-/***/ }),
-/* 117 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const CSG = __webpack_require__(11)
-const {cube} = __webpack_require__(92)
-
-// For debugging
-// Creates a new solid with a tiny cube at every vertex of the source solid
-// this is seperated from the CSG class itself because of the dependency on cube
-const toPointCloud = function (csg, cuberadius) {
-  csg = csg.reTesselated()
-
-  let result = new CSG()
-
-    // make a list of all unique vertices
-    // For each vertex we also collect the list of normals of the planes touching the vertices
-  let vertexmap = {}
-  csg.polygons.map(function (polygon) {
-    polygon.vertices.map(function (vertex) {
-      vertexmap[vertex.getTag()] = vertex.pos
-    })
-  })
-
-  for (let vertextag in vertexmap) {
-    let pos = vertexmap[vertextag]
-    let _cube = cube({
-      center: pos,
-      radius: cuberadius
-    })
-    result = result.unionSub(_cube, false, false)
-  }
-  result = result.reTesselated()
-  return result
-}
-
-module.exports = {toPointCloud}
-
-
-/***/ }),
-/* 118 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const {EPS} = __webpack_require__(0)
-const {solve2Linear} = __webpack_require__(24)
-
-// see if the line between p0start and p0end intersects with the line between p1start and p1end
-// returns true if the lines strictly intersect, the end points are not counted!
-const linesIntersect = function (p0start, p0end, p1start, p1end) {
-  if (p0end.equals(p1start) || p1end.equals(p0start)) {
-    let d = p1end.minus(p1start).unit().plus(p0end.minus(p0start).unit()).length()
-    if (d < EPS) {
-      return true
-    }
-  } else {
-    let d0 = p0end.minus(p0start)
-    let d1 = p1end.minus(p1start)
-        // FIXME These epsilons need review and testing
-    if (Math.abs(d0.cross(d1)) < 1e-9) return false // lines are parallel
-    let alphas = solve2Linear(-d0.x, d1.x, -d0.y, d1.y, p0start.x - p1start.x, p0start.y - p1start.y)
-    if ((alphas[0] > 1e-6) && (alphas[0] < 0.999999) && (alphas[1] > 1e-5) && (alphas[1] < 0.999999)) return true
-        //    if( (alphas[0] >= 0) && (alphas[0] <= 1) && (alphas[1] >= 0) && (alphas[1] <= 1) ) return true;
-  }
-  return false
-}
-
-
-module.exports = {linesIntersect}
-
-
-/***/ }),
-/* 119 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const {EPS} = __webpack_require__(0)
-const OrthoNormalBasis = __webpack_require__(37)
-const {interpolateBetween2DPointsForY, insertSorted, fnNumberSort} = __webpack_require__(24)
-const Vertex = __webpack_require__(16)
-const Vector2D = __webpack_require__(7)
-const Line2D = __webpack_require__(72)
-const Polygon = __webpack_require__(15)
-
-// Retesselation function for a set of coplanar polygons. See the introduction at the top of
-// this file.
-const reTesselateCoplanarPolygons = function (sourcepolygons, destpolygons) {
-  let numpolygons = sourcepolygons.length
-  if (numpolygons > 0) {
-    let plane = sourcepolygons[0].plane
-    let shared = sourcepolygons[0].shared
-    let orthobasis = new OrthoNormalBasis(plane)
-    let polygonvertices2d = [] // array of array of Vector2D
-    let polygontopvertexindexes = [] // array of indexes of topmost vertex per polygon
-    let topy2polygonindexes = {}
-    let ycoordinatetopolygonindexes = {}
-
-    let xcoordinatebins = {}
-    let ycoordinatebins = {}
-
-        // convert all polygon vertices to 2D
-        // Make a list of all encountered y coordinates
-        // And build a map of all polygons that have a vertex at a certain y coordinate:
-    let ycoordinateBinningFactor = 1.0 / EPS * 10
-    for (let polygonindex = 0; polygonindex < numpolygons; polygonindex++) {
-      let poly3d = sourcepolygons[polygonindex]
-      let vertices2d = []
-      let numvertices = poly3d.vertices.length
-      let minindex = -1
-      if (numvertices > 0) {
-        let miny, maxy, maxindex
-        for (let i = 0; i < numvertices; i++) {
-          let pos2d = orthobasis.to2D(poly3d.vertices[i].pos)
-                    // perform binning of y coordinates: If we have multiple vertices very
-                    // close to each other, give them the same y coordinate:
-          let ycoordinatebin = Math.floor(pos2d.y * ycoordinateBinningFactor)
-          let newy
-          if (ycoordinatebin in ycoordinatebins) {
-            newy = ycoordinatebins[ycoordinatebin]
-          } else if (ycoordinatebin + 1 in ycoordinatebins) {
-            newy = ycoordinatebins[ycoordinatebin + 1]
-          } else if (ycoordinatebin - 1 in ycoordinatebins) {
-            newy = ycoordinatebins[ycoordinatebin - 1]
-          } else {
-            newy = pos2d.y
-            ycoordinatebins[ycoordinatebin] = pos2d.y
-          }
-          pos2d = Vector2D.Create(pos2d.x, newy)
-          vertices2d.push(pos2d)
-          let y = pos2d.y
-          if ((i === 0) || (y < miny)) {
-            miny = y
-            minindex = i
-          }
-          if ((i === 0) || (y > maxy)) {
-            maxy = y
-            maxindex = i
-          }
-          if (!(y in ycoordinatetopolygonindexes)) {
-            ycoordinatetopolygonindexes[y] = {}
-          }
-          ycoordinatetopolygonindexes[y][polygonindex] = true
-        }
-        if (miny >= maxy) {
-                    // degenerate polygon, all vertices have same y coordinate. Just ignore it from now:
-          vertices2d = []
-          numvertices = 0
-          minindex = -1
-        } else {
-          if (!(miny in topy2polygonindexes)) {
-            topy2polygonindexes[miny] = []
-          }
-          topy2polygonindexes[miny].push(polygonindex)
-        }
-      } // if(numvertices > 0)
-            // reverse the vertex order:
-      vertices2d.reverse()
-      minindex = numvertices - minindex - 1
-      polygonvertices2d.push(vertices2d)
-      polygontopvertexindexes.push(minindex)
-    }
-    let ycoordinates = []
-    for (let ycoordinate in ycoordinatetopolygonindexes) ycoordinates.push(ycoordinate)
-    ycoordinates.sort(fnNumberSort)
-
-        // Now we will iterate over all y coordinates, from lowest to highest y coordinate
-        // activepolygons: source polygons that are 'active', i.e. intersect with our y coordinate
-        //   Is sorted so the polygons are in left to right order
-        // Each element in activepolygons has these properties:
-        //        polygonindex: the index of the source polygon (i.e. an index into the sourcepolygons
-        //                      and polygonvertices2d arrays)
-        //        leftvertexindex: the index of the vertex at the left side of the polygon (lowest x)
-        //                         that is at or just above the current y coordinate
-        //        rightvertexindex: dito at right hand side of polygon
-        //        topleft, bottomleft: coordinates of the left side of the polygon crossing the current y coordinate
-        //        topright, bottomright: coordinates of the right hand side of the polygon crossing the current y coordinate
-    let activepolygons = []
-    let prevoutpolygonrow = []
-    for (let yindex = 0; yindex < ycoordinates.length; yindex++) {
-      let newoutpolygonrow = []
-      let ycoordinate_as_string = ycoordinates[yindex]
-      let ycoordinate = Number(ycoordinate_as_string)
-
-            // update activepolygons for this y coordinate:
-            // - Remove any polygons that end at this y coordinate
-            // - update leftvertexindex and rightvertexindex (which point to the current vertex index
-            //   at the the left and right side of the polygon
-            // Iterate over all polygons that have a corner at this y coordinate:
-      let polygonindexeswithcorner = ycoordinatetopolygonindexes[ycoordinate_as_string]
-      for (let activepolygonindex = 0; activepolygonindex < activepolygons.length; ++activepolygonindex) {
-        let activepolygon = activepolygons[activepolygonindex]
-        let polygonindex = activepolygon.polygonindex
-        if (polygonindexeswithcorner[polygonindex]) {
-                    // this active polygon has a corner at this y coordinate:
-          let vertices2d = polygonvertices2d[polygonindex]
-          let numvertices = vertices2d.length
-          let newleftvertexindex = activepolygon.leftvertexindex
-          let newrightvertexindex = activepolygon.rightvertexindex
-                    // See if we need to increase leftvertexindex or decrease rightvertexindex:
-          while (true) {
-            let nextleftvertexindex = newleftvertexindex + 1
-            if (nextleftvertexindex >= numvertices) nextleftvertexindex = 0
-            if (vertices2d[nextleftvertexindex].y !== ycoordinate) break
-            newleftvertexindex = nextleftvertexindex
-          }
-          let nextrightvertexindex = newrightvertexindex - 1
-          if (nextrightvertexindex < 0) nextrightvertexindex = numvertices - 1
-          if (vertices2d[nextrightvertexindex].y === ycoordinate) {
-            newrightvertexindex = nextrightvertexindex
-          }
-          if ((newleftvertexindex !== activepolygon.leftvertexindex) && (newleftvertexindex === newrightvertexindex)) {
-                        // We have increased leftvertexindex or decreased rightvertexindex, and now they point to the same vertex
-                        // This means that this is the bottom point of the polygon. We'll remove it:
-            activepolygons.splice(activepolygonindex, 1)
-            --activepolygonindex
-          } else {
-            activepolygon.leftvertexindex = newleftvertexindex
-            activepolygon.rightvertexindex = newrightvertexindex
-            activepolygon.topleft = vertices2d[newleftvertexindex]
-            activepolygon.topright = vertices2d[newrightvertexindex]
-            let nextleftvertexindex = newleftvertexindex + 1
-            if (nextleftvertexindex >= numvertices) nextleftvertexindex = 0
-            activepolygon.bottomleft = vertices2d[nextleftvertexindex]
-            let nextrightvertexindex = newrightvertexindex - 1
-            if (nextrightvertexindex < 0) nextrightvertexindex = numvertices - 1
-            activepolygon.bottomright = vertices2d[nextrightvertexindex]
-          }
-        } // if polygon has corner here
-      } // for activepolygonindex
-      let nextycoordinate
-      if (yindex >= ycoordinates.length - 1) {
-                // last row, all polygons must be finished here:
-        activepolygons = []
-        nextycoordinate = null
-      } else // yindex < ycoordinates.length-1
-            {
-        nextycoordinate = Number(ycoordinates[yindex + 1])
-        let middleycoordinate = 0.5 * (ycoordinate + nextycoordinate)
-                // update activepolygons by adding any polygons that start here:
-        let startingpolygonindexes = topy2polygonindexes[ycoordinate_as_string]
-        for (let polygonindex_key in startingpolygonindexes) {
-          let polygonindex = startingpolygonindexes[polygonindex_key]
-          let vertices2d = polygonvertices2d[polygonindex]
-          let numvertices = vertices2d.length
-          let topvertexindex = polygontopvertexindexes[polygonindex]
-                    // the top of the polygon may be a horizontal line. In that case topvertexindex can point to any point on this line.
-                    // Find the left and right topmost vertices which have the current y coordinate:
-          let topleftvertexindex = topvertexindex
-          while (true) {
-            let i = topleftvertexindex + 1
-            if (i >= numvertices) i = 0
-            if (vertices2d[i].y !== ycoordinate) break
-            if (i === topvertexindex) break // should not happen, but just to prevent endless loops
-            topleftvertexindex = i
-          }
-          let toprightvertexindex = topvertexindex
-          while (true) {
-            let i = toprightvertexindex - 1
-            if (i < 0) i = numvertices - 1
-            if (vertices2d[i].y !== ycoordinate) break
-            if (i === topleftvertexindex) break // should not happen, but just to prevent endless loops
-            toprightvertexindex = i
-          }
-          let nextleftvertexindex = topleftvertexindex + 1
-          if (nextleftvertexindex >= numvertices) nextleftvertexindex = 0
-          let nextrightvertexindex = toprightvertexindex - 1
-          if (nextrightvertexindex < 0) nextrightvertexindex = numvertices - 1
-          let newactivepolygon = {
-            polygonindex: polygonindex,
-            leftvertexindex: topleftvertexindex,
-            rightvertexindex: toprightvertexindex,
-            topleft: vertices2d[topleftvertexindex],
-            topright: vertices2d[toprightvertexindex],
-            bottomleft: vertices2d[nextleftvertexindex],
-            bottomright: vertices2d[nextrightvertexindex]
-          }
-          insertSorted(activepolygons, newactivepolygon, function (el1, el2) {
-            let x1 = interpolateBetween2DPointsForY(
-                            el1.topleft, el1.bottomleft, middleycoordinate)
-            let x2 = interpolateBetween2DPointsForY(
-                            el2.topleft, el2.bottomleft, middleycoordinate)
-            if (x1 > x2) return 1
-            if (x1 < x2) return -1
-            return 0
-          })
-        } // for(let polygonindex in startingpolygonindexes)
-      } //  yindex < ycoordinates.length-1
-            // if( (yindex === ycoordinates.length-1) || (nextycoordinate - ycoordinate > EPS) )
-      if (true) {
-                // Now activepolygons is up to date
-                // Build the output polygons for the next row in newoutpolygonrow:
-        for (let activepolygonKey in activepolygons) {
-          let activepolygon = activepolygons[activepolygonKey]
-          let polygonindex = activepolygon.polygonindex
-          let vertices2d = polygonvertices2d[polygonindex]
-          let numvertices = vertices2d.length
-
-          let x = interpolateBetween2DPointsForY(activepolygon.topleft, activepolygon.bottomleft, ycoordinate)
-          let topleft = Vector2D.Create(x, ycoordinate)
-          x = interpolateBetween2DPointsForY(activepolygon.topright, activepolygon.bottomright, ycoordinate)
-          let topright = Vector2D.Create(x, ycoordinate)
-          x = interpolateBetween2DPointsForY(activepolygon.topleft, activepolygon.bottomleft, nextycoordinate)
-          let bottomleft = Vector2D.Create(x, nextycoordinate)
-          x = interpolateBetween2DPointsForY(activepolygon.topright, activepolygon.bottomright, nextycoordinate)
-          let bottomright = Vector2D.Create(x, nextycoordinate)
-          let outpolygon = {
-            topleft: topleft,
-            topright: topright,
-            bottomleft: bottomleft,
-            bottomright: bottomright,
-            leftline: Line2D.fromPoints(topleft, bottomleft),
-            rightline: Line2D.fromPoints(bottomright, topright)
-          }
-          if (newoutpolygonrow.length > 0) {
-            let prevoutpolygon = newoutpolygonrow[newoutpolygonrow.length - 1]
-            let d1 = outpolygon.topleft.distanceTo(prevoutpolygon.topright)
-            let d2 = outpolygon.bottomleft.distanceTo(prevoutpolygon.bottomright)
-            if ((d1 < EPS) && (d2 < EPS)) {
-                            // we can join this polygon with the one to the left:
-              outpolygon.topleft = prevoutpolygon.topleft
-              outpolygon.leftline = prevoutpolygon.leftline
-              outpolygon.bottomleft = prevoutpolygon.bottomleft
-              newoutpolygonrow.splice(newoutpolygonrow.length - 1, 1)
-            }
-          }
-          newoutpolygonrow.push(outpolygon)
-        } // for(activepolygon in activepolygons)
-        if (yindex > 0) {
-                    // try to match the new polygons against the previous row:
-          let prevcontinuedindexes = {}
-          let matchedindexes = {}
-          for (let i = 0; i < newoutpolygonrow.length; i++) {
-            let thispolygon = newoutpolygonrow[i]
-            for (let ii = 0; ii < prevoutpolygonrow.length; ii++) {
-              if (!matchedindexes[ii]) // not already processed?
-                            {
-                                // We have a match if the sidelines are equal or if the top coordinates
-                                // are on the sidelines of the previous polygon
-                let prevpolygon = prevoutpolygonrow[ii]
-                if (prevpolygon.bottomleft.distanceTo(thispolygon.topleft) < EPS) {
-                  if (prevpolygon.bottomright.distanceTo(thispolygon.topright) < EPS) {
-                                        // Yes, the top of this polygon matches the bottom of the previous:
-                    matchedindexes[ii] = true
-                                        // Now check if the joined polygon would remain convex:
-                    let d1 = thispolygon.leftline.direction().x - prevpolygon.leftline.direction().x
-                    let d2 = thispolygon.rightline.direction().x - prevpolygon.rightline.direction().x
-                    let leftlinecontinues = Math.abs(d1) < EPS
-                    let rightlinecontinues = Math.abs(d2) < EPS
-                    let leftlineisconvex = leftlinecontinues || (d1 >= 0)
-                    let rightlineisconvex = rightlinecontinues || (d2 >= 0)
-                    if (leftlineisconvex && rightlineisconvex) {
-                                            // yes, both sides have convex corners:
-                                            // This polygon will continue the previous polygon
-                      thispolygon.outpolygon = prevpolygon.outpolygon
-                      thispolygon.leftlinecontinues = leftlinecontinues
-                      thispolygon.rightlinecontinues = rightlinecontinues
-                      prevcontinuedindexes[ii] = true
-                    }
-                    break
-                  }
-                }
-              } // if(!prevcontinuedindexes[ii])
-            } // for ii
-          } // for i
-          for (let ii = 0; ii < prevoutpolygonrow.length; ii++) {
-            if (!prevcontinuedindexes[ii]) {
-                            // polygon ends here
-                            // Finish the polygon with the last point(s):
-              let prevpolygon = prevoutpolygonrow[ii]
-              prevpolygon.outpolygon.rightpoints.push(prevpolygon.bottomright)
-              if (prevpolygon.bottomright.distanceTo(prevpolygon.bottomleft) > EPS) {
-                                // polygon ends with a horizontal line:
-                prevpolygon.outpolygon.leftpoints.push(prevpolygon.bottomleft)
-              }
-                            // reverse the left half so we get a counterclockwise circle:
-              prevpolygon.outpolygon.leftpoints.reverse()
-              let points2d = prevpolygon.outpolygon.rightpoints.concat(prevpolygon.outpolygon.leftpoints)
-              let vertices3d = []
-              points2d.map(function (point2d) {
-                let point3d = orthobasis.to3D(point2d)
-                let vertex3d = new Vertex(point3d)
-                vertices3d.push(vertex3d)
-              })
-              let polygon = new Polygon(vertices3d, shared, plane)
-              destpolygons.push(polygon)
-            }
-          }
-        } // if(yindex > 0)
-        for (let i = 0; i < newoutpolygonrow.length; i++) {
-          let thispolygon = newoutpolygonrow[i]
-          if (!thispolygon.outpolygon) {
-                        // polygon starts here:
-            thispolygon.outpolygon = {
-              leftpoints: [],
-              rightpoints: []
-            }
-            thispolygon.outpolygon.leftpoints.push(thispolygon.topleft)
-            if (thispolygon.topleft.distanceTo(thispolygon.topright) > EPS) {
-                            // we have a horizontal line at the top:
-              thispolygon.outpolygon.rightpoints.push(thispolygon.topright)
-            }
-          } else {
-                        // continuation of a previous row
-            if (!thispolygon.leftlinecontinues) {
-              thispolygon.outpolygon.leftpoints.push(thispolygon.topleft)
-            }
-            if (!thispolygon.rightlinecontinues) {
-              thispolygon.outpolygon.rightpoints.push(thispolygon.topright)
-            }
-          }
-        }
-        prevoutpolygonrow = newoutpolygonrow
-      }
-    } // for yindex
-  } // if(numpolygons > 0)
-}
-
-module.exports = {reTesselateCoplanarPolygons}
-
-
-/***/ }),
-/* 120 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Matrix4x4 = __webpack_require__(32)
-const Vector3D = __webpack_require__(3)
-const Plane = __webpack_require__(14)
-
-// Add several convenience methods to the classes that support a transform() method:
-const addTransformationMethodsToPrototype = function (prot) {
-  prot.mirrored = function (plane) {
-    return this.transform(Matrix4x4.mirroring(plane))
-  }
-
-  prot.mirroredX = function () {
-    let plane = new Plane(Vector3D.Create(1, 0, 0), 0)
-    return this.mirrored(plane)
-  }
-
-  prot.mirroredY = function () {
-    let plane = new Plane(Vector3D.Create(0, 1, 0), 0)
-    return this.mirrored(plane)
-  }
-
-  prot.mirroredZ = function () {
-    let plane = new Plane(Vector3D.Create(0, 0, 1), 0)
-    return this.mirrored(plane)
-  }
-
-  prot.translate = function (v) {
-    return this.transform(Matrix4x4.translation(v))
-  }
-
-  prot.scale = function (f) {
-    return this.transform(Matrix4x4.scaling(f))
-  }
-
-  prot.rotateX = function (deg) {
-    return this.transform(Matrix4x4.rotationX(deg))
-  }
-
-  prot.rotateY = function (deg) {
-    return this.transform(Matrix4x4.rotationY(deg))
-  }
-
-  prot.rotateZ = function (deg) {
-    return this.transform(Matrix4x4.rotationZ(deg))
-  }
-
-  prot.rotate = function (rotationCenter, rotationAxis, degrees) {
-    return this.transform(Matrix4x4.rotation(rotationCenter, rotationAxis, degrees))
-  }
-
-  prot.rotateEulerAngles = function (alpha, beta, gamma, position) {
-    position = position || [0, 0, 0]
-
-    let Rz1 = Matrix4x4.rotationZ(alpha)
-    let Rx = Matrix4x4.rotationX(beta)
-    let Rz2 = Matrix4x4.rotationZ(gamma)
-    let T = Matrix4x4.translation(new Vector3D(position))
-
-    return this.transform(Rz2.multiply(Rx).multiply(Rz1).multiply(T))
-  }
-}
-
-// TODO: consider generalization and adding to addTransformationMethodsToPrototype
-const addCenteringToPrototype = function (prot, axes) {
-  prot.center = function (cAxes) {
-    cAxes = Array.prototype.map.call(arguments, function (a) {
-      return a // .toLowerCase();
-    })
-        // no args: center on all axes
-    if (!cAxes.length) {
-      cAxes = axes.slice()
-    }
-    let b = this.getBounds()
-    return this.translate(axes.map(function (a) {
-      return cAxes.indexOf(a) > -1 ? -(b[0][a] + b[1][a]) / 2 : 0
-    }))
-  }
-}
-module.exports = {
-  addTransformationMethodsToPrototype,
-  addCenteringToPrototype
-}
-
-
-/***/ }),
-/* 121 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const CAG = __webpack_require__(23)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(55)
-const {defaultResolution2D} = __webpack_require__(0)
-const Vector2D = __webpack_require__(7)
-const Path2D = __webpack_require__(73)
-const {fromCompactBinary} = __webpack_require__(70)
-
-/** Construct a circle.
- * @param {Object} [options] - options for construction
- * @param {Vector2D} [options.center=[0,0]] - center of circle
- * @param {Number} [options.radius=1] - radius of circle
- * @param {Number} [options.resolution=defaultResolution2D] - number of sides per 360 rotation
- * @returns {CAG} new CAG object
- */
-const circle = function (options) {
-  options = options || {}
-  let center = parseOptionAs2DVector(options, 'center', [0, 0])
-  let radius = parseOptionAsFloat(options, 'radius', 1)
-  let resolution = parseOptionAsInt(options, 'resolution', defaultResolution2D)
-  let points = []
-  for (let i = 0; i < resolution; i++) {
-    let radians = 2 * Math.PI * i / resolution
-    let point = Vector2D.fromAngleRadians(radians).times(radius).plus(center)
-    points.push(point)
-  }
-  return CAG.fromPoints(points)
-}
-
-/** Construct an ellispe.
- * @param {Object} [options] - options for construction
- * @param {Vector2D} [options.center=[0,0]] - center of ellipse
- * @param {Vector2D} [options.radius=[1,1]] - radius of ellipse, width and height
- * @param {Number} [options.resolution=defaultResolution2D] - number of sides per 360 rotation
- * @returns {CAG} new CAG object
- */
-const ellipse = function (options) {
-  options = options || {}
-  let c = parseOptionAs2DVector(options, 'center', [0, 0])
-  let r = parseOptionAs2DVector(options, 'radius', [1, 1])
-  r = r.abs() // negative radii make no sense
-  let res = parseOptionAsInt(options, 'resolution', defaultResolution2D)
-
-  let e2 = new Path2D([[c.x, c.y + r.y]])
-  e2 = e2.appendArc([c.x, c.y - r.y], {
-    xradius: r.x,
-    yradius: r.y,
-    xaxisrotation: 0,
-    resolution: res,
-    clockwise: true,
-    large: false
-  })
-  e2 = e2.appendArc([c.x, c.y + r.y], {
-    xradius: r.x,
-    yradius: r.y,
-    xaxisrotation: 0,
-    resolution: res,
-    clockwise: true,
-    large: false
-  })
-  e2 = e2.close()
-  return e2.innerToCAG()
-}
-
-/** Construct a rectangle.
- * @param {Object} [options] - options for construction
- * @param {Vector2D} [options.center=[0,0]] - center of rectangle
- * @param {Vector2D} [options.radius=[1,1]] - radius of rectangle, width and height
- * @param {Vector2D} [options.corner1=[0,0]] - bottom left corner of rectangle (alternate)
- * @param {Vector2D} [options.corner2=[0,0]] - upper right corner of rectangle (alternate)
- * @returns {CAG} new CAG object
- */
-const rectangle = function (options) {
-  options = options || {}
-  let c, r
-  if (('corner1' in options) || ('corner2' in options)) {
-    if (('center' in options) || ('radius' in options)) {
-      throw new Error('rectangle: should either give a radius and center parameter, or a corner1 and corner2 parameter')
-    }
-    let corner1 = parseOptionAs2DVector(options, 'corner1', [0, 0])
-    let corner2 = parseOptionAs2DVector(options, 'corner2', [1, 1])
-    c = corner1.plus(corner2).times(0.5)
-    r = corner2.minus(corner1).times(0.5)
-  } else {
-    c = parseOptionAs2DVector(options, 'center', [0, 0])
-    r = parseOptionAs2DVector(options, 'radius', [1, 1])
-  }
-  r = r.abs() // negative radii make no sense
-  let rswap = new Vector2D(r.x, -r.y)
-  let points = [
-    c.plus(r), c.plus(rswap), c.minus(r), c.minus(rswap)
-  ]
-  return CAG.fromPoints(points)
-}
-
-/** Construct a rounded rectangle.
- * @param {Object} [options] - options for construction
- * @param {Vector2D} [options.center=[0,0]] - center of rounded rectangle
- * @param {Vector2D} [options.radius=[1,1]] - radius of rounded rectangle, width and height
- * @param {Vector2D} [options.corner1=[0,0]] - bottom left corner of rounded rectangle (alternate)
- * @param {Vector2D} [options.corner2=[0,0]] - upper right corner of rounded rectangle (alternate)
- * @param {Number} [options.roundradius=0.2] - round radius of corners
- * @param {Number} [options.resolution=defaultResolution2D] - number of sides per 360 rotation
- * @returns {CAG} new CAG object
- *
- * @example
- * let r = roundedRectangle({
- *   center: [0, 0],
- *   radius: [5, 10],
- *   roundradius: 2,
- *   resolution: 36,
- * });
- */
-const roundedRectangle = function (options) {
-  options = options || {}
-  let center, radius
-  if (('corner1' in options) || ('corner2' in options)) {
-    if (('center' in options) || ('radius' in options)) {
-      throw new Error('roundedRectangle: should either give a radius and center parameter, or a corner1 and corner2 parameter')
-    }
-    let corner1 = parseOptionAs2DVector(options, 'corner1', [0, 0])
-    let corner2 = parseOptionAs2DVector(options, 'corner2', [1, 1])
-    center = corner1.plus(corner2).times(0.5)
-    radius = corner2.minus(corner1).times(0.5)
-  } else {
-    center = parseOptionAs2DVector(options, 'center', [0, 0])
-    radius = parseOptionAs2DVector(options, 'radius', [1, 1])
-  }
-  radius = radius.abs() // negative radii make no sense
-  let roundradius = parseOptionAsFloat(options, 'roundradius', 0.2)
-  let resolution = parseOptionAsInt(options, 'resolution', defaultResolution2D)
-  let maxroundradius = Math.min(radius.x, radius.y)
-  maxroundradius -= 0.1
-  roundradius = Math.min(roundradius, maxroundradius)
-  roundradius = Math.max(0, roundradius)
-  radius = new Vector2D(radius.x - roundradius, radius.y - roundradius)
-  let rect = CAG.rectangle({
-    center: center,
-    radius: radius
-  })
-  if (roundradius > 0) {
-    rect = rect.expand(roundradius, resolution)
-  }
-  return rect
-}
-
-/** Reconstruct a CAG from the output of toCompactBinary().
- * @param {CompactBinary} bin - see toCompactBinary()
- * @returns {CAG} new CAG object
- */
-CAG.fromCompactBinary = function (bin) {
-  if (bin['class'] !== 'CAG') throw new Error('Not a CAG')
-  let vertices = []
-  let vertexData = bin.vertexData
-  let numvertices = vertexData.length / 2
-  let arrayindex = 0
-  for (let vertexindex = 0; vertexindex < numvertices; vertexindex++) {
-    let x = vertexData[arrayindex++]
-    let y = vertexData[arrayindex++]
-    let pos = new Vector2D(x, y)
-    let vertex = new CAG.Vertex(pos)
-    vertices.push(vertex)
-  }
-
-  let sides = []
-  let numsides = bin.sideVertexIndices.length / 2
-  arrayindex = 0
-  for (let sideindex = 0; sideindex < numsides; sideindex++) {
-    let vertexindex0 = bin.sideVertexIndices[arrayindex++]
-    let vertexindex1 = bin.sideVertexIndices[arrayindex++]
-    let side = new CAG.Side(vertices[vertexindex0], vertices[vertexindex1])
-    sides.push(side)
-  }
-  let cag = CAG.fromSides(sides)
-  cag.isCanonicalized = true
-  return cag
-}
-
-module.exports = {
-  circle,
-  ellipse,
-  rectangle,
-  roundedRectangle,
-  fromCompactBinary
-}
-
-
-/***/ }),
-/* 122 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const {_CSGDEBUG, EPS} = __webpack_require__(0)
-const Vertex = __webpack_require__(16)
-const Polygon = __webpack_require__(15)
-
-// Returns object:
-// .type:
-//   0: coplanar-front
-//   1: coplanar-back
-//   2: front
-//   3: back
-//   4: spanning
-// In case the polygon is spanning, returns:
-// .front: a Polygon of the front part
-// .back: a Polygon of the back part
-function splitPolygonByPlane (plane, polygon) {
-  let result = {
-    type: null,
-    front: null,
-    back: null
-  }
-      // cache in local lets (speedup):
-  let planenormal = plane.normal
-  let vertices = polygon.vertices
-  let numvertices = vertices.length
-  if (polygon.plane.equals(plane)) {
-    result.type = 0
-  } else {
-    let thisw = plane.w
-    let hasfront = false
-    let hasback = false
-    let vertexIsBack = []
-    let MINEPS = -EPS
-    for (let i = 0; i < numvertices; i++) {
-      let t = planenormal.dot(vertices[i].pos) - thisw
-      let isback = (t < 0)
-      vertexIsBack.push(isback)
-      if (t > EPS) hasfront = true
-      if (t < MINEPS) hasback = true
-    }
-    if ((!hasfront) && (!hasback)) {
-              // all points coplanar
-      let t = planenormal.dot(polygon.plane.normal)
-      result.type = (t >= 0) ? 0 : 1
-    } else if (!hasback) {
-      result.type = 2
-    } else if (!hasfront) {
-      result.type = 3
-    } else {
-              // spanning
-      result.type = 4
-      let frontvertices = []
-      let backvertices = []
-      let isback = vertexIsBack[0]
-      for (let vertexindex = 0; vertexindex < numvertices; vertexindex++) {
-        let vertex = vertices[vertexindex]
-        let nextvertexindex = vertexindex + 1
-        if (nextvertexindex >= numvertices) nextvertexindex = 0
-        let nextisback = vertexIsBack[nextvertexindex]
-        if (isback === nextisback) {
-                      // line segment is on one side of the plane:
-          if (isback) {
-            backvertices.push(vertex)
-          } else {
-            frontvertices.push(vertex)
-          }
-        } else {
-                      // line segment intersects plane:
-          let point = vertex.pos
-          let nextpoint = vertices[nextvertexindex].pos
-          let intersectionpoint = plane.splitLineBetweenPoints(point, nextpoint)
-          let intersectionvertex = new Vertex(intersectionpoint)
-          if (isback) {
-            backvertices.push(vertex)
-            backvertices.push(intersectionvertex)
-            frontvertices.push(intersectionvertex)
-          } else {
-            frontvertices.push(vertex)
-            frontvertices.push(intersectionvertex)
-            backvertices.push(intersectionvertex)
-          }
-        }
-        isback = nextisback
-      } // for vertexindex
-              // remove duplicate vertices:
-      let EPS_SQUARED = EPS * EPS
-      if (backvertices.length >= 3) {
-        let prevvertex = backvertices[backvertices.length - 1]
-        for (let vertexindex = 0; vertexindex < backvertices.length; vertexindex++) {
-          let vertex = backvertices[vertexindex]
-          if (vertex.pos.distanceToSquared(prevvertex.pos) < EPS_SQUARED) {
-            backvertices.splice(vertexindex, 1)
-            vertexindex--
-          }
-          prevvertex = vertex
-        }
-      }
-      if (frontvertices.length >= 3) {
-        let prevvertex = frontvertices[frontvertices.length - 1]
-        for (let vertexindex = 0; vertexindex < frontvertices.length; vertexindex++) {
-          let vertex = frontvertices[vertexindex]
-          if (vertex.pos.distanceToSquared(prevvertex.pos) < EPS_SQUARED) {
-            frontvertices.splice(vertexindex, 1)
-            vertexindex--
-          }
-          prevvertex = vertex
-        }
-      }
-      if (frontvertices.length >= 3) {
-        result.front = new Polygon(frontvertices, polygon.shared, polygon.plane)
-      }
-      if (backvertices.length >= 3) {
-        result.back = new Polygon(backvertices, polygon.shared, polygon.plane)
-      }
-    }
-  }
-  return result
-}
-
-// # class PolygonTreeNode
-// This class manages hierarchical splits of polygons
-// At the top is a root node which doesn hold a polygon, only child PolygonTreeNodes
-// Below that are zero or more 'top' nodes; each holds a polygon. The polygons can be in different planes
-// splitByPlane() splits a node by a plane. If the plane intersects the polygon, two new child nodes
-// are created holding the splitted polygon.
-// getPolygons() retrieves the polygon from the tree. If for PolygonTreeNode the polygon is split but
-// the two split parts (child nodes) are still intact, then the unsplit polygon is returned.
-// This ensures that we can safely split a polygon into many fragments. If the fragments are untouched,
-//  getPolygons() will return the original unsplit polygon instead of the fragments.
-// remove() removes a polygon from the tree. Once a polygon is removed, the parent polygons are invalidated
-// since they are no longer intact.
-// constructor creates the root node:
-const PolygonTreeNode = function () {
-  this.parent = null
-  this.children = []
-  this.polygon = null
-  this.removed = false
-}
-
-PolygonTreeNode.prototype = {
-    // fill the tree with polygons. Should be called on the root node only; child nodes must
-    // always be a derivate (split) of the parent node.
-  addPolygons: function (polygons) {
-    if (!this.isRootNode())
-        // new polygons can only be added to root node; children can only be splitted polygons
-          {
-      throw new Error('Assertion failed')
-    }
-    let _this = this
-    polygons.map(function (polygon) {
-      _this.addChild(polygon)
-    })
-  },
-
-    // remove a node
-    // - the siblings become toplevel nodes
-    // - the parent is removed recursively
-  remove: function () {
-    if (!this.removed) {
-      this.removed = true
-
-      if (_CSGDEBUG) {
-        if (this.isRootNode()) throw new Error('Assertion failed') // can't remove root node
-        if (this.children.length) throw new Error('Assertion failed') // we shouldn't remove nodes with children
-      }
-
-            // remove ourselves from the parent's children list:
-      let parentschildren = this.parent.children
-      let i = parentschildren.indexOf(this)
-      if (i < 0) throw new Error('Assertion failed')
-      parentschildren.splice(i, 1)
-
-            // invalidate the parent's polygon, and of all parents above it:
-      this.parent.recursivelyInvalidatePolygon()
-    }
-  },
-
-  isRemoved: function () {
-    return this.removed
-  },
-
-  isRootNode: function () {
-    return !this.parent
-  },
-
-    // invert all polygons in the tree. Call on the root node
-  invert: function () {
-    if (!this.isRootNode()) throw new Error('Assertion failed') // can only call this on the root node
-    this.invertSub()
-  },
-
-  getPolygon: function () {
-    if (!this.polygon) throw new Error('Assertion failed') // doesn't have a polygon, which means that it has been broken down
-    return this.polygon
-  },
-
-  getPolygons: function (result) {
-    let children = [this]
-    let queue = [children]
-    let i, j, l, node
-    for (i = 0; i < queue.length; ++i) { // queue size can change in loop, don't cache length
-      children = queue[i]
-      for (j = 0, l = children.length; j < l; j++) { // ok to cache length
-        node = children[j]
-        if (node.polygon) {
-                    // the polygon hasn't been broken yet. We can ignore the children and return our polygon:
-          result.push(node.polygon)
-        } else {
-                    // our polygon has been split up and broken, so gather all subpolygons from the children
-          queue.push(node.children)
-        }
-      }
-    }
-  },
-
-    // split the node by a plane; add the resulting nodes to the frontnodes and backnodes array
-    // If the plane doesn't intersect the polygon, the 'this' object is added to one of the arrays
-    // If the plane does intersect the polygon, two new child nodes are created for the front and back fragments,
-    //  and added to both arrays.
-  splitByPlane: function (plane, coplanarfrontnodes, coplanarbacknodes, frontnodes, backnodes) {
-    if (this.children.length) {
-      let queue = [this.children]
-      let i
-      let j
-      let l
-      let node
-      let nodes
-      for (i = 0; i < queue.length; i++) { // queue.length can increase, do not cache
-        nodes = queue[i]
-        for (j = 0, l = nodes.length; j < l; j++) { // ok to cache length
-          node = nodes[j]
-          if (node.children.length) {
-            queue.push(node.children)
-          } else {
-                        // no children. Split the polygon:
-            node._splitByPlane(plane, coplanarfrontnodes, coplanarbacknodes, frontnodes, backnodes)
-          }
-        }
-      }
-    } else {
-      this._splitByPlane(plane, coplanarfrontnodes, coplanarbacknodes, frontnodes, backnodes)
-    }
-  },
-
-    // only to be called for nodes with no children
-  _splitByPlane: function (plane, coplanarfrontnodes, coplanarbacknodes, frontnodes, backnodes) {
-    let polygon = this.polygon
-    if (polygon) {
-      let bound = polygon.boundingSphere()
-      let sphereradius = bound[1] + EPS // FIXME Why add imprecision?
-      let planenormal = plane.normal
-      let spherecenter = bound[0]
-      let d = planenormal.dot(spherecenter) - plane.w
-      if (d > sphereradius) {
-        frontnodes.push(this)
-      } else if (d < -sphereradius) {
-        backnodes.push(this)
-      } else {
-        let splitresult = splitPolygonByPlane(plane, polygon)
-        switch (splitresult.type) {
-          case 0:
-                        // coplanar front:
-            coplanarfrontnodes.push(this)
-            break
-
-          case 1:
-                        // coplanar back:
-            coplanarbacknodes.push(this)
-            break
-
-          case 2:
-                        // front:
-            frontnodes.push(this)
-            break
-
-          case 3:
-                        // back:
-            backnodes.push(this)
-            break
-
-          case 4:
-                        // spanning:
-            if (splitresult.front) {
-              let frontnode = this.addChild(splitresult.front)
-              frontnodes.push(frontnode)
-            }
-            if (splitresult.back) {
-              let backnode = this.addChild(splitresult.back)
-              backnodes.push(backnode)
-            }
-            break
-        }
-      }
-    }
-  },
-
-    // PRIVATE methods from here:
-    // add child to a node
-    // this should be called whenever the polygon is split
-    // a child should be created for every fragment of the split polygon
-    // returns the newly created child
-  addChild: function (polygon) {
-    let newchild = new PolygonTreeNode()
-    newchild.parent = this
-    newchild.polygon = polygon
-    this.children.push(newchild)
-    return newchild
-  },
-
-  invertSub: function () {
-    let children = [this]
-    let queue = [children]
-    let i, j, l, node
-    for (i = 0; i < queue.length; i++) {
-      children = queue[i]
-      for (j = 0, l = children.length; j < l; j++) {
-        node = children[j]
-        if (node.polygon) {
-          node.polygon = node.polygon.flipped()
-        }
-        queue.push(node.children)
-      }
-    }
-  },
-
-  recursivelyInvalidatePolygon: function () {
-    let node = this
-    while (node.polygon) {
-      node.polygon = null
-      if (node.parent) {
-        node = node.parent
-      }
-    }
-  }
-}
-
-// # class Tree
-// This is the root of a BSP tree
-// We are using this separate class for the root of the tree, to hold the PolygonTreeNode root
-// The actual tree is kept in this.rootnode
-const Tree = function (polygons) {
-  this.polygonTree = new PolygonTreeNode()
-  this.rootnode = new Node(null)
-  if (polygons) this.addPolygons(polygons)
-}
-
-Tree.prototype = {
-  invert: function () {
-    this.polygonTree.invert()
-    this.rootnode.invert()
-  },
-
-    // Remove all polygons in this BSP tree that are inside the other BSP tree
-    // `tree`.
-  clipTo: function (tree, alsoRemovecoplanarFront) {
-    alsoRemovecoplanarFront = alsoRemovecoplanarFront ? true : false
-    this.rootnode.clipTo(tree, alsoRemovecoplanarFront)
-  },
-
-  allPolygons: function () {
-    let result = []
-    this.polygonTree.getPolygons(result)
-    return result
-  },
-
-  addPolygons: function (polygons) {
-    let _this = this
-    let polygontreenodes = polygons.map(function (p) {
-      return _this.polygonTree.addChild(p)
-    })
-    this.rootnode.addPolygonTreeNodes(polygontreenodes)
-  }
-}
-
-// # class Node
-// Holds a node in a BSP tree. A BSP tree is built from a collection of polygons
-// by picking a polygon to split along.
-// Polygons are not stored directly in the tree, but in PolygonTreeNodes, stored in
-// this.polygontreenodes. Those PolygonTreeNodes are children of the owning
-// Tree.polygonTree
-// This is not a leafy BSP tree since there is
-// no distinction between internal and leaf nodes.
-const Node = function (parent) {
-  this.plane = null
-  this.front = null
-  this.back = null
-  this.polygontreenodes = []
-  this.parent = parent
-}
-
-Node.prototype = {
-    // Convert solid space to empty space and empty space to solid space.
-  invert: function () {
-    let queue = [this]
-    let node
-    for (let i = 0; i < queue.length; i++) {
-      node = queue[i]
-      if (node.plane) node.plane = node.plane.flipped()
-      if (node.front) queue.push(node.front)
-      if (node.back) queue.push(node.back)
-      let temp = node.front
-      node.front = node.back
-      node.back = temp
-    }
-  },
-
-    // clip polygontreenodes to our plane
-    // calls remove() for all clipped PolygonTreeNodes
-  clipPolygons: function (polygontreenodes, alsoRemovecoplanarFront) {
-    let args = {'node': this, 'polygontreenodes': polygontreenodes}
-    let node
-    let stack = []
-
-    do {
-      node = args.node
-      polygontreenodes = args.polygontreenodes
-
-            // begin "function"
-      if (node.plane) {
-        let backnodes = []
-        let frontnodes = []
-        let coplanarfrontnodes = alsoRemovecoplanarFront ? backnodes : frontnodes
-        let plane = node.plane
-        let numpolygontreenodes = polygontreenodes.length
-        for (let i = 0; i < numpolygontreenodes; i++) {
-          let node1 = polygontreenodes[i]
-          if (!node1.isRemoved()) {
-            node1.splitByPlane(plane, coplanarfrontnodes, backnodes, frontnodes, backnodes)
-          }
-        }
-
-        if (node.front && (frontnodes.length > 0)) {
-          stack.push({'node': node.front, 'polygontreenodes': frontnodes})
-        }
-        let numbacknodes = backnodes.length
-        if (node.back && (numbacknodes > 0)) {
-          stack.push({'node': node.back, 'polygontreenodes': backnodes})
-        } else {
-                    // there's nothing behind this plane. Delete the nodes behind this plane:
-          for (let i = 0; i < numbacknodes; i++) {
-            backnodes[i].remove()
-          }
-        }
-      }
-      args = stack.pop()
-    } while (typeof (args) !== 'undefined')
-  },
-
-    // Remove all polygons in this BSP tree that are inside the other BSP tree
-    // `tree`.
-  clipTo: function (tree, alsoRemovecoplanarFront) {
-    let node = this
-    let stack = []
-    do {
-      if (node.polygontreenodes.length > 0) {
-        tree.rootnode.clipPolygons(node.polygontreenodes, alsoRemovecoplanarFront)
-      }
-      if (node.front) stack.push(node.front)
-      if (node.back) stack.push(node.back)
-      node = stack.pop()
-    } while (typeof (node) !== 'undefined')
-  },
-
-  addPolygonTreeNodes: function (polygontreenodes) {
-    let args = {'node': this, 'polygontreenodes': polygontreenodes}
-    let node
-    let stack = []
-    do {
-      node = args.node
-      polygontreenodes = args.polygontreenodes
-
-      if (polygontreenodes.length === 0) {
-        args = stack.pop()
-        continue
-      }
-      let _this = node
-      if (!node.plane) {
-        let bestplane = polygontreenodes[0].getPolygon().plane
-        node.plane = bestplane
-      }
-      let frontnodes = []
-      let backnodes = []
-
-      for (let i = 0, n = polygontreenodes.length; i < n; ++i) {
-        polygontreenodes[i].splitByPlane(_this.plane, _this.polygontreenodes, backnodes, frontnodes, backnodes)
-      }
-
-      if (frontnodes.length > 0) {
-        if (!node.front) node.front = new Node(node)
-        stack.push({'node': node.front, 'polygontreenodes': frontnodes})
-      }
-      if (backnodes.length > 0) {
-        if (!node.back) node.back = new Node(node)
-        stack.push({'node': node.back, 'polygontreenodes': backnodes})
-      }
-
-      args = stack.pop()
-    } while (typeof (args) !== 'undefined')
-  },
-
-  getParentPlaneNormals: function (normals, maxdepth) {
-    if (maxdepth > 0) {
-      if (this.parent) {
-        normals.push(this.parent.plane.normal)
-        this.parent.getParentPlaneNormals(normals, maxdepth - 1)
-      }
-    }
-  }
-}
-
-module.exports = Tree
-
-
-/***/ }),
-/* 123 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const {makeBlob} = __webpack_require__(93)
-
-const amfSerializer = __webpack_require__(125)
-const dxfSerializer = __webpack_require__(126)
-const jsonSerializer = __webpack_require__(131)
-const stlSerializer = __webpack_require__(148)
-const svgSerializer = __webpack_require__(153)
-const x3dSerializer = __webpack_require__(164)
-
-const amfDeSerializer = __webpack_require__(124)
-const gcodeDeSerializer = __webpack_require__(127)
-const jsonDeSerializer = __webpack_require__(130)
-const objDeSerializer = __webpack_require__(142)
-const stlDeSerializer = __webpack_require__(144)
-const svgDeSerializer = __webpack_require__(149)
-
-module.exports = {
-  makeBlob,
-  amfSerializer,
-  dxfSerializer,
-  jsonSerializer,
-  stlSerializer,
-  svgSerializer,
-  x3dSerializer,
-
-  amfDeSerializer,
-  gcodeDeSerializer,
-  jsonDeSerializer,
-  objDeSerializer,
-  stlDeSerializer,
-  svgDeSerializer
-}
-/*export {makeBlob} from './utils/Blob'
-
-import * as CAGToDxf from './serializers/CAGToDxf'
-import * as CAGToJson from './serializers/CAGToJson'
-import * as CAGToSvg from './serializers/CAGToSvg'
-import * as CSGToAMF from './serializers/CSGToAMF'
-import * as CSGToJson from './serializers/CSGToJson'
-import * as CSGToStla from './serializers/CSGToStla'
-import * as CSGToStlb from './serializers/CSGToStlb'
-import * as CSGToX3D from './serializers/CSGToX3D'
-
-export {CAGToDxf, CAGToJson, CAGToSvg, CSGToAMF, CSGToJson, CSGToStla, CSGToStlb, CSGToX3D}
-
-export {parseAMF} from './deserializers/parseAMF'
-export {parseGCode} from './deserializers/parseGCode'
-export {parseJSON} from './deserializers/parseJSON'
-export {parseOBJ} from './deserializers/parseOBJ'
-export {parseSTL} from './deserializers/parseSTL'
-export {parseSVG} from './deserializers/parseSVG'*/
-
-
-/***/ }),
-/* 124 */
-/***/ (function(module, exports, __webpack_require__) {
-
 /*
 ## License
 
@@ -42248,7 +40774,7 @@ module.exports = {
 
 
 /***/ }),
-/* 125 */
+/* 115 */
 /***/ (function(module, exports) {
 
 const mimeType = 'application/amf+xml'
@@ -42322,7 +40848,1440 @@ module.exports = {
 
 
 /***/ }),
-/* 126 */
+/* 116 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector3D = __webpack_require__(3)
+const Vertex = __webpack_require__(16)
+const Plane = __webpack_require__(14)
+const Polygon2D = __webpack_require__(91)
+const Polygon3D = __webpack_require__(15)
+
+/** Construct a CSG solid from a list of pre-generated slices.
+ * See Polygon.prototype.solidFromSlices() for details.
+ * @param {Object} options - options passed to solidFromSlices()
+ * @returns {CSG} new CSG object
+ */
+function fromSlices (options) {
+  return (new Polygon2D.createFromPoints([
+        [0, 0, 0],
+        [1, 0, 0],
+        [1, 1, 0],
+        [0, 1, 0]
+  ])).solidFromSlices(options)
+}
+
+/** Reconstruct a CSG solid from an object with identical property names.
+ * @param {Object} obj - anonymous object, typically from JSON
+ * @returns {CSG} new CSG object
+ */
+function fromObject (obj) {
+  const CSG = __webpack_require__(11)
+  let polygons = obj.polygons.map(function (p) {
+    return Polygon3D.fromObject(p)
+  })
+  let csg = CSG.fromPolygons(polygons)
+  csg.isCanonicalized = obj.isCanonicalized
+  csg.isRetesselated = obj.isRetesselated
+  return csg
+}
+
+/** Reconstruct a CSG from the output of toCompactBinary().
+ * @param {CompactBinary} bin - see toCompactBinary().
+ * @returns {CSG} new CSG object
+ */
+function fromCompactBinary (bin) {
+  const CSG = __webpack_require__(11) // FIXME: circular dependency ??
+
+  if (bin['class'] !== 'CSG') throw new Error('Not a CSG')
+  let planes = []
+  let planeData = bin.planeData
+  let numplanes = planeData.length / 4
+  let arrayindex = 0
+  let x, y, z, w, normal, plane
+  for (let planeindex = 0; planeindex < numplanes; planeindex++) {
+    x = planeData[arrayindex++]
+    y = planeData[arrayindex++]
+    z = planeData[arrayindex++]
+    w = planeData[arrayindex++]
+    normal = Vector3D.Create(x, y, z)
+    plane = new Plane(normal, w)
+    planes.push(plane)
+  }
+
+  let vertices = []
+  const vertexData = bin.vertexData
+  const numvertices = vertexData.length / 3
+  let pos
+  let vertex
+  arrayindex = 0
+  for (let vertexindex = 0; vertexindex < numvertices; vertexindex++) {
+    x = vertexData[arrayindex++]
+    y = vertexData[arrayindex++]
+    z = vertexData[arrayindex++]
+    pos = Vector3D.Create(x, y, z)
+    vertex = new Vertex(pos)
+    vertices.push(vertex)
+  }
+
+  let shareds = bin.shared.map(function (shared) {
+    return Polygon3D.Shared.fromObject(shared)
+  })
+
+  let polygons = []
+  let numpolygons = bin.numPolygons
+  let numVerticesPerPolygon = bin.numVerticesPerPolygon
+  let polygonVertices = bin.polygonVertices
+  let polygonPlaneIndexes = bin.polygonPlaneIndexes
+  let polygonSharedIndexes = bin.polygonSharedIndexes
+  let numpolygonvertices
+  let polygonvertices
+  let shared
+  let polygon // already defined plane,
+  arrayindex = 0
+  for (let polygonindex = 0; polygonindex < numpolygons; polygonindex++) {
+    numpolygonvertices = numVerticesPerPolygon[polygonindex]
+    polygonvertices = []
+    for (let i = 0; i < numpolygonvertices; i++) {
+      polygonvertices.push(vertices[polygonVertices[arrayindex++]])
+    }
+    plane = planes[polygonPlaneIndexes[polygonindex]]
+    shared = shareds[polygonSharedIndexes[polygonindex]]
+    polygon = new Polygon3D(polygonvertices, shared, plane)
+    polygons.push(polygon)
+  }
+  let csg = CSG.fromPolygons(polygons)
+  csg.isCanonicalized = true
+  csg.isRetesselated = true
+  return csg
+}
+
+module.exports = {
+  //fromPolygons,
+  fromSlices,
+  fromObject,
+  fromCompactBinary
+}
+
+
+/***/ }),
+/* 117 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const FuzzyFactory = __webpack_require__(90)
+const {EPS} = __webpack_require__(0)
+const Side = __webpack_require__(44)
+
+const FuzzyCAGFactory = function () {
+  this.vertexfactory = new FuzzyFactory(2, EPS)
+}
+
+FuzzyCAGFactory.prototype = {
+  getVertex: function (sourcevertex) {
+    let elements = [sourcevertex.pos._x, sourcevertex.pos._y]
+    let result = this.vertexfactory.lookupOrCreate(elements, function (els) {
+      return sourcevertex
+    })
+    return result
+  },
+
+  getSide: function (sourceside) {
+    let vertex0 = this.getVertex(sourceside.vertex0)
+    let vertex1 = this.getVertex(sourceside.vertex1)
+    return new Side(vertex0, vertex1)
+  }
+}
+
+module.exports = FuzzyCAGFactory
+
+
+/***/ }),
+/* 118 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const {EPS} = __webpack_require__(0)
+const Polygon = __webpack_require__(15)
+const FuzzyFactory = __webpack_require__(90)
+
+// ////////////////////////////////////
+const FuzzyCSGFactory = function () {
+  this.vertexfactory = new FuzzyFactory(3, EPS)
+  this.planefactory = new FuzzyFactory(4, EPS)
+  this.polygonsharedfactory = {}
+}
+
+FuzzyCSGFactory.prototype = {
+  getPolygonShared: function (sourceshared) {
+    let hash = sourceshared.getHash()
+    if (hash in this.polygonsharedfactory) {
+      return this.polygonsharedfactory[hash]
+    } else {
+      this.polygonsharedfactory[hash] = sourceshared
+      return sourceshared
+    }
+  },
+
+  getVertex: function (sourcevertex) {
+    let elements = [sourcevertex.pos._x, sourcevertex.pos._y, sourcevertex.pos._z]
+    let result = this.vertexfactory.lookupOrCreate(elements, function (els) {
+      return sourcevertex
+    })
+    return result
+  },
+
+  getPlane: function (sourceplane) {
+    let elements = [sourceplane.normal._x, sourceplane.normal._y, sourceplane.normal._z, sourceplane.w]
+    let result = this.planefactory.lookupOrCreate(elements, function (els) {
+      return sourceplane
+    })
+    return result
+  },
+
+  getPolygon: function (sourcepolygon) {
+    let newplane = this.getPlane(sourcepolygon.plane)
+    let newshared = this.getPolygonShared(sourcepolygon.shared)
+    let _this = this
+    let newvertices = sourcepolygon.vertices.map(function (vertex) {
+      return _this.getVertex(vertex)
+    })
+        // two vertices that were originally very close may now have become
+        // truly identical (referring to the same Vertex object).
+        // Remove duplicate vertices:
+    let newverticesDedup = []
+    if (newvertices.length > 0) {
+      let prevvertextag = newvertices[newvertices.length - 1].getTag()
+      newvertices.forEach(function (vertex) {
+        let vertextag = vertex.getTag()
+        if (vertextag !== prevvertextag) {
+          newverticesDedup.push(vertex)
+        }
+        prevvertextag = vertextag
+      })
+    }
+        // If it's degenerate, remove all vertices:
+    if (newverticesDedup.length < 3) {
+      newverticesDedup = []
+    }
+    return new Polygon(newverticesDedup, newshared, newplane)
+  }
+}
+
+module.exports = FuzzyCSGFactory
+
+
+/***/ }),
+/* 119 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const CSG = __webpack_require__(11)
+const {cube} = __webpack_require__(92)
+
+// For debugging
+// Creates a new solid with a tiny cube at every vertex of the source solid
+// this is seperated from the CSG class itself because of the dependency on cube
+const toPointCloud = function (csg, cuberadius) {
+  csg = csg.reTesselated()
+
+  let result = new CSG()
+
+    // make a list of all unique vertices
+    // For each vertex we also collect the list of normals of the planes touching the vertices
+  let vertexmap = {}
+  csg.polygons.map(function (polygon) {
+    polygon.vertices.map(function (vertex) {
+      vertexmap[vertex.getTag()] = vertex.pos
+    })
+  })
+
+  for (let vertextag in vertexmap) {
+    let pos = vertexmap[vertextag]
+    let _cube = cube({
+      center: pos,
+      radius: cuberadius
+    })
+    result = result.unionSub(_cube, false, false)
+  }
+  result = result.reTesselated()
+  return result
+}
+
+module.exports = {toPointCloud}
+
+
+/***/ }),
+/* 120 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const {EPS} = __webpack_require__(0)
+const {solve2Linear} = __webpack_require__(24)
+
+// see if the line between p0start and p0end intersects with the line between p1start and p1end
+// returns true if the lines strictly intersect, the end points are not counted!
+const linesIntersect = function (p0start, p0end, p1start, p1end) {
+  if (p0end.equals(p1start) || p1end.equals(p0start)) {
+    let d = p1end.minus(p1start).unit().plus(p0end.minus(p0start).unit()).length()
+    if (d < EPS) {
+      return true
+    }
+  } else {
+    let d0 = p0end.minus(p0start)
+    let d1 = p1end.minus(p1start)
+        // FIXME These epsilons need review and testing
+    if (Math.abs(d0.cross(d1)) < 1e-9) return false // lines are parallel
+    let alphas = solve2Linear(-d0.x, d1.x, -d0.y, d1.y, p0start.x - p1start.x, p0start.y - p1start.y)
+    if ((alphas[0] > 1e-6) && (alphas[0] < 0.999999) && (alphas[1] > 1e-5) && (alphas[1] < 0.999999)) return true
+        //    if( (alphas[0] >= 0) && (alphas[0] <= 1) && (alphas[1] >= 0) && (alphas[1] <= 1) ) return true;
+  }
+  return false
+}
+
+
+module.exports = {linesIntersect}
+
+
+/***/ }),
+/* 121 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const {EPS} = __webpack_require__(0)
+const OrthoNormalBasis = __webpack_require__(37)
+const {interpolateBetween2DPointsForY, insertSorted, fnNumberSort} = __webpack_require__(24)
+const Vertex = __webpack_require__(16)
+const Vector2D = __webpack_require__(7)
+const Line2D = __webpack_require__(72)
+const Polygon = __webpack_require__(15)
+
+// Retesselation function for a set of coplanar polygons. See the introduction at the top of
+// this file.
+const reTesselateCoplanarPolygons = function (sourcepolygons, destpolygons) {
+  let numpolygons = sourcepolygons.length
+  if (numpolygons > 0) {
+    let plane = sourcepolygons[0].plane
+    let shared = sourcepolygons[0].shared
+    let orthobasis = new OrthoNormalBasis(plane)
+    let polygonvertices2d = [] // array of array of Vector2D
+    let polygontopvertexindexes = [] // array of indexes of topmost vertex per polygon
+    let topy2polygonindexes = {}
+    let ycoordinatetopolygonindexes = {}
+
+    let xcoordinatebins = {}
+    let ycoordinatebins = {}
+
+        // convert all polygon vertices to 2D
+        // Make a list of all encountered y coordinates
+        // And build a map of all polygons that have a vertex at a certain y coordinate:
+    let ycoordinateBinningFactor = 1.0 / EPS * 10
+    for (let polygonindex = 0; polygonindex < numpolygons; polygonindex++) {
+      let poly3d = sourcepolygons[polygonindex]
+      let vertices2d = []
+      let numvertices = poly3d.vertices.length
+      let minindex = -1
+      if (numvertices > 0) {
+        let miny, maxy, maxindex
+        for (let i = 0; i < numvertices; i++) {
+          let pos2d = orthobasis.to2D(poly3d.vertices[i].pos)
+                    // perform binning of y coordinates: If we have multiple vertices very
+                    // close to each other, give them the same y coordinate:
+          let ycoordinatebin = Math.floor(pos2d.y * ycoordinateBinningFactor)
+          let newy
+          if (ycoordinatebin in ycoordinatebins) {
+            newy = ycoordinatebins[ycoordinatebin]
+          } else if (ycoordinatebin + 1 in ycoordinatebins) {
+            newy = ycoordinatebins[ycoordinatebin + 1]
+          } else if (ycoordinatebin - 1 in ycoordinatebins) {
+            newy = ycoordinatebins[ycoordinatebin - 1]
+          } else {
+            newy = pos2d.y
+            ycoordinatebins[ycoordinatebin] = pos2d.y
+          }
+          pos2d = Vector2D.Create(pos2d.x, newy)
+          vertices2d.push(pos2d)
+          let y = pos2d.y
+          if ((i === 0) || (y < miny)) {
+            miny = y
+            minindex = i
+          }
+          if ((i === 0) || (y > maxy)) {
+            maxy = y
+            maxindex = i
+          }
+          if (!(y in ycoordinatetopolygonindexes)) {
+            ycoordinatetopolygonindexes[y] = {}
+          }
+          ycoordinatetopolygonindexes[y][polygonindex] = true
+        }
+        if (miny >= maxy) {
+                    // degenerate polygon, all vertices have same y coordinate. Just ignore it from now:
+          vertices2d = []
+          numvertices = 0
+          minindex = -1
+        } else {
+          if (!(miny in topy2polygonindexes)) {
+            topy2polygonindexes[miny] = []
+          }
+          topy2polygonindexes[miny].push(polygonindex)
+        }
+      } // if(numvertices > 0)
+            // reverse the vertex order:
+      vertices2d.reverse()
+      minindex = numvertices - minindex - 1
+      polygonvertices2d.push(vertices2d)
+      polygontopvertexindexes.push(minindex)
+    }
+    let ycoordinates = []
+    for (let ycoordinate in ycoordinatetopolygonindexes) ycoordinates.push(ycoordinate)
+    ycoordinates.sort(fnNumberSort)
+
+        // Now we will iterate over all y coordinates, from lowest to highest y coordinate
+        // activepolygons: source polygons that are 'active', i.e. intersect with our y coordinate
+        //   Is sorted so the polygons are in left to right order
+        // Each element in activepolygons has these properties:
+        //        polygonindex: the index of the source polygon (i.e. an index into the sourcepolygons
+        //                      and polygonvertices2d arrays)
+        //        leftvertexindex: the index of the vertex at the left side of the polygon (lowest x)
+        //                         that is at or just above the current y coordinate
+        //        rightvertexindex: dito at right hand side of polygon
+        //        topleft, bottomleft: coordinates of the left side of the polygon crossing the current y coordinate
+        //        topright, bottomright: coordinates of the right hand side of the polygon crossing the current y coordinate
+    let activepolygons = []
+    let prevoutpolygonrow = []
+    for (let yindex = 0; yindex < ycoordinates.length; yindex++) {
+      let newoutpolygonrow = []
+      let ycoordinate_as_string = ycoordinates[yindex]
+      let ycoordinate = Number(ycoordinate_as_string)
+
+            // update activepolygons for this y coordinate:
+            // - Remove any polygons that end at this y coordinate
+            // - update leftvertexindex and rightvertexindex (which point to the current vertex index
+            //   at the the left and right side of the polygon
+            // Iterate over all polygons that have a corner at this y coordinate:
+      let polygonindexeswithcorner = ycoordinatetopolygonindexes[ycoordinate_as_string]
+      for (let activepolygonindex = 0; activepolygonindex < activepolygons.length; ++activepolygonindex) {
+        let activepolygon = activepolygons[activepolygonindex]
+        let polygonindex = activepolygon.polygonindex
+        if (polygonindexeswithcorner[polygonindex]) {
+                    // this active polygon has a corner at this y coordinate:
+          let vertices2d = polygonvertices2d[polygonindex]
+          let numvertices = vertices2d.length
+          let newleftvertexindex = activepolygon.leftvertexindex
+          let newrightvertexindex = activepolygon.rightvertexindex
+                    // See if we need to increase leftvertexindex or decrease rightvertexindex:
+          while (true) {
+            let nextleftvertexindex = newleftvertexindex + 1
+            if (nextleftvertexindex >= numvertices) nextleftvertexindex = 0
+            if (vertices2d[nextleftvertexindex].y !== ycoordinate) break
+            newleftvertexindex = nextleftvertexindex
+          }
+          let nextrightvertexindex = newrightvertexindex - 1
+          if (nextrightvertexindex < 0) nextrightvertexindex = numvertices - 1
+          if (vertices2d[nextrightvertexindex].y === ycoordinate) {
+            newrightvertexindex = nextrightvertexindex
+          }
+          if ((newleftvertexindex !== activepolygon.leftvertexindex) && (newleftvertexindex === newrightvertexindex)) {
+                        // We have increased leftvertexindex or decreased rightvertexindex, and now they point to the same vertex
+                        // This means that this is the bottom point of the polygon. We'll remove it:
+            activepolygons.splice(activepolygonindex, 1)
+            --activepolygonindex
+          } else {
+            activepolygon.leftvertexindex = newleftvertexindex
+            activepolygon.rightvertexindex = newrightvertexindex
+            activepolygon.topleft = vertices2d[newleftvertexindex]
+            activepolygon.topright = vertices2d[newrightvertexindex]
+            let nextleftvertexindex = newleftvertexindex + 1
+            if (nextleftvertexindex >= numvertices) nextleftvertexindex = 0
+            activepolygon.bottomleft = vertices2d[nextleftvertexindex]
+            let nextrightvertexindex = newrightvertexindex - 1
+            if (nextrightvertexindex < 0) nextrightvertexindex = numvertices - 1
+            activepolygon.bottomright = vertices2d[nextrightvertexindex]
+          }
+        } // if polygon has corner here
+      } // for activepolygonindex
+      let nextycoordinate
+      if (yindex >= ycoordinates.length - 1) {
+                // last row, all polygons must be finished here:
+        activepolygons = []
+        nextycoordinate = null
+      } else // yindex < ycoordinates.length-1
+            {
+        nextycoordinate = Number(ycoordinates[yindex + 1])
+        let middleycoordinate = 0.5 * (ycoordinate + nextycoordinate)
+                // update activepolygons by adding any polygons that start here:
+        let startingpolygonindexes = topy2polygonindexes[ycoordinate_as_string]
+        for (let polygonindex_key in startingpolygonindexes) {
+          let polygonindex = startingpolygonindexes[polygonindex_key]
+          let vertices2d = polygonvertices2d[polygonindex]
+          let numvertices = vertices2d.length
+          let topvertexindex = polygontopvertexindexes[polygonindex]
+                    // the top of the polygon may be a horizontal line. In that case topvertexindex can point to any point on this line.
+                    // Find the left and right topmost vertices which have the current y coordinate:
+          let topleftvertexindex = topvertexindex
+          while (true) {
+            let i = topleftvertexindex + 1
+            if (i >= numvertices) i = 0
+            if (vertices2d[i].y !== ycoordinate) break
+            if (i === topvertexindex) break // should not happen, but just to prevent endless loops
+            topleftvertexindex = i
+          }
+          let toprightvertexindex = topvertexindex
+          while (true) {
+            let i = toprightvertexindex - 1
+            if (i < 0) i = numvertices - 1
+            if (vertices2d[i].y !== ycoordinate) break
+            if (i === topleftvertexindex) break // should not happen, but just to prevent endless loops
+            toprightvertexindex = i
+          }
+          let nextleftvertexindex = topleftvertexindex + 1
+          if (nextleftvertexindex >= numvertices) nextleftvertexindex = 0
+          let nextrightvertexindex = toprightvertexindex - 1
+          if (nextrightvertexindex < 0) nextrightvertexindex = numvertices - 1
+          let newactivepolygon = {
+            polygonindex: polygonindex,
+            leftvertexindex: topleftvertexindex,
+            rightvertexindex: toprightvertexindex,
+            topleft: vertices2d[topleftvertexindex],
+            topright: vertices2d[toprightvertexindex],
+            bottomleft: vertices2d[nextleftvertexindex],
+            bottomright: vertices2d[nextrightvertexindex]
+          }
+          insertSorted(activepolygons, newactivepolygon, function (el1, el2) {
+            let x1 = interpolateBetween2DPointsForY(
+                            el1.topleft, el1.bottomleft, middleycoordinate)
+            let x2 = interpolateBetween2DPointsForY(
+                            el2.topleft, el2.bottomleft, middleycoordinate)
+            if (x1 > x2) return 1
+            if (x1 < x2) return -1
+            return 0
+          })
+        } // for(let polygonindex in startingpolygonindexes)
+      } //  yindex < ycoordinates.length-1
+            // if( (yindex === ycoordinates.length-1) || (nextycoordinate - ycoordinate > EPS) )
+      if (true) {
+                // Now activepolygons is up to date
+                // Build the output polygons for the next row in newoutpolygonrow:
+        for (let activepolygonKey in activepolygons) {
+          let activepolygon = activepolygons[activepolygonKey]
+          let polygonindex = activepolygon.polygonindex
+          let vertices2d = polygonvertices2d[polygonindex]
+          let numvertices = vertices2d.length
+
+          let x = interpolateBetween2DPointsForY(activepolygon.topleft, activepolygon.bottomleft, ycoordinate)
+          let topleft = Vector2D.Create(x, ycoordinate)
+          x = interpolateBetween2DPointsForY(activepolygon.topright, activepolygon.bottomright, ycoordinate)
+          let topright = Vector2D.Create(x, ycoordinate)
+          x = interpolateBetween2DPointsForY(activepolygon.topleft, activepolygon.bottomleft, nextycoordinate)
+          let bottomleft = Vector2D.Create(x, nextycoordinate)
+          x = interpolateBetween2DPointsForY(activepolygon.topright, activepolygon.bottomright, nextycoordinate)
+          let bottomright = Vector2D.Create(x, nextycoordinate)
+          let outpolygon = {
+            topleft: topleft,
+            topright: topright,
+            bottomleft: bottomleft,
+            bottomright: bottomright,
+            leftline: Line2D.fromPoints(topleft, bottomleft),
+            rightline: Line2D.fromPoints(bottomright, topright)
+          }
+          if (newoutpolygonrow.length > 0) {
+            let prevoutpolygon = newoutpolygonrow[newoutpolygonrow.length - 1]
+            let d1 = outpolygon.topleft.distanceTo(prevoutpolygon.topright)
+            let d2 = outpolygon.bottomleft.distanceTo(prevoutpolygon.bottomright)
+            if ((d1 < EPS) && (d2 < EPS)) {
+                            // we can join this polygon with the one to the left:
+              outpolygon.topleft = prevoutpolygon.topleft
+              outpolygon.leftline = prevoutpolygon.leftline
+              outpolygon.bottomleft = prevoutpolygon.bottomleft
+              newoutpolygonrow.splice(newoutpolygonrow.length - 1, 1)
+            }
+          }
+          newoutpolygonrow.push(outpolygon)
+        } // for(activepolygon in activepolygons)
+        if (yindex > 0) {
+                    // try to match the new polygons against the previous row:
+          let prevcontinuedindexes = {}
+          let matchedindexes = {}
+          for (let i = 0; i < newoutpolygonrow.length; i++) {
+            let thispolygon = newoutpolygonrow[i]
+            for (let ii = 0; ii < prevoutpolygonrow.length; ii++) {
+              if (!matchedindexes[ii]) // not already processed?
+                            {
+                                // We have a match if the sidelines are equal or if the top coordinates
+                                // are on the sidelines of the previous polygon
+                let prevpolygon = prevoutpolygonrow[ii]
+                if (prevpolygon.bottomleft.distanceTo(thispolygon.topleft) < EPS) {
+                  if (prevpolygon.bottomright.distanceTo(thispolygon.topright) < EPS) {
+                                        // Yes, the top of this polygon matches the bottom of the previous:
+                    matchedindexes[ii] = true
+                                        // Now check if the joined polygon would remain convex:
+                    let d1 = thispolygon.leftline.direction().x - prevpolygon.leftline.direction().x
+                    let d2 = thispolygon.rightline.direction().x - prevpolygon.rightline.direction().x
+                    let leftlinecontinues = Math.abs(d1) < EPS
+                    let rightlinecontinues = Math.abs(d2) < EPS
+                    let leftlineisconvex = leftlinecontinues || (d1 >= 0)
+                    let rightlineisconvex = rightlinecontinues || (d2 >= 0)
+                    if (leftlineisconvex && rightlineisconvex) {
+                                            // yes, both sides have convex corners:
+                                            // This polygon will continue the previous polygon
+                      thispolygon.outpolygon = prevpolygon.outpolygon
+                      thispolygon.leftlinecontinues = leftlinecontinues
+                      thispolygon.rightlinecontinues = rightlinecontinues
+                      prevcontinuedindexes[ii] = true
+                    }
+                    break
+                  }
+                }
+              } // if(!prevcontinuedindexes[ii])
+            } // for ii
+          } // for i
+          for (let ii = 0; ii < prevoutpolygonrow.length; ii++) {
+            if (!prevcontinuedindexes[ii]) {
+                            // polygon ends here
+                            // Finish the polygon with the last point(s):
+              let prevpolygon = prevoutpolygonrow[ii]
+              prevpolygon.outpolygon.rightpoints.push(prevpolygon.bottomright)
+              if (prevpolygon.bottomright.distanceTo(prevpolygon.bottomleft) > EPS) {
+                                // polygon ends with a horizontal line:
+                prevpolygon.outpolygon.leftpoints.push(prevpolygon.bottomleft)
+              }
+                            // reverse the left half so we get a counterclockwise circle:
+              prevpolygon.outpolygon.leftpoints.reverse()
+              let points2d = prevpolygon.outpolygon.rightpoints.concat(prevpolygon.outpolygon.leftpoints)
+              let vertices3d = []
+              points2d.map(function (point2d) {
+                let point3d = orthobasis.to3D(point2d)
+                let vertex3d = new Vertex(point3d)
+                vertices3d.push(vertex3d)
+              })
+              let polygon = new Polygon(vertices3d, shared, plane)
+              destpolygons.push(polygon)
+            }
+          }
+        } // if(yindex > 0)
+        for (let i = 0; i < newoutpolygonrow.length; i++) {
+          let thispolygon = newoutpolygonrow[i]
+          if (!thispolygon.outpolygon) {
+                        // polygon starts here:
+            thispolygon.outpolygon = {
+              leftpoints: [],
+              rightpoints: []
+            }
+            thispolygon.outpolygon.leftpoints.push(thispolygon.topleft)
+            if (thispolygon.topleft.distanceTo(thispolygon.topright) > EPS) {
+                            // we have a horizontal line at the top:
+              thispolygon.outpolygon.rightpoints.push(thispolygon.topright)
+            }
+          } else {
+                        // continuation of a previous row
+            if (!thispolygon.leftlinecontinues) {
+              thispolygon.outpolygon.leftpoints.push(thispolygon.topleft)
+            }
+            if (!thispolygon.rightlinecontinues) {
+              thispolygon.outpolygon.rightpoints.push(thispolygon.topright)
+            }
+          }
+        }
+        prevoutpolygonrow = newoutpolygonrow
+      }
+    } // for yindex
+  } // if(numpolygons > 0)
+}
+
+module.exports = {reTesselateCoplanarPolygons}
+
+
+/***/ }),
+/* 122 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Matrix4x4 = __webpack_require__(32)
+const Vector3D = __webpack_require__(3)
+const Plane = __webpack_require__(14)
+
+// Add several convenience methods to the classes that support a transform() method:
+const addTransformationMethodsToPrototype = function (prot) {
+  prot.mirrored = function (plane) {
+    return this.transform(Matrix4x4.mirroring(plane))
+  }
+
+  prot.mirroredX = function () {
+    let plane = new Plane(Vector3D.Create(1, 0, 0), 0)
+    return this.mirrored(plane)
+  }
+
+  prot.mirroredY = function () {
+    let plane = new Plane(Vector3D.Create(0, 1, 0), 0)
+    return this.mirrored(plane)
+  }
+
+  prot.mirroredZ = function () {
+    let plane = new Plane(Vector3D.Create(0, 0, 1), 0)
+    return this.mirrored(plane)
+  }
+
+  prot.translate = function (v) {
+    return this.transform(Matrix4x4.translation(v))
+  }
+
+  prot.scale = function (f) {
+    return this.transform(Matrix4x4.scaling(f))
+  }
+
+  prot.rotateX = function (deg) {
+    return this.transform(Matrix4x4.rotationX(deg))
+  }
+
+  prot.rotateY = function (deg) {
+    return this.transform(Matrix4x4.rotationY(deg))
+  }
+
+  prot.rotateZ = function (deg) {
+    return this.transform(Matrix4x4.rotationZ(deg))
+  }
+
+  prot.rotate = function (rotationCenter, rotationAxis, degrees) {
+    return this.transform(Matrix4x4.rotation(rotationCenter, rotationAxis, degrees))
+  }
+
+  prot.rotateEulerAngles = function (alpha, beta, gamma, position) {
+    position = position || [0, 0, 0]
+
+    let Rz1 = Matrix4x4.rotationZ(alpha)
+    let Rx = Matrix4x4.rotationX(beta)
+    let Rz2 = Matrix4x4.rotationZ(gamma)
+    let T = Matrix4x4.translation(new Vector3D(position))
+
+    return this.transform(Rz2.multiply(Rx).multiply(Rz1).multiply(T))
+  }
+}
+
+// TODO: consider generalization and adding to addTransformationMethodsToPrototype
+const addCenteringToPrototype = function (prot, axes) {
+  prot.center = function (cAxes) {
+    cAxes = Array.prototype.map.call(arguments, function (a) {
+      return a // .toLowerCase();
+    })
+        // no args: center on all axes
+    if (!cAxes.length) {
+      cAxes = axes.slice()
+    }
+    let b = this.getBounds()
+    return this.translate(axes.map(function (a) {
+      return cAxes.indexOf(a) > -1 ? -(b[0][a] + b[1][a]) / 2 : 0
+    }))
+  }
+}
+module.exports = {
+  addTransformationMethodsToPrototype,
+  addCenteringToPrototype
+}
+
+
+/***/ }),
+/* 123 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const CAG = __webpack_require__(23)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(55)
+const {defaultResolution2D} = __webpack_require__(0)
+const Vector2D = __webpack_require__(7)
+const Path2D = __webpack_require__(73)
+const {fromCompactBinary} = __webpack_require__(70)
+
+/** Construct a circle.
+ * @param {Object} [options] - options for construction
+ * @param {Vector2D} [options.center=[0,0]] - center of circle
+ * @param {Number} [options.radius=1] - radius of circle
+ * @param {Number} [options.resolution=defaultResolution2D] - number of sides per 360 rotation
+ * @returns {CAG} new CAG object
+ */
+const circle = function (options) {
+  options = options || {}
+  let center = parseOptionAs2DVector(options, 'center', [0, 0])
+  let radius = parseOptionAsFloat(options, 'radius', 1)
+  let resolution = parseOptionAsInt(options, 'resolution', defaultResolution2D)
+  let points = []
+  for (let i = 0; i < resolution; i++) {
+    let radians = 2 * Math.PI * i / resolution
+    let point = Vector2D.fromAngleRadians(radians).times(radius).plus(center)
+    points.push(point)
+  }
+  return CAG.fromPoints(points)
+}
+
+/** Construct an ellispe.
+ * @param {Object} [options] - options for construction
+ * @param {Vector2D} [options.center=[0,0]] - center of ellipse
+ * @param {Vector2D} [options.radius=[1,1]] - radius of ellipse, width and height
+ * @param {Number} [options.resolution=defaultResolution2D] - number of sides per 360 rotation
+ * @returns {CAG} new CAG object
+ */
+const ellipse = function (options) {
+  options = options || {}
+  let c = parseOptionAs2DVector(options, 'center', [0, 0])
+  let r = parseOptionAs2DVector(options, 'radius', [1, 1])
+  r = r.abs() // negative radii make no sense
+  let res = parseOptionAsInt(options, 'resolution', defaultResolution2D)
+
+  let e2 = new Path2D([[c.x, c.y + r.y]])
+  e2 = e2.appendArc([c.x, c.y - r.y], {
+    xradius: r.x,
+    yradius: r.y,
+    xaxisrotation: 0,
+    resolution: res,
+    clockwise: true,
+    large: false
+  })
+  e2 = e2.appendArc([c.x, c.y + r.y], {
+    xradius: r.x,
+    yradius: r.y,
+    xaxisrotation: 0,
+    resolution: res,
+    clockwise: true,
+    large: false
+  })
+  e2 = e2.close()
+  return e2.innerToCAG()
+}
+
+/** Construct a rectangle.
+ * @param {Object} [options] - options for construction
+ * @param {Vector2D} [options.center=[0,0]] - center of rectangle
+ * @param {Vector2D} [options.radius=[1,1]] - radius of rectangle, width and height
+ * @param {Vector2D} [options.corner1=[0,0]] - bottom left corner of rectangle (alternate)
+ * @param {Vector2D} [options.corner2=[0,0]] - upper right corner of rectangle (alternate)
+ * @returns {CAG} new CAG object
+ */
+const rectangle = function (options) {
+  options = options || {}
+  let c, r
+  if (('corner1' in options) || ('corner2' in options)) {
+    if (('center' in options) || ('radius' in options)) {
+      throw new Error('rectangle: should either give a radius and center parameter, or a corner1 and corner2 parameter')
+    }
+    let corner1 = parseOptionAs2DVector(options, 'corner1', [0, 0])
+    let corner2 = parseOptionAs2DVector(options, 'corner2', [1, 1])
+    c = corner1.plus(corner2).times(0.5)
+    r = corner2.minus(corner1).times(0.5)
+  } else {
+    c = parseOptionAs2DVector(options, 'center', [0, 0])
+    r = parseOptionAs2DVector(options, 'radius', [1, 1])
+  }
+  r = r.abs() // negative radii make no sense
+  let rswap = new Vector2D(r.x, -r.y)
+  let points = [
+    c.plus(r), c.plus(rswap), c.minus(r), c.minus(rswap)
+  ]
+  return CAG.fromPoints(points)
+}
+
+/** Construct a rounded rectangle.
+ * @param {Object} [options] - options for construction
+ * @param {Vector2D} [options.center=[0,0]] - center of rounded rectangle
+ * @param {Vector2D} [options.radius=[1,1]] - radius of rounded rectangle, width and height
+ * @param {Vector2D} [options.corner1=[0,0]] - bottom left corner of rounded rectangle (alternate)
+ * @param {Vector2D} [options.corner2=[0,0]] - upper right corner of rounded rectangle (alternate)
+ * @param {Number} [options.roundradius=0.2] - round radius of corners
+ * @param {Number} [options.resolution=defaultResolution2D] - number of sides per 360 rotation
+ * @returns {CAG} new CAG object
+ *
+ * @example
+ * let r = roundedRectangle({
+ *   center: [0, 0],
+ *   radius: [5, 10],
+ *   roundradius: 2,
+ *   resolution: 36,
+ * });
+ */
+const roundedRectangle = function (options) {
+  options = options || {}
+  let center, radius
+  if (('corner1' in options) || ('corner2' in options)) {
+    if (('center' in options) || ('radius' in options)) {
+      throw new Error('roundedRectangle: should either give a radius and center parameter, or a corner1 and corner2 parameter')
+    }
+    let corner1 = parseOptionAs2DVector(options, 'corner1', [0, 0])
+    let corner2 = parseOptionAs2DVector(options, 'corner2', [1, 1])
+    center = corner1.plus(corner2).times(0.5)
+    radius = corner2.minus(corner1).times(0.5)
+  } else {
+    center = parseOptionAs2DVector(options, 'center', [0, 0])
+    radius = parseOptionAs2DVector(options, 'radius', [1, 1])
+  }
+  radius = radius.abs() // negative radii make no sense
+  let roundradius = parseOptionAsFloat(options, 'roundradius', 0.2)
+  let resolution = parseOptionAsInt(options, 'resolution', defaultResolution2D)
+  let maxroundradius = Math.min(radius.x, radius.y)
+  maxroundradius -= 0.1
+  roundradius = Math.min(roundradius, maxroundradius)
+  roundradius = Math.max(0, roundradius)
+  radius = new Vector2D(radius.x - roundradius, radius.y - roundradius)
+  let rect = CAG.rectangle({
+    center: center,
+    radius: radius
+  })
+  if (roundradius > 0) {
+    rect = rect.expand(roundradius, resolution)
+  }
+  return rect
+}
+
+/** Reconstruct a CAG from the output of toCompactBinary().
+ * @param {CompactBinary} bin - see toCompactBinary()
+ * @returns {CAG} new CAG object
+ */
+CAG.fromCompactBinary = function (bin) {
+  if (bin['class'] !== 'CAG') throw new Error('Not a CAG')
+  let vertices = []
+  let vertexData = bin.vertexData
+  let numvertices = vertexData.length / 2
+  let arrayindex = 0
+  for (let vertexindex = 0; vertexindex < numvertices; vertexindex++) {
+    let x = vertexData[arrayindex++]
+    let y = vertexData[arrayindex++]
+    let pos = new Vector2D(x, y)
+    let vertex = new CAG.Vertex(pos)
+    vertices.push(vertex)
+  }
+
+  let sides = []
+  let numsides = bin.sideVertexIndices.length / 2
+  arrayindex = 0
+  for (let sideindex = 0; sideindex < numsides; sideindex++) {
+    let vertexindex0 = bin.sideVertexIndices[arrayindex++]
+    let vertexindex1 = bin.sideVertexIndices[arrayindex++]
+    let side = new CAG.Side(vertices[vertexindex0], vertices[vertexindex1])
+    sides.push(side)
+  }
+  let cag = CAG.fromSides(sides)
+  cag.isCanonicalized = true
+  return cag
+}
+
+module.exports = {
+  circle,
+  ellipse,
+  rectangle,
+  roundedRectangle,
+  fromCompactBinary
+}
+
+
+/***/ }),
+/* 124 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const {_CSGDEBUG, EPS} = __webpack_require__(0)
+const Vertex = __webpack_require__(16)
+const Polygon = __webpack_require__(15)
+
+// Returns object:
+// .type:
+//   0: coplanar-front
+//   1: coplanar-back
+//   2: front
+//   3: back
+//   4: spanning
+// In case the polygon is spanning, returns:
+// .front: a Polygon of the front part
+// .back: a Polygon of the back part
+function splitPolygonByPlane (plane, polygon) {
+  let result = {
+    type: null,
+    front: null,
+    back: null
+  }
+      // cache in local lets (speedup):
+  let planenormal = plane.normal
+  let vertices = polygon.vertices
+  let numvertices = vertices.length
+  if (polygon.plane.equals(plane)) {
+    result.type = 0
+  } else {
+    let thisw = plane.w
+    let hasfront = false
+    let hasback = false
+    let vertexIsBack = []
+    let MINEPS = -EPS
+    for (let i = 0; i < numvertices; i++) {
+      let t = planenormal.dot(vertices[i].pos) - thisw
+      let isback = (t < 0)
+      vertexIsBack.push(isback)
+      if (t > EPS) hasfront = true
+      if (t < MINEPS) hasback = true
+    }
+    if ((!hasfront) && (!hasback)) {
+              // all points coplanar
+      let t = planenormal.dot(polygon.plane.normal)
+      result.type = (t >= 0) ? 0 : 1
+    } else if (!hasback) {
+      result.type = 2
+    } else if (!hasfront) {
+      result.type = 3
+    } else {
+              // spanning
+      result.type = 4
+      let frontvertices = []
+      let backvertices = []
+      let isback = vertexIsBack[0]
+      for (let vertexindex = 0; vertexindex < numvertices; vertexindex++) {
+        let vertex = vertices[vertexindex]
+        let nextvertexindex = vertexindex + 1
+        if (nextvertexindex >= numvertices) nextvertexindex = 0
+        let nextisback = vertexIsBack[nextvertexindex]
+        if (isback === nextisback) {
+                      // line segment is on one side of the plane:
+          if (isback) {
+            backvertices.push(vertex)
+          } else {
+            frontvertices.push(vertex)
+          }
+        } else {
+                      // line segment intersects plane:
+          let point = vertex.pos
+          let nextpoint = vertices[nextvertexindex].pos
+          let intersectionpoint = plane.splitLineBetweenPoints(point, nextpoint)
+          let intersectionvertex = new Vertex(intersectionpoint)
+          if (isback) {
+            backvertices.push(vertex)
+            backvertices.push(intersectionvertex)
+            frontvertices.push(intersectionvertex)
+          } else {
+            frontvertices.push(vertex)
+            frontvertices.push(intersectionvertex)
+            backvertices.push(intersectionvertex)
+          }
+        }
+        isback = nextisback
+      } // for vertexindex
+              // remove duplicate vertices:
+      let EPS_SQUARED = EPS * EPS
+      if (backvertices.length >= 3) {
+        let prevvertex = backvertices[backvertices.length - 1]
+        for (let vertexindex = 0; vertexindex < backvertices.length; vertexindex++) {
+          let vertex = backvertices[vertexindex]
+          if (vertex.pos.distanceToSquared(prevvertex.pos) < EPS_SQUARED) {
+            backvertices.splice(vertexindex, 1)
+            vertexindex--
+          }
+          prevvertex = vertex
+        }
+      }
+      if (frontvertices.length >= 3) {
+        let prevvertex = frontvertices[frontvertices.length - 1]
+        for (let vertexindex = 0; vertexindex < frontvertices.length; vertexindex++) {
+          let vertex = frontvertices[vertexindex]
+          if (vertex.pos.distanceToSquared(prevvertex.pos) < EPS_SQUARED) {
+            frontvertices.splice(vertexindex, 1)
+            vertexindex--
+          }
+          prevvertex = vertex
+        }
+      }
+      if (frontvertices.length >= 3) {
+        result.front = new Polygon(frontvertices, polygon.shared, polygon.plane)
+      }
+      if (backvertices.length >= 3) {
+        result.back = new Polygon(backvertices, polygon.shared, polygon.plane)
+      }
+    }
+  }
+  return result
+}
+
+// # class PolygonTreeNode
+// This class manages hierarchical splits of polygons
+// At the top is a root node which doesn hold a polygon, only child PolygonTreeNodes
+// Below that are zero or more 'top' nodes; each holds a polygon. The polygons can be in different planes
+// splitByPlane() splits a node by a plane. If the plane intersects the polygon, two new child nodes
+// are created holding the splitted polygon.
+// getPolygons() retrieves the polygon from the tree. If for PolygonTreeNode the polygon is split but
+// the two split parts (child nodes) are still intact, then the unsplit polygon is returned.
+// This ensures that we can safely split a polygon into many fragments. If the fragments are untouched,
+//  getPolygons() will return the original unsplit polygon instead of the fragments.
+// remove() removes a polygon from the tree. Once a polygon is removed, the parent polygons are invalidated
+// since they are no longer intact.
+// constructor creates the root node:
+const PolygonTreeNode = function () {
+  this.parent = null
+  this.children = []
+  this.polygon = null
+  this.removed = false
+}
+
+PolygonTreeNode.prototype = {
+    // fill the tree with polygons. Should be called on the root node only; child nodes must
+    // always be a derivate (split) of the parent node.
+  addPolygons: function (polygons) {
+    if (!this.isRootNode())
+        // new polygons can only be added to root node; children can only be splitted polygons
+          {
+      throw new Error('Assertion failed')
+    }
+    let _this = this
+    polygons.map(function (polygon) {
+      _this.addChild(polygon)
+    })
+  },
+
+    // remove a node
+    // - the siblings become toplevel nodes
+    // - the parent is removed recursively
+  remove: function () {
+    if (!this.removed) {
+      this.removed = true
+
+      if (_CSGDEBUG) {
+        if (this.isRootNode()) throw new Error('Assertion failed') // can't remove root node
+        if (this.children.length) throw new Error('Assertion failed') // we shouldn't remove nodes with children
+      }
+
+            // remove ourselves from the parent's children list:
+      let parentschildren = this.parent.children
+      let i = parentschildren.indexOf(this)
+      if (i < 0) throw new Error('Assertion failed')
+      parentschildren.splice(i, 1)
+
+            // invalidate the parent's polygon, and of all parents above it:
+      this.parent.recursivelyInvalidatePolygon()
+    }
+  },
+
+  isRemoved: function () {
+    return this.removed
+  },
+
+  isRootNode: function () {
+    return !this.parent
+  },
+
+    // invert all polygons in the tree. Call on the root node
+  invert: function () {
+    if (!this.isRootNode()) throw new Error('Assertion failed') // can only call this on the root node
+    this.invertSub()
+  },
+
+  getPolygon: function () {
+    if (!this.polygon) throw new Error('Assertion failed') // doesn't have a polygon, which means that it has been broken down
+    return this.polygon
+  },
+
+  getPolygons: function (result) {
+    let children = [this]
+    let queue = [children]
+    let i, j, l, node
+    for (i = 0; i < queue.length; ++i) { // queue size can change in loop, don't cache length
+      children = queue[i]
+      for (j = 0, l = children.length; j < l; j++) { // ok to cache length
+        node = children[j]
+        if (node.polygon) {
+                    // the polygon hasn't been broken yet. We can ignore the children and return our polygon:
+          result.push(node.polygon)
+        } else {
+                    // our polygon has been split up and broken, so gather all subpolygons from the children
+          queue.push(node.children)
+        }
+      }
+    }
+  },
+
+    // split the node by a plane; add the resulting nodes to the frontnodes and backnodes array
+    // If the plane doesn't intersect the polygon, the 'this' object is added to one of the arrays
+    // If the plane does intersect the polygon, two new child nodes are created for the front and back fragments,
+    //  and added to both arrays.
+  splitByPlane: function (plane, coplanarfrontnodes, coplanarbacknodes, frontnodes, backnodes) {
+    if (this.children.length) {
+      let queue = [this.children]
+      let i
+      let j
+      let l
+      let node
+      let nodes
+      for (i = 0; i < queue.length; i++) { // queue.length can increase, do not cache
+        nodes = queue[i]
+        for (j = 0, l = nodes.length; j < l; j++) { // ok to cache length
+          node = nodes[j]
+          if (node.children.length) {
+            queue.push(node.children)
+          } else {
+                        // no children. Split the polygon:
+            node._splitByPlane(plane, coplanarfrontnodes, coplanarbacknodes, frontnodes, backnodes)
+          }
+        }
+      }
+    } else {
+      this._splitByPlane(plane, coplanarfrontnodes, coplanarbacknodes, frontnodes, backnodes)
+    }
+  },
+
+    // only to be called for nodes with no children
+  _splitByPlane: function (plane, coplanarfrontnodes, coplanarbacknodes, frontnodes, backnodes) {
+    let polygon = this.polygon
+    if (polygon) {
+      let bound = polygon.boundingSphere()
+      let sphereradius = bound[1] + EPS // FIXME Why add imprecision?
+      let planenormal = plane.normal
+      let spherecenter = bound[0]
+      let d = planenormal.dot(spherecenter) - plane.w
+      if (d > sphereradius) {
+        frontnodes.push(this)
+      } else if (d < -sphereradius) {
+        backnodes.push(this)
+      } else {
+        let splitresult = splitPolygonByPlane(plane, polygon)
+        switch (splitresult.type) {
+          case 0:
+                        // coplanar front:
+            coplanarfrontnodes.push(this)
+            break
+
+          case 1:
+                        // coplanar back:
+            coplanarbacknodes.push(this)
+            break
+
+          case 2:
+                        // front:
+            frontnodes.push(this)
+            break
+
+          case 3:
+                        // back:
+            backnodes.push(this)
+            break
+
+          case 4:
+                        // spanning:
+            if (splitresult.front) {
+              let frontnode = this.addChild(splitresult.front)
+              frontnodes.push(frontnode)
+            }
+            if (splitresult.back) {
+              let backnode = this.addChild(splitresult.back)
+              backnodes.push(backnode)
+            }
+            break
+        }
+      }
+    }
+  },
+
+    // PRIVATE methods from here:
+    // add child to a node
+    // this should be called whenever the polygon is split
+    // a child should be created for every fragment of the split polygon
+    // returns the newly created child
+  addChild: function (polygon) {
+    let newchild = new PolygonTreeNode()
+    newchild.parent = this
+    newchild.polygon = polygon
+    this.children.push(newchild)
+    return newchild
+  },
+
+  invertSub: function () {
+    let children = [this]
+    let queue = [children]
+    let i, j, l, node
+    for (i = 0; i < queue.length; i++) {
+      children = queue[i]
+      for (j = 0, l = children.length; j < l; j++) {
+        node = children[j]
+        if (node.polygon) {
+          node.polygon = node.polygon.flipped()
+        }
+        queue.push(node.children)
+      }
+    }
+  },
+
+  recursivelyInvalidatePolygon: function () {
+    let node = this
+    while (node.polygon) {
+      node.polygon = null
+      if (node.parent) {
+        node = node.parent
+      }
+    }
+  }
+}
+
+// # class Tree
+// This is the root of a BSP tree
+// We are using this separate class for the root of the tree, to hold the PolygonTreeNode root
+// The actual tree is kept in this.rootnode
+const Tree = function (polygons) {
+  this.polygonTree = new PolygonTreeNode()
+  this.rootnode = new Node(null)
+  if (polygons) this.addPolygons(polygons)
+}
+
+Tree.prototype = {
+  invert: function () {
+    this.polygonTree.invert()
+    this.rootnode.invert()
+  },
+
+    // Remove all polygons in this BSP tree that are inside the other BSP tree
+    // `tree`.
+  clipTo: function (tree, alsoRemovecoplanarFront) {
+    alsoRemovecoplanarFront = alsoRemovecoplanarFront ? true : false
+    this.rootnode.clipTo(tree, alsoRemovecoplanarFront)
+  },
+
+  allPolygons: function () {
+    let result = []
+    this.polygonTree.getPolygons(result)
+    return result
+  },
+
+  addPolygons: function (polygons) {
+    let _this = this
+    let polygontreenodes = polygons.map(function (p) {
+      return _this.polygonTree.addChild(p)
+    })
+    this.rootnode.addPolygonTreeNodes(polygontreenodes)
+  }
+}
+
+// # class Node
+// Holds a node in a BSP tree. A BSP tree is built from a collection of polygons
+// by picking a polygon to split along.
+// Polygons are not stored directly in the tree, but in PolygonTreeNodes, stored in
+// this.polygontreenodes. Those PolygonTreeNodes are children of the owning
+// Tree.polygonTree
+// This is not a leafy BSP tree since there is
+// no distinction between internal and leaf nodes.
+const Node = function (parent) {
+  this.plane = null
+  this.front = null
+  this.back = null
+  this.polygontreenodes = []
+  this.parent = parent
+}
+
+Node.prototype = {
+    // Convert solid space to empty space and empty space to solid space.
+  invert: function () {
+    let queue = [this]
+    let node
+    for (let i = 0; i < queue.length; i++) {
+      node = queue[i]
+      if (node.plane) node.plane = node.plane.flipped()
+      if (node.front) queue.push(node.front)
+      if (node.back) queue.push(node.back)
+      let temp = node.front
+      node.front = node.back
+      node.back = temp
+    }
+  },
+
+    // clip polygontreenodes to our plane
+    // calls remove() for all clipped PolygonTreeNodes
+  clipPolygons: function (polygontreenodes, alsoRemovecoplanarFront) {
+    let args = {'node': this, 'polygontreenodes': polygontreenodes}
+    let node
+    let stack = []
+
+    do {
+      node = args.node
+      polygontreenodes = args.polygontreenodes
+
+            // begin "function"
+      if (node.plane) {
+        let backnodes = []
+        let frontnodes = []
+        let coplanarfrontnodes = alsoRemovecoplanarFront ? backnodes : frontnodes
+        let plane = node.plane
+        let numpolygontreenodes = polygontreenodes.length
+        for (let i = 0; i < numpolygontreenodes; i++) {
+          let node1 = polygontreenodes[i]
+          if (!node1.isRemoved()) {
+            node1.splitByPlane(plane, coplanarfrontnodes, backnodes, frontnodes, backnodes)
+          }
+        }
+
+        if (node.front && (frontnodes.length > 0)) {
+          stack.push({'node': node.front, 'polygontreenodes': frontnodes})
+        }
+        let numbacknodes = backnodes.length
+        if (node.back && (numbacknodes > 0)) {
+          stack.push({'node': node.back, 'polygontreenodes': backnodes})
+        } else {
+                    // there's nothing behind this plane. Delete the nodes behind this plane:
+          for (let i = 0; i < numbacknodes; i++) {
+            backnodes[i].remove()
+          }
+        }
+      }
+      args = stack.pop()
+    } while (typeof (args) !== 'undefined')
+  },
+
+    // Remove all polygons in this BSP tree that are inside the other BSP tree
+    // `tree`.
+  clipTo: function (tree, alsoRemovecoplanarFront) {
+    let node = this
+    let stack = []
+    do {
+      if (node.polygontreenodes.length > 0) {
+        tree.rootnode.clipPolygons(node.polygontreenodes, alsoRemovecoplanarFront)
+      }
+      if (node.front) stack.push(node.front)
+      if (node.back) stack.push(node.back)
+      node = stack.pop()
+    } while (typeof (node) !== 'undefined')
+  },
+
+  addPolygonTreeNodes: function (polygontreenodes) {
+    let args = {'node': this, 'polygontreenodes': polygontreenodes}
+    let node
+    let stack = []
+    do {
+      node = args.node
+      polygontreenodes = args.polygontreenodes
+
+      if (polygontreenodes.length === 0) {
+        args = stack.pop()
+        continue
+      }
+      let _this = node
+      if (!node.plane) {
+        let bestplane = polygontreenodes[0].getPolygon().plane
+        node.plane = bestplane
+      }
+      let frontnodes = []
+      let backnodes = []
+
+      for (let i = 0, n = polygontreenodes.length; i < n; ++i) {
+        polygontreenodes[i].splitByPlane(_this.plane, _this.polygontreenodes, backnodes, frontnodes, backnodes)
+      }
+
+      if (frontnodes.length > 0) {
+        if (!node.front) node.front = new Node(node)
+        stack.push({'node': node.front, 'polygontreenodes': frontnodes})
+      }
+      if (backnodes.length > 0) {
+        if (!node.back) node.back = new Node(node)
+        stack.push({'node': node.back, 'polygontreenodes': backnodes})
+      }
+
+      args = stack.pop()
+    } while (typeof (args) !== 'undefined')
+  },
+
+  getParentPlaneNormals: function (normals, maxdepth) {
+    if (maxdepth > 0) {
+      if (this.parent) {
+        normals.push(this.parent.plane.normal)
+        this.parent.getParentPlaneNormals(normals, maxdepth - 1)
+      }
+    }
+  }
+}
+
+module.exports = Tree
+
+
+/***/ }),
+/* 125 */
 /***/ (function(module, exports) {
 
 const mimeType = 'application/dxf'
@@ -42370,7 +42329,7 @@ module.exports = {
 
 
 /***/ }),
-/* 127 */
+/* 126 */
 /***/ (function(module, exports) {
 
 
@@ -42469,7 +42428,7 @@ module.exports = {
 
 
 /***/ }),
-/* 128 */
+/* 127 */
 /***/ (function(module, exports) {
 
 // BinaryReader
@@ -42601,7 +42560,7 @@ module.exports = BinaryReader
 
 
 /***/ }),
-/* 129 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {/*
@@ -42720,6 +42679,63 @@ Blob.prototype = {
 module.exports = makeBlob
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(51).Buffer))
+
+/***/ }),
+/* 129 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const {makeBlob} = __webpack_require__(93)
+
+const amfSerializer = __webpack_require__(115)
+const dxfSerializer = __webpack_require__(125)
+const jsonSerializer = __webpack_require__(131)
+const stlSerializer = __webpack_require__(148)
+const svgSerializer = __webpack_require__(153)
+const x3dSerializer = __webpack_require__(164)
+
+const amfDeSerializer = __webpack_require__(114)
+const gcodeDeSerializer = __webpack_require__(126)
+const jsonDeSerializer = __webpack_require__(130)
+const objDeSerializer = __webpack_require__(142)
+const stlDeSerializer = __webpack_require__(144)
+const svgDeSerializer = __webpack_require__(149)
+
+module.exports = {
+  makeBlob,
+  amfSerializer,
+  dxfSerializer,
+  jsonSerializer,
+  stlSerializer,
+  svgSerializer,
+  x3dSerializer,
+
+  amfDeSerializer,
+  gcodeDeSerializer,
+  jsonDeSerializer,
+  objDeSerializer,
+  stlDeSerializer,
+  svgDeSerializer
+}
+/*export {makeBlob} from './utils/Blob'
+
+import * as CAGToDxf from './serializers/CAGToDxf'
+import * as CAGToJson from './serializers/CAGToJson'
+import * as CAGToSvg from './serializers/CAGToSvg'
+import * as CSGToAMF from './serializers/CSGToAMF'
+import * as CSGToJson from './serializers/CSGToJson'
+import * as CSGToStla from './serializers/CSGToStla'
+import * as CSGToStlb from './serializers/CSGToStlb'
+import * as CSGToX3D from './serializers/CSGToX3D'
+
+export {CAGToDxf, CAGToJson, CAGToSvg, CSGToAMF, CSGToJson, CSGToStla, CSGToStlb, CSGToX3D}
+
+export {parseAMF} from './deserializers/parseAMF'
+export {parseGCode} from './deserializers/parseGCode'
+export {parseJSON} from './deserializers/parseJSON'
+export {parseOBJ} from './deserializers/parseOBJ'
+export {parseSTL} from './deserializers/parseSTL'
+export {parseSVG} from './deserializers/parseSVG'*/
+
 
 /***/ }),
 /* 130 */
@@ -48602,29 +48618,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //
 //
 //
+//
+//
+//
+//
 
 exports.default = {
     props: ['canvasHandler', 'spheirahedraHandler'],
-    data: function data() {
-        return {
-            topRightCanvas: 'limitset-canvas',
-            topLeftCanvas: 'prism-canvas',
-            bottomLeftCanvas: 'parameter-canvas',
-            bottomRightCanvas: 'sphairahedra-canvas'
-        };
-    },
     components: {
         LimitsetCanvas: _limitsetCanvas2.default, PrismCanvas: _prismCanvas2.default, ParameterCanvas: _parameterCanvas2.default, SphairahedraCanvas: _sphaiahedraCanvas2.default
-    },
-    methods: {
-        changeLayout: function changeLayout(evnet) {
-            var tmp = this.topRightCanvas;
-            console.log(tmp);
-            this.topRightCanvas = this.topLeftCanvas;
-            this.topLeftCanvas = 'limitsetCanvas';
-            this.canvasHandler.reRenderCanvases();
-            console.log(this.canvasHandler.reRenderCanvases);
-        }
     }
 };
 
@@ -48638,6 +48640,21 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -48837,6 +48854,10 @@ exports.default = {
         },
         saveSphairahedronImage: function saveSphairahedronImage(event) {
             this.canvasHandler.spheirahedraCanvas.saveCanvas(this.productRenderWidth, this.productRenderHeight, 'sphairahedron.png');
+        },
+        resetCamera: function resetCamera(event) {
+            this.canvasHandler.limitsetCanvas.resetCamera();
+            this.canvasHandler.reRenderLimitsetCanvas();
         }
     }
 };
@@ -52040,7 +52061,7 @@ exports = module.exports = __webpack_require__(83)(undefined);
 
 
 // module
-exports.push([module.i, "#controlPanel{border-style:ridge;width:300px;flex-basis:300px;overflow-y:scroll;border-color:gray;display:flex}#control{width:100%;padding:5px}", ""]);
+exports.push([module.i, "#controlPanel{border-style:ridge;width:300px;flex-basis:300px;overflow-y:scroll;border-color:gray;display:flex}#control{width:100%;padding:5px}.uiGroup{margin:5px}.uiGroup,.uiInnerGroup{border-style:ridge;padding:5px}.uiInnerGroup{margin:2px}.uiGroupTitle{margin:5px}", ""]);
 
 // exports
 
@@ -53669,7 +53690,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{attrs:{"id":"controlPanel"}},[_c('div',{attrs:{"id":"control"}},[_vm._v("\n    Polyhedron:\n    "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.selectedSpheirahedron),expression:"selectedSpheirahedron"}],attrs:{"id":"sphairahedraTypeBox"},on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.selectedSpheirahedron=$event.target.multiple ? $$selectedVal : $$selectedVal[0]},_vm.changeSpheirahedron]}},_vm._l((Object.keys(_vm.spheirahedraHandler.baseTypes)),function(k){return _c('option',[_vm._v("\n        "+_vm._s(k)+"\n      ")])})),_c('br'),_vm._v("\n    Dihedral Angle Type:\n    "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.spheirahedraHandler.currentDihedralAngleIndex),expression:"spheirahedraHandler.currentDihedralAngleIndex"}],on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.spheirahedraHandler, "currentDihedralAngleIndex", $event.target.multiple ? $$selectedVal : $$selectedVal[0])},_vm.changeDihedralAngleType]}},_vm._l((_vm.spheirahedraHandler.baseTypes[_vm.selectedSpheirahedron]),function(item,index){return _c('option',[_vm._v("\n        "+_vm._s(index)+"\n      ")])})),_vm._v(" "),_c('br'),_vm._v("\n    Max Iterations"),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.maxIterations),expression:"canvasHandler.limitsetCanvas.maxIterations"}],attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.maxIterations)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "maxIterations", $event.target.value)},_vm.updateRenderParameter]}}),_c('br'),_vm._v("\n    Max Samples"),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.maxSamples),expression:"canvasHandler.limitsetCanvas.maxSamples",modifiers:{"number":true}}],attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.maxSamples)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "maxSamples", _vm._n($event.target.value))},"blur":function($event){_vm.$forceUpdate()}}}),_c('br'),_vm._v("\n    "+_vm._s(_vm.canvasHandler.limitsetCanvas.numSamples)+" / "+_vm._s(_vm.canvasHandler.limitsetCanvas.maxSamples)+"\n    "),_c('br'),_vm._v("\n    MarchingThreshold"),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.marchingThreshold),expression:"canvasHandler.limitsetCanvas.marchingThreshold"}],attrs:{"type":"number","step":"0.000001","min":"0.0000001"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.marchingThreshold)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "marchingThreshold", $event.target.value)},_vm.updateRenderParameter]}}),_c('br'),_vm._v("\n    (fast) 0.0001 ~ 000001 (slow) are best parameters."),_c('br'),_vm._v("\n    FudgeFactor "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.fudgeFactor),expression:"canvasHandler.limitsetCanvas.fudgeFactor"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.01","min":"0.001","max":"1.0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.fudgeFactor)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "fudgeFactor", $event.target.value)},_vm.updateRenderParameter]}}),_c('br'),_vm._v("\n    (slow) 0.1 ~ 1.0 (fast)  Large fudgeFactor may cause artifacts."),_c('br'),_vm._v("\n    AO Epsilon"),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.aoEps),expression:"canvasHandler.limitsetCanvas.aoEps"}],attrs:{"type":"number","min":"0","step":"0.0001"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.aoEps)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "aoEps", $event.target.value)},_vm.updateRenderParameter]}}),_c('br'),_vm._v("\n    AO Intensity"),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.aoIntensity),expression:"canvasHandler.limitsetCanvas.aoIntensity"}],attrs:{"type":"number","step":"0.0001","min":"0.0000001"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.aoIntensity)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "aoIntensity", $event.target.value)},_vm.updateRenderParameter]}}),_c('br'),_vm._v("\n    Inversion Sphere"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere),expression:"canvasHandler.spheirahedraHandler.constrainsInversionSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere)?_vm._i(_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere,null)>-1:(_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.spheirahedraHandler, "constrainsInversionSphere", $$c)}},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Constrains Inversion Sphere")]),_c('br'),_vm._v("\n    X "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center, "x", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){_vm.$forceUpdate()}}}),_c('br'),_vm._v("\n    Y "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center, "y", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){_vm.$forceUpdate()}}}),_c('br'),_vm._v("\n    Z "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center, "z", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){_vm.$forceUpdate()}}}),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode),expression:"canvasHandler.spheirahedraHandler.limitRenderingMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"0"},domProps:{"checked":_vm._q(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode,_vm._n("0"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.spheirahedraHandler, "limitRenderingMode", _vm._n("0"))},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Terrain limit set ")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode),expression:"canvasHandler.spheirahedraHandler.limitRenderingMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"1"},domProps:{"checked":_vm._q(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode,_vm._n("1"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.spheirahedraHandler, "limitRenderingMode", _vm._n("1"))},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Quasi-sphere from seed spheres")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode),expression:"canvasHandler.spheirahedraHandler.limitRenderingMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"2"},domProps:{"checked":_vm._q(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode,_vm._n("2"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.spheirahedraHandler, "limitRenderingMode", _vm._n("2"))},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Quasi-sphere from spheirahedron")]),_c('br'),_vm._v("\n    Camera Mode:"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.cameraMode),expression:"canvasHandler.limitsetCanvas.cameraMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"0"},domProps:{"checked":_vm._q(_vm.canvasHandler.limitsetCanvas.cameraMode,_vm._n("0"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.limitsetCanvas, "cameraMode", _vm._n("0"))},_vm.changeCameraMode]}}),_vm._v(" "),_c('label',[_vm._v("Camera on Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.cameraMode),expression:"canvasHandler.limitsetCanvas.cameraMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"1"},domProps:{"checked":_vm._q(_vm.canvasHandler.limitsetCanvas.cameraMode,_vm._n("1"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.limitsetCanvas, "cameraMode", _vm._n("1"))},_vm.changeCameraMode]}}),_vm._v(" "),_c('label',[_vm._v("Fly")]),_vm._v(" "),_c('br'),_vm._v("\n    Display Limit Set:"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere),expression:"canvasHandler.limitsetCanvas.displaySpheirahedraSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere)?_vm._i(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere,null)>-1:(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "displaySpheirahedraSphere", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Spheirahedra Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere),expression:"canvasHandler.limitsetCanvas.displayBoundingSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere)?_vm._i(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere,null)>-1:(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.displayBoundingSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayBoundingSphere", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Bounding Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet),expression:"canvasHandler.limitsetCanvas.displayPrismWithLimitSet"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet)?_vm._i(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet,null)>-1:(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayPrismWithLimitSet", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Prism")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.castShadow),expression:"canvasHandler.limitsetCanvas.castShadow"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.castShadow)?_vm._i(_vm.canvasHandler.limitsetCanvas.castShadow,null)>-1:(_vm.canvasHandler.limitsetCanvas.castShadow)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.castShadow,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.limitsetCanvas.castShadow=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.limitsetCanvas.castShadow=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "castShadow", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Cast Shadow")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.colorWeight),expression:"canvasHandler.limitsetCanvas.colorWeight"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.colorWeight)},on:{"change":_vm.updateRenderParameter,"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "colorWeight", $event.target.value)}}}),_vm._v(" "),_c('label',[_vm._v("Color Weight")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.productRenderWidth),expression:"productRenderWidth",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.productRenderWidth)},on:{"input":function($event){if($event.target.composing){ return; }_vm.productRenderWidth=_vm._n($event.target.value)},"blur":function($event){_vm.$forceUpdate()}}}),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.productRenderHeight),expression:"productRenderHeight",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.productRenderHeight)},on:{"input":function($event){if($event.target.composing){ return; }_vm.productRenderHeight=_vm._n($event.target.value)},"blur":function($event){_vm.$forceUpdate()}}}),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.productRenderMaxSamples),expression:"productRenderMaxSamples",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.productRenderMaxSamples)},on:{"input":function($event){if($event.target.composing){ return; }_vm.productRenderMaxSamples=_vm._n($event.target.value)},"blur":function($event){_vm.$forceUpdate()}}}),_vm._v(" "),_c('button',{on:{"click":_vm.saveLimitsetImage}},[_vm._v("Save Image")]),_vm._v(" "),_c('br'),_vm._v("\n\n    Display Spheirahedron:"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere),expression:"canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere)?_vm._i(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere,null)>-1:(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displaySpheirahedraSphere", $$c)}},_vm.renderSpheirahedraCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Spheirahedra Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere),expression:"canvasHandler.spheirahedraCanvas.displayConvexSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere)?_vm._i(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere,null)>-1:(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayConvexSphere", $$c)}},_vm.renderSpheirahedraCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Convex Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere),expression:"canvasHandler.spheirahedraCanvas.displayInversionSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere)?_vm._i(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere,null)>-1:(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayInversionSphere", $$c)}},_vm.renderSpheirahedraCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Inversion Sphere")]),_c('br'),_vm._v("\n    Display Spheirahedral Prism:"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere),expression:"canvasHandler.prismCanvas.displaySpheirahedraSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere)?_vm._i(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere,null)>-1:(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.prismCanvas, "displaySpheirahedraSphere", $$c)}},_vm.renderPrismCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Spheirahedra Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.prismCanvas.displayInversionSphere),expression:"canvasHandler.prismCanvas.displayInversionSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.prismCanvas.displayInversionSphere)?_vm._i(_vm.canvasHandler.prismCanvas.displayInversionSphere,null)>-1:(_vm.canvasHandler.prismCanvas.displayInversionSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.prismCanvas.displayInversionSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.prismCanvas.displayInversionSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.prismCanvas.displayInversionSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.prismCanvas, "displayInversionSphere", $$c)}},_vm.renderPrismCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Inversion Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism),expression:"canvasHandler.prismCanvas.displayRawSpheirahedralPrism"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism)?_vm._i(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism,null)>-1:(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism)},on:{"change":[function($event){var $$a=_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.prismCanvas, "displayRawSpheirahedralPrism", $$c)}},_vm.renderPrismCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Display Raw Prism")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedraPrismMesh}},[_vm._v("Export Sphairahedral Prism")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedronMesh}},[_vm._v("Export Sphairahedron")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedralPrismImage}},[_vm._v("Save Sphairahedral Prism")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedronImage}},[_vm._v("Save Sphairahedron")]),_c('br')])])}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{attrs:{"id":"controlPanel"}},[_c('div',{attrs:{"id":"control"}},[_c('div',{staticClass:"uiGroup"},[_vm._v("\n      Polyhedron:\n      "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.selectedSpheirahedron),expression:"selectedSpheirahedron"}],attrs:{"id":"sphairahedraTypeBox"},on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.selectedSpheirahedron=$event.target.multiple ? $$selectedVal : $$selectedVal[0]},_vm.changeSpheirahedron]}},_vm._l((Object.keys(_vm.spheirahedraHandler.baseTypes)),function(k){return _c('option',[_vm._v("\n          "+_vm._s(k)+"\n        ")])})),_c('br'),_vm._v("\n      Dihedral Angle Type:\n      "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.spheirahedraHandler.currentDihedralAngleIndex),expression:"spheirahedraHandler.currentDihedralAngleIndex"}],on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.spheirahedraHandler, "currentDihedralAngleIndex", $event.target.multiple ? $$selectedVal : $$selectedVal[0])},_vm.changeDihedralAngleType]}},_vm._l((_vm.spheirahedraHandler.baseTypes[_vm.selectedSpheirahedron]),function(item,index){return _c('option',[_vm._v("\n          "+_vm._s(index)+"\n        ")])}))]),_vm._v(" "),_c('div',{staticClass:"uiGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Limit Set  -  Samples: "+_vm._s(_vm.canvasHandler.limitsetCanvas.numSamples)+" of "+_vm._s(_vm.canvasHandler.limitsetCanvas.maxSamples))]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Mode")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode),expression:"canvasHandler.spheirahedraHandler.limitRenderingMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"0"},domProps:{"checked":_vm._q(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode,_vm._n("0"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.spheirahedraHandler, "limitRenderingMode", _vm._n("0"))},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Terrain Limit Set ")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode),expression:"canvasHandler.spheirahedraHandler.limitRenderingMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"1"},domProps:{"checked":_vm._q(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode,_vm._n("1"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.spheirahedraHandler, "limitRenderingMode", _vm._n("1"))},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Limit Set from seed spheres")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode),expression:"canvasHandler.spheirahedraHandler.limitRenderingMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"2"},domProps:{"checked":_vm._q(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode,_vm._n("2"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.spheirahedraHandler, "limitRenderingMode", _vm._n("2"))},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Limit Set from sphairahedron")])]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Rendering Parameters")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.maxIterations),expression:"canvasHandler.limitsetCanvas.maxIterations"}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.maxIterations)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "maxIterations", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("Max Iterations"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.maxSamples),expression:"canvasHandler.limitsetCanvas.maxSamples",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.maxSamples)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "maxSamples", _vm._n($event.target.value))},"blur":function($event){_vm.$forceUpdate()}}}),_vm._v("Max Samples"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.marchingThreshold),expression:"canvasHandler.limitsetCanvas.marchingThreshold"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.000001","min":"0.0000001"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.marchingThreshold)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "marchingThreshold", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("MarchingThreshold"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.fudgeFactor),expression:"canvasHandler.limitsetCanvas.fudgeFactor"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.01","min":"0.001","max":"1.0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.fudgeFactor)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "fudgeFactor", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("FudgeFactor"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.aoEps),expression:"canvasHandler.limitsetCanvas.aoEps"}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0","step":"0.0001"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.aoEps)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "aoEps", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("AO Epsilon"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.aoIntensity),expression:"canvasHandler.limitsetCanvas.aoIntensity"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.0001","min":"0.0000001"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.aoIntensity)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "aoIntensity", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("AO Intensity\n      ")]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Inversion Sphere")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere),expression:"canvasHandler.spheirahedraHandler.constrainsInversionSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere)?_vm._i(_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere,null)>-1:(_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.spheirahedraHandler.constrainsInversionSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.spheirahedraHandler, "constrainsInversionSphere", $$c)}},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Constrains Inversion Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center, "x", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){_vm.$forceUpdate()}}}),_vm._v("X"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center, "y", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){_vm.$forceUpdate()}}}),_vm._v("Y"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center, "z", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){_vm.$forceUpdate()}}}),_vm._v("Z"),_c('br')]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Camera Mode")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.cameraMode),expression:"canvasHandler.limitsetCanvas.cameraMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"0"},domProps:{"checked":_vm._q(_vm.canvasHandler.limitsetCanvas.cameraMode,_vm._n("0"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.limitsetCanvas, "cameraMode", _vm._n("0"))},_vm.changeCameraMode]}}),_vm._v(" "),_c('label',[_vm._v("Camera on Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.cameraMode),expression:"canvasHandler.limitsetCanvas.cameraMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"1"},domProps:{"checked":_vm._q(_vm.canvasHandler.limitsetCanvas.cameraMode,_vm._n("1"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.limitsetCanvas, "cameraMode", _vm._n("1"))},_vm.changeCameraMode]}}),_vm._v(" "),_c('label',[_vm._v("Fly")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.resetCamera}},[_vm._v("Reset Camera")]),_c('br')]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Display")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere),expression:"canvasHandler.limitsetCanvas.displaySpheirahedraSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere)?_vm._i(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere,null)>-1:(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "displaySpheirahedraSphere", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Spheirahedra Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere),expression:"canvasHandler.limitsetCanvas.displayBoundingSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere)?_vm._i(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere,null)>-1:(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.displayBoundingSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayBoundingSphere", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Bounding Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet),expression:"canvasHandler.limitsetCanvas.displayPrismWithLimitSet"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet)?_vm._i(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet,null)>-1:(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayPrismWithLimitSet", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Prism")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.castShadow),expression:"canvasHandler.limitsetCanvas.castShadow"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.castShadow)?_vm._i(_vm.canvasHandler.limitsetCanvas.castShadow,null)>-1:(_vm.canvasHandler.limitsetCanvas.castShadow)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.castShadow,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.limitsetCanvas.castShadow=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.limitsetCanvas.castShadow=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "castShadow", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Cast Shadow")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.colorWeight),expression:"canvasHandler.limitsetCanvas.colorWeight"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.colorWeight)},on:{"change":_vm.updateRenderParameter,"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "colorWeight", $event.target.value)}}}),_vm._v(" "),_c('label',[_vm._v("Color Weight")]),_c('br')])]),_vm._v(" "),_c('div',{staticClass:"uiGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Sphairahedron")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere),expression:"canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere)?_vm._i(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere,null)>-1:(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displaySpheirahedraSphere", $$c)}},_vm.renderSpheirahedraCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Spheirahedra Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere),expression:"canvasHandler.spheirahedraCanvas.displayConvexSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere)?_vm._i(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere,null)>-1:(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayConvexSphere", $$c)}},_vm.renderSpheirahedraCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Convex Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere),expression:"canvasHandler.spheirahedraCanvas.displayInversionSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere)?_vm._i(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere,null)>-1:(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayInversionSphere", $$c)}},_vm.renderSpheirahedraCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Inversion Sphere")])]),_vm._v(" "),_c('div',{staticClass:"uiGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Sphairahedral Prism")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere),expression:"canvasHandler.prismCanvas.displaySpheirahedraSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere)?_vm._i(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere,null)>-1:(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.prismCanvas, "displaySpheirahedraSphere", $$c)}},_vm.renderPrismCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Sphairahedra Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.prismCanvas.displayInversionSphere),expression:"canvasHandler.prismCanvas.displayInversionSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.prismCanvas.displayInversionSphere)?_vm._i(_vm.canvasHandler.prismCanvas.displayInversionSphere,null)>-1:(_vm.canvasHandler.prismCanvas.displayInversionSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.prismCanvas.displayInversionSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.prismCanvas.displayInversionSphere=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.prismCanvas.displayInversionSphere=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.prismCanvas, "displayInversionSphere", $$c)}},_vm.renderPrismCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Inversion Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism),expression:"canvasHandler.prismCanvas.displayRawSpheirahedralPrism"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism)?_vm._i(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism,null)>-1:(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism)},on:{"change":[function($event){var $$a=_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism=$$a.concat([$$v]))}else{$$i>-1&&(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{_vm.$set(_vm.canvasHandler.prismCanvas, "displayRawSpheirahedralPrism", $$c)}},_vm.renderPrismCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Display Raw Prism")])]),_vm._v(" "),_c('div',{staticClass:"uiGroup",attrs:{"id":"saveGroup"}},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Save")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.productRenderWidth),expression:"productRenderWidth",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.productRenderWidth)},on:{"input":function($event){if($event.target.composing){ return; }_vm.productRenderWidth=_vm._n($event.target.value)},"blur":function($event){_vm.$forceUpdate()}}}),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.productRenderHeight),expression:"productRenderHeight",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.productRenderHeight)},on:{"input":function($event){if($event.target.composing){ return; }_vm.productRenderHeight=_vm._n($event.target.value)},"blur":function($event){_vm.$forceUpdate()}}}),_c('br'),_vm._v("\n      Samples"),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.productRenderMaxSamples),expression:"productRenderMaxSamples",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.productRenderMaxSamples)},on:{"input":function($event){if($event.target.composing){ return; }_vm.productRenderMaxSamples=_vm._n($event.target.value)},"blur":function($event){_vm.$forceUpdate()}}}),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveLimitsetImage}},[_vm._v("Save Limit Set Image")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedralPrismImage}},[_vm._v("Save Sphairahedral Prism Image")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedronImage}},[_vm._v("Save Sphairahedron Image")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedraPrismMesh}},[_vm._v("Export Sphairahedral Prism Stl")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedronMesh}},[_vm._v("Export Sphairahedron Stl")]),_c('br')])])])}
 var staticRenderFns = []
 var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
@@ -53689,7 +53710,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{attrs:{"id":"rootPanel"}},[_c('div',{staticClass:"subPanel",attrs:{"id":"topPanel"}},[_c('div',{staticClass:"canvasParent"},[_c(_vm.canvasHandler.topLeftCanvas,{tag:"component"})],1),_vm._v(" "),_c('div',{staticClass:"canvasParent"},[_c(_vm.canvasHandler.topRightCanvas,{tag:"component"})],1)]),_vm._v(" "),_c('div',{staticClass:"subPanel",attrs:{"id":"bottomPanel"}},[_c('div',{staticClass:"subPanel"},[_c('div',{staticClass:"canvasParent"},[_c(_vm.canvasHandler.bottomLeftCanvas,{tag:"component"})],1),_vm._v(" "),_c('div',{staticClass:"canvasParent"},[_c(_vm.canvasHandler.bottomRightCanvas,{tag:"component"})],1)]),_vm._v(" "),_vm._m(0)])])}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{attrs:{"id":"rootPanel"}},[_c('div',{staticClass:"subPanel",attrs:{"id":"topPanel"}},[_c('div',{staticClass:"canvasParent"},[_c('keep-alive',[_c(_vm.canvasHandler.topLeftCanvas,{tag:"component"})],1)],1),_vm._v(" "),_c('div',{staticClass:"canvasParent"},[_c(_vm.canvasHandler.topRightCanvas,{tag:"component"})],1)]),_vm._v(" "),_c('div',{staticClass:"subPanel",attrs:{"id":"bottomPanel"}},[_c('div',{staticClass:"subPanel"},[_c('div',{staticClass:"canvasParent"},[_c('keep-alive',[_c(_vm.canvasHandler.bottomLeftCanvas,{tag:"component"})],1)],1),_vm._v(" "),_c('div',{staticClass:"canvasParent"},[_c(_vm.canvasHandler.bottomRightCanvas,{tag:"component"})],1)]),_vm._v(" "),_vm._m(0)])])}
 var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"subPanel"},[_c('div',{attrs:{"id":"infoPanel"}},[_vm._v("\n      Left Button + dragging : rotate camera / tweak parameter (parameter view)"),_c('br'),_vm._v("\n      Right Button + dragging : move camera"),_c('br'),_vm._v("\n      Wheel : zoom"),_c('br'),_vm._v(" "),_c('a',{attrs:{"href":"https://github.com/soma-arc/SpheirahedronExperiment"}},[_vm._v("Source code on GitHub")]),_c('br')])])}]
 var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
@@ -53725,7 +53746,7 @@ var content = __webpack_require__(191);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(89)("5845ce79", content, true);
+var update = __webpack_require__(88)("5845ce79", content, true);
 
 /***/ }),
 /* 225 */
@@ -53738,7 +53759,7 @@ var content = __webpack_require__(192);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(89)("74a31a92", content, true);
+var update = __webpack_require__(88)("74a31a92", content, true);
 
 /***/ }),
 /* 226 */
@@ -53751,7 +53772,7 @@ var content = __webpack_require__(193);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(89)("25f90cf6", content, true);
+var update = __webpack_require__(88)("25f90cf6", content, true);
 
 /***/ }),
 /* 227 */
