@@ -366,7 +366,7 @@ export default class Spheirahedra {
             if (Math.abs(s.r, sphere.r) < 0.00001 &&
                 Vec3.distance(s.center, sphere.center) < 0.00001) {
                 console.log('duplicate');
-                return;
+//                return;
             }
         }
         spheres.push(sphere);

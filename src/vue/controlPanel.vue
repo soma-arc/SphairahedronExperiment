@@ -57,15 +57,15 @@
                @input="reRenderAll">
       <br>
       <input type="radio" value="0"
-             v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
+             v-model.number="canvasHandler.spheirahedraHandler.limitRenderingMode"
              @change="updateLimitSetShader">
       <label>Terrain limit set </label><br>
       <input type="radio" value="1"
-             v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
+             v-model.number="canvasHandler.spheirahedraHandler.limitRenderingMode"
              @change="updateLimitSetShader">
       <label>Quasi-sphere from seed spheres</label><br>
       <input type="radio" value="2"
-             v-model="canvasHandler.spheirahedraHandler.limitRenderingMode"
+             v-model.number="canvasHandler.spheirahedraHandler.limitRenderingMode"
              @change="updateLimitSetShader">
       <label>Quasi-sphere from spheirahedron</label><br>
       Camera Mode:<br>

@@ -4,23 +4,25 @@
         <title>Spheirahedron</title>
         <meta charset="UTF-8" />
         <link rel="shortcut icon" href="./img/favicon.ico">
+        <style>
+         *,
+         *::before,
+         *::after {
+             box-sizing: border-box;
+         }
+         html {
+             font-size: 100%;
+             height: 100%;
+         }
+         body {
+             margin: 0;
+             height: 100%;
+             overflow: hidden;
+         }
+        </style>
         <script type="text/javascript" src="./bundle.js"></script>
     </head>
-    <body id="bodyElem">
-        <div class="content">
-            Left Button + dragging : rotate camera / tweak parameter (parameter view)<br>
-            Right Button + dragging : move camera<br>
-            Wheel : zoom<br>
-            <a href="https://github.com/soma-arc/SpheirahedronExperiment">Source code on GitHub</a><br>
-            <div id="vue-ui"></div>
-            <canvas id="parameterCanvas"
-                    width="256px" height="256px"></canvas>
-            <canvas id="limitsetCanvas"
-                    width="512px" height="512px"></canvas><br>
-            <canvas id="prismCanvas"
-                    width="256px" height="256px"></canvas>
-            <canvas id="spheirahedraCanvas"
-                    width="256px" height="256px"></canvas><br>
-        </div>
+    <body>
+        <div id="vue-ui"></div>
     </body>
 </html>

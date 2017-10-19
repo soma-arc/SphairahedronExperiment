@@ -22,7 +22,6 @@
         Left Button + dragging : rotate camera / tweak parameter (parameter view)<br>
         Right Button + dragging : move camera<br>
         Wheel : zoom<br>
-        <button @click="changeLayout">changeLayout</button>
         <a href="https://github.com/soma-arc/SpheirahedronExperiment">Source code on GitHub</a><br>
         </div>
       </div>

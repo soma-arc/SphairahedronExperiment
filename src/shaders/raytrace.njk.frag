@@ -219,7 +219,7 @@ float DistLimitsetTerrain(vec3 pos, out float invNum) {
         bool inFund = true;
 		{% for n in range(0, numPrismSpheres) %}
 		if(distance(pos, u_prismSpheres[{{ n }}].center) < u_prismSpheres[{{ n }}].r.x) {
-            invNum += float({{ (n + 1) *  n }}) * u_colorWeight + 1.;
+            invNum += (float({{ (n + 1) *  10 }}) + invNum) * u_colorWeight + 1.;
 			SphereInvert(pos, dr,
 						 u_prismSpheres[{{ n }}].center,
 						 u_prismSpheres[{{ n }}].r);
@@ -231,7 +231,7 @@ float DistLimitsetTerrain(vec3 pos, out float invNum) {
 		pos -= u_prismPlanes[{{ n }}].origin;
 		d = dot(pos, u_prismPlanes[{{ n }}].normal);
 		if(d > 0.) {
-            invNum += float({{ (n + 1) *  n }}) * u_colorWeight + 1.;
+            invNum += (float({{ (n + 1) *  10 }}) + invNum) * u_colorWeight + 1.;
 			pos -= 2. * d * u_prismPlanes[{{ n }}].normal;
 			pos += u_prismPlanes[{{ n }}].origin;
 			continue;
