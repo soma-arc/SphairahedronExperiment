@@ -94,7 +94,7 @@ float computeShadowFactor (const vec3 rayOrg, const vec3 rayDir,
 }
 
 const vec3 AMBIENT_FACTOR = vec3(0.3);
-const vec3 LIGHT_DIR = normalize(vec3(0, 1, 0));
+const vec3 LIGHT_DIR = normalize(vec3(1, 0.8, 0));
 vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
     IsectInfo isectInfo = NewIsectInfo();
     vec3 rayPos = rayOrg;

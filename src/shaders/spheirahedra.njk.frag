@@ -124,7 +124,7 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 break;
             }
         }
-        // alpha = 0.;
+        //        alpha = (depth == 0) ? 0. : alpha;
         break;
     }
 
