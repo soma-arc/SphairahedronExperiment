@@ -39,7 +39,9 @@ export default class Spheirahedra {
         this.prismSpheres = new Array(3);
         this.planes = [];
 
-//        this.update();
+        //        this.update();
+        this.constrainsInversionSphere = true;
+        this.inversionSphere = new Sphere(0, 0, 0, 1);
     }
 
     buildSpheirahedronMeshWithCSG() {
@@ -115,6 +117,9 @@ export default class Spheirahedra {
 
     update() {
         this.computeSpheres();
+        if (this.constrainsInversionSphere) {
+            this.computeInversionSphere();
+        }
         this.computeGenSpheres();
         this.computeVertexes();
         this.computeDividePlanes();
@@ -125,6 +130,8 @@ export default class Spheirahedra {
 
         this.updated();
     }
+
+    computeInversionSphere() {}
 
     computeSpheres() {}
 

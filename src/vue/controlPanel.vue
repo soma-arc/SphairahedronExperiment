@@ -61,9 +61,9 @@
         <div class="uiInnerGroup">
           <h4 class="uiGroupTitle">Inversion Sphere</h4>
           <input type="checkbox"
-                 v-model="canvasHandler.spheirahedraHandler.constrainsInversionSphere"
+                 v-model="canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere"
                  @change="updateLimitSetShader">
-          <label>Constrains Inversion Sphere</label><br>
+          <label>Constrains</label><br>
           <input v-model.number="canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x"
                    type="number" step="0.01"
                    @input="reRenderAll">X<br>
@@ -139,16 +139,16 @@
         <input type="checkbox"
                v-model="canvasHandler.prismCanvas.displayRawSpheirahedralPrism"
                @change="renderPrismCanvas">
-        <label>Display Raw Prism</label>
+        <label>Raw Prism</label>
       </div>
       <div id="saveGroup" class="uiGroup">
         <h4 class="uiGroupTitle">Save</h4>
         <input v-model.number="productRenderWidth"
-               style="width: 80px;" type="number" min="0">
+               style="width: 80px;" type="number" min="0"> :
         <input v-model.number="productRenderHeight"
-               style="width: 80px;" type="number" min="0"><br>
-        Samples<input v-model.number="productRenderMaxSamples"
-                      style="width: 80px;" type="number" min="0"><br>
+               style="width: 80px;" type="number" min="0">w:h<br>
+        <input v-model.number="productRenderMaxSamples"
+               style="width: 80px;" type="number" min="0">Samples<br>
         <button @click="saveLimitsetImage">Save Limit Set Image</button><br>
         <button @click="saveSphairahedralPrismImage">Save Sphairahedral Prism Image</button><br>
         <button @click="saveSphairahedronImage">Save Sphairahedron Image</button><br>

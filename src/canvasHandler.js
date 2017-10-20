@@ -97,7 +97,7 @@ export default class CanvasHandler {
         if (this.limitsetSamplingTimer !== undefined) window.clearTimeout(this.limitsetSamplingTimer);
         this.limitsetCanvas.isKeepingSampling = false;
         this.limitsetCanvas.numSamples = 0;
-        this.limitsetCanvas.render();
+        this.limitsetCanvas.callRender();
         this.prismCanvas.render();
         this.parameterCanvas.render();
         this.spheirahedraCanvas.render();
