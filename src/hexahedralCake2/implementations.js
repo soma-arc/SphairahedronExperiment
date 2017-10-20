@@ -34,8 +34,13 @@ class CakeA extends Cake {
                                    new Vec3((cx + dx) * 0.5, 6, (cy + dy) * 0.5),
                                    new Vec3(dx, -3, dy),
                                    this.planes[2].normal);
-        this.inversionSphere = new Sphere(s5.center.x, s5.center.y + 1.2, s5.center.z,
-                                          0.5);
+    }
+
+    computeInversionSphere() {
+        this.inversionSphere = new Sphere(this.prismSpheres[0].center.x,
+                                          this.prismSpheres[0].center.y + 1.2,
+                                          this.prismSpheres[0].center.z,
+                                          0.5)
     }
 }
 
@@ -61,7 +66,12 @@ class CakeB extends Cake {
                                    new Vec3((cx + dx) * 0.5, 6, (cy + dy) * 0.5),
                                    new Vec3(dx, -2, dy),
                                    this.planes[2].normal);
-        this.inversionSphere = new Sphere(s5.center.x, s5.center.y + 1.5, s5.center.z,
+    }
+
+    computeInversionSphere() {
+        this.inversionSphere = new Sphere(this.prismSpheres[0].center.x,
+                                          this.prismSpheres[0].center.y + 1.5,
+                                          this.prismSpheres[0].center.z,
                                           0.8);
     }
 }
@@ -88,7 +98,12 @@ class CakeC extends Cake {
                                    new Vec3((cx + dx) * 0.5, 6, (cy + dy) * 0.5),
                                    new Vec3(dx, -3, dy),
                                    this.planes[2].normal);
-        this.inversionSphere = new Sphere(s5.center.x, s5.center.y + 1.2, s5.center.z,
+    }
+
+    computeInversionSphere() {
+        this.inversionSphere = new Sphere(this.prismSpheres[0].center.x,
+                                          this.prismSpheres[0].center.y + 1.2,
+                                          this.prismSpheres[0].center.z,
                                           0.5);
     }
 }
