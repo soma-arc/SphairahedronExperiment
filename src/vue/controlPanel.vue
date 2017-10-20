@@ -72,7 +72,10 @@
                    @input="reRenderAll">Y<br>
           <input v-model.number="canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z"
                    type="number" step="0.01"
-                   @input="reRenderAll">Z<br>
+                 @input="reRenderAll">Z<br>
+          <input v-model.number="canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.r"
+                 type="number" step="0.01"
+                 @input="reRenderAll">R<br>
         </div>
         <div class="uiInnerGroup">
           <h4 class="uiGroupTitle">Camera Mode</h4>
@@ -191,6 +194,7 @@
                 this.canvasHandler.prismCanvas.render();
             },
             reRenderAll: function(event) {
+                this.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.update();
                 this.canvasHandler.spheirahedraHandler.currentSpheirahedra.update();
                 this.canvasHandler.reRenderCanvases();
             },
