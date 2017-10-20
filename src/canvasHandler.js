@@ -122,12 +122,14 @@ export default class CanvasHandler {
         this.spheirahedraHandler.changeSpheirahedron(typeName);
 
         this.spheirahedraCanvas.setPrograms(
-            this.spheirahedraHandler.getSpheirahedraProgram(this.spheirahedraCanvas.gl));
+            this.spheirahedraHandler.getSpheirahedraProgram(this.spheirahedraCanvas.gl,
+                                                            this.topLeftCanvas));
         this.limitsetCanvas.setPrograms(
             this.spheirahedraHandler.getLimitsetProgram(this.limitsetCanvas.gl)
         );
         this.prismCanvas.setPrograms(
-            this.spheirahedraHandler.getPrismProgram(this.prismCanvas.gl)
+            this.spheirahedraHandler.getPrismProgram(this.prismCanvas.gl,
+                                                     this.bottomRightCanvas)
         );
         this.parameterCanvas.setPrograms(
             this.spheirahedraHandler.getParameterProgram(this.parameterCanvas.gl)
