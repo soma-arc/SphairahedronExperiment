@@ -26,7 +26,12 @@ export default class HexahedralCake3 extends Spheirahedra {
 
     computeDividePlanes() {
         this.dividePlanes = [];
-        this.dividePlanes.push(this.computePlane(0, 1, 2));
-        this.dividePlanes.push(this.computePlane(3, 4, 5));
+        if(this.prismSpheres[0].center.y > this.prismSpheres[1].center.y) {
+            this.dividePlanes.push(this.computePlane(0, 1, 2));
+            this.dividePlanes.push(this.computePlane(3, 4, 5));
+        } else {
+            this.dividePlanes.push(this.computePlane(0, 4, 5));
+            this.dividePlanes.push(this.computePlane(0, 4, 5));
+        }
     }
 }
