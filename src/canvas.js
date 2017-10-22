@@ -24,6 +24,27 @@ export default class Canvas {
         this.lowResRatio = 0.5;
     }
 
+    addEventListeners() {
+        this.canvas.addEventListener('mousedown',
+                                     this.boundMouseDownListener);
+        this.canvas.addEventListener('mouseup',
+                                     this.boundMouseUpListener);
+        this.canvas.addEventListener('wheel',
+                                     this.boundMouseWheelListener);
+        this.canvas.addEventListener('mousemove',
+                                     this.boundMouseMoveListener);
+        this.canvas.addEventListener('mouseout',
+                                     this.boundMouseOutListener);
+        this.canvas.addEventListener('dblclick',
+                                     this.boundDblClickLisntener);
+        this.canvas.addEventListener('keydown',
+                                     this.boundKeydown);
+        this.canvas.addEventListener('keyup',
+                                     this.boundKeyup);
+        this.canvas.addEventListener('contextmenu',
+                                     event => event.preventDefault());
+    }
+
     resizeCanvas() {
         const parent = this.canvas.parentElement;
         this.canvas.width = parent.clientWidth * this.pixelRatio;
