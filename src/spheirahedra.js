@@ -44,6 +44,24 @@ export default class Spheirahedra {
         this.inversionSphere = new Sphere(0, 0, 0, 1);
     }
 
+    toJson() {
+        const prismPlanes = this.planes.map((p) => { return p.toJson(); });
+        const prismSpheres = this.prismSpheres.map((s) => { return s.toJson(); });
+        const genSpheres = this.gSpheres.map((s) => { return s.toJson(); });
+        const divPlanes = this.dividePlanes.map((p) => { return p.toJson(); })
+        const data = {
+            'zb': this.zb,
+            'zc': this.zc,
+            'inversionSphere': this.inversionSphere.toJson(),
+            'prismPlanes': prismPlanes,
+            'prismSpheres': prismSpheres,
+            'genSpheres': genSpheres,
+            'dividePlanes': divPlanes
+        };
+
+        return data;
+    }
+
     buildSpheirahedronMeshWithCSG() {
         let sphairahedra;
         const k = 5;

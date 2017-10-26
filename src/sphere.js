@@ -162,4 +162,11 @@ export default class Sphere {
                                  this.invertOnPoint(plane.p3),
                                  this.center);
     }
+
+    toJson() {
+        return {
+            'center': [this.center.x, this.center.y, this.center.z],
+            'r': this.r
+        };
+    }
 }

@@ -157,80 +157,90 @@
         <button @click="saveSphairahedronImage">Save Sphairahedron Image</button><br>
         <button @click="saveSphairahedraPrismMesh">Export Sphairahedral Prism Stl</button><br>
         <button @click="saveSphairahedronMesh">Export Sphairahedron Stl</button><br>
+        <button @click="saveSceneParamJson">Export Parameter as Json</button><br>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-  export default {
-        props: ['canvasHandler', 'spheirahedraHandler'],
-        data: function() {
-            return {
-                selectedSpheirahedron: 'cube',
-                currentRoute: window.location.pathname,
-                productRenderWidth: 1024,
-                productRenderHeight: 1024,
-                productRenderMaxSamples: 1
-            }
+export default {
+    props: ['canvasHandler', 'spheirahedraHandler'],
+    data: function() {
+        return {
+            selectedSpheirahedron: 'cube',
+            currentRoute: window.location.pathname,
+            productRenderWidth: 1024,
+            productRenderHeight: 1024,
+            productRenderMaxSamples: 1
+        }
+    },
+    methods: {
+        changeSpheirahedron: function(event) {
+            this.canvasHandler.changeSpheirahedron(this.selectedSpheirahedron);
         },
-        methods: {
-            changeSpheirahedron: function(event) {
-                this.canvasHandler.changeSpheirahedron(this.selectedSpheirahedron);
-            },
-            changeDihedralAngleType: function(event) {
-                this.canvasHandler.changeDihedralAngleType(this.spheirahedraHandler.currentDihedralAngleIndex);
-            },
-            updateRenderParameter: function(event) {
-                this.canvasHandler.reRenderLimitsetCanvas();
-            },
-            updateLimitSetShader: function(event) {
-                this.canvasHandler.changeRenderMode();
-            },
-            renderSpheirahedraCanvas: function(even) {
-                this.canvasHandler.spheirahedraCanvas.render();
-            },
-            renderPrismCanvas: function(event) {
-                this.canvasHandler.prismCanvas.render();
-            },
-            reRenderAll: function(event) {
-                this.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.update();
-                this.canvasHandler.spheirahedraHandler.currentSpheirahedra.update();
-                this.canvasHandler.reRenderCanvases();
-            },
-            saveSphairahedraPrismMesh: function(event) {
-                this.spheirahedraHandler.saveSphairahedraPrismMesh();
-            },
-            saveSphairahedronMesh: function(event) {
-                this.spheirahedraHandler.saveSphairahedronMesh();
-            },
-            changeCameraMode: function(event) {
-                this.canvasHandler.limitsetCanvas.changeCamera();
-                this.canvasHandler.reRenderLimitsetCanvas();
-            },
-            saveLimitsetImage: function(event) {
-                this.canvasHandler.limitsetCanvas.startProductRendering(this.productRenderWidth,
-                                                                        this.productRenderHeight,
-                                                                        this.productRenderMaxSamples,
-                                                                        'limitset.png');
-            },
-            saveSphairahedralPrismImage: function(event) {
-                this.canvasHandler.prismCanvas.saveCanvas(this.productRenderWidth,
-                                                          this.productRenderHeight,
-                                                          'sphairahedralPrism.png');
-            },
-            saveSphairahedronImage: function(event) {
-                this.canvasHandler.spheirahedraCanvas.saveCanvas(this.productRenderWidth,
-                                                                 this.productRenderHeight,
-                                                                 'sphairahedron.png');
-            },
-            resetCamera: function(event) {
-                this.canvasHandler.limitsetCanvas.resetCamera();
-                this.canvasHandler.reRenderLimitsetCanvas();
-            }
+        changeDihedralAngleType: function(event) {
+            this.canvasHandler.changeDihedralAngleType(this.spheirahedraHandler.currentDihedralAngleIndex);
+        },
+        updateRenderParameter: function(event) {
+            this.canvasHandler.reRenderLimitsetCanvas();
+        },
+        updateLimitSetShader: function(event) {
+            this.canvasHandler.changeRenderMode();
+        },
+        renderSpheirahedraCanvas: function(even) {
+            this.canvasHandler.spheirahedraCanvas.render();
+        },
+        renderPrismCanvas: function(event) {
+            this.canvasHandler.prismCanvas.render();
+        },
+        reRenderAll: function(event) {
+            this.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.update();
+            this.canvasHandler.spheirahedraHandler.currentSpheirahedra.update();
+            this.canvasHandler.reRenderCanvases();
+        },
+        saveSphairahedraPrismMesh: function(event) {
+            this.spheirahedraHandler.saveSphairahedraPrismMesh();
+        },
+        saveSphairahedronMesh: function(event) {
+            this.spheirahedraHandler.saveSphairahedronMesh();
+        },
+        changeCameraMode: function(event) {
+            this.canvasHandler.limitsetCanvas.changeCamera();
+            this.canvasHandler.reRenderLimitsetCanvas();
+        },
+        saveLimitsetImage: function(event) {
+            this.canvasHandler.limitsetCanvas.startProductRendering(this.productRenderWidth,
+                                                                    this.productRenderHeight,
+                                                                    this.productRenderMaxSamples,
+                                                                    'limitset.png');
+        },
+        saveSphairahedralPrismImage: function(event) {
+            this.canvasHandler.prismCanvas.saveCanvas(this.productRenderWidth,
+                                                      this.productRenderHeight,
+                                                      'sphairahedralPrism.png');
+        },
+        saveSphairahedronImage: function(event) {
+            this.canvasHandler.spheirahedraCanvas.saveCanvas(this.productRenderWidth,
+                                                             this.productRenderHeight,
+                                                             'sphairahedron.png');
+        },
+        resetCamera: function(event) {
+            this.canvasHandler.limitsetCanvas.resetCamera();
+            this.canvasHandler.reRenderLimitsetCanvas();
+        },
+        saveSceneParamJson: function(event) {
+            const data = this.spheirahedraHandler.currentSpheirahedra.toJson();
+            const blob = new Blob([JSON.stringify(data, null, '    ')],
+                                  { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'scene.json';
+            a.click();
         }
     }
-</script>
+}
+  </script>
 
 <style>
 #controlPanel {
