@@ -19,6 +19,16 @@
             {{ index }}
           </option>
         </select>
+        <input type="number"
+               v-model.number="canvasHandler.spheirahedraHandler.currentSpheirahedra.zb"
+               @input="reRenderAll" style="width: 80px;"
+               step="0.01">
+        <label>Zb </label><br>
+        <input type="number"
+               v-model.number="canvasHandler.spheirahedraHandler.currentSpheirahedra.zc"
+               @input="reRenderAll" style="width: 80px;"
+               step="0.01">
+        <label>Zc</label><br>
       </div>
       <div class="uiGroup">
         <h4 class="uiGroupTitle">Limit Set&nbsp;&nbsp;-&nbsp;&nbsp;Samples: {{ canvasHandler.limitsetCanvas.numSamples }} of {{ canvasHandler.limitsetCanvas.maxSamples }}</h4>
@@ -240,7 +250,7 @@ export default {
         }
     }
 }
-  </script>
+</script>
 
 <style>
 #controlPanel {

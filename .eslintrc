@@ -8,7 +8,9 @@
     },
     "rules": {
         "indent": ["error", 4, { "ArrayExpression": "first",
-                                 "ObjectExpression": "first"}],
+                                 "ObjectExpression": "first",
+                                 "FunctionExpression": {"parameters": "first"},
+                                 "CallExpression": {"arguments": "first"}}],
         "semi": ["off"],
         "comma-dangle": ["off"],
         "space-before-function-paren": ["off"],
