@@ -113,14 +113,106 @@ export default class Spheirahedra {
                 [p.normal.x, p.normal.y, p.normal.z],
                 [p.p1.x, p.p1.y, p.p1.z]));
         }
+
+        let minZ = 10000;
         for (const s of this.prismSpheres) {
             sphairahedralPrism = sphairahedralPrism.subtract(CSG.sphere({
                 center: [s.center.x, s.center.y, s.center.z],
                 radius: s.r,
                 resolution: 64
             }));
+            minZ = Math.min(minZ, s.center.y);
         }
+
+        sphairahedralPrism = sphairahedralPrism.cutByPlane(CSG.Plane.fromNormalAndPoint(
+            [0, -1, 0],
+            [0, minZ - 1, 0]));
         return sphairahedralPrism;
+    }
+
+    invertSphairahedralPrismMesh() {
+        const invertedSphairahedron = new Spheirahedra(0, 0);
+
+        const invPlane = this.planes[2];
+        const newPlanes = [];
+        for (const p of this.planes) {
+            newPlanes.push(invPlane.invertOnPlane(p));
+        }
+        invertedSphairahedron.planes = newPlanes;
+        console.log(this.planes);
+        console.log(newPlanes);
+
+        const newDividePlanes = []
+        for (const p of this.dividePlanes) {
+            newDividePlanes.push(invPlane.invertOnPlane(p));
+        }
+        invertedSphairahedron.dividePlanes = newDividePlanes;
+
+        const newSpheres = [];
+        for (const s of this.prismSpheres) {
+            newSpheres.push(invPlane.invertOnSphere(s));
+        }
+        invertedSphairahedron.prismSpheres = newSpheres;
+
+        return invertedSphairahedron.buildPrismMeshWithCSG();
+    }
+
+    invertedSphairahedronMesh() {
+        const index = 1;
+        const inversionSphere = this.prismSpheres[index];
+
+        const spheres = [];
+
+        for (let i = 0; i < this.prismSpheres.length; i++) {
+            if (index === i) continue;
+            spheres.push(inversionSphere.invertOnSphere(this.prismSpheres[i]));
+        }
+
+        for (const p of this.planes) {
+            spheres.push(inversionSphere.invertOnPlane(p));
+        }
+
+        const divideSpheres = [];
+        for (const p of this.dividePlanes) {
+            divideSpheres.push(inversionSphere.invertOnPlane(p));
+        }
+
+        let sphairahedron = CSG.sphere({
+            center: [inversionSphere.center.x,
+                     inversionSphere.center.y,
+                     inversionSphere.center.z],
+            radius: inversionSphere.r,
+            resolution: 64
+        });
+
+        console.log('subtract');
+        let progress = 1;
+        for (const s of spheres) {
+            console.log(` ${progress} / ${spheres.length}`);
+            progress++;
+            sphairahedron = sphairahedron.subtract(CSG.sphere({
+                center: [s.center.x, s.center.y, s.center.z],
+                radius: s.r,
+                resolution: 64
+            }));
+        }
+
+        for (const p of this.dividePlanes) {
+            sphairahedron = sphairahedron.cutByPlane(CSG.Plane.fromNormalAndPoint(
+                [p.normal.x, p.normal.y, p.normal.z],
+                [p.p1.x, p.p1.y, p.p1.z]));
+        }
+
+        // for (const s of divideSpheres) {
+        //     console.log(` ${progress} / ${spheres.length}`);
+        //     progress++;
+        //     sphairahedron = sphairahedron.intersect(CSG.sphere({
+        //         center: [s.center.x, s.center.y, s.center.z],
+        //         radius: s.r,
+        //         resolution: 64
+        //     }));
+        // }
+        return sphairahedron;
     }
 
     addUpdateListener(listener) {
