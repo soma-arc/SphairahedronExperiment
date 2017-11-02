@@ -45,13 +45,13 @@ void main() {
 		float xy = x * y;
 		float xx = x * x;
 		float yy = y * y;
-		
+
 		if (distance(position, u_zbzc) < u_ui.x) {
             // point (zb, zc)
             sum += vec3(1, 0, 0);
 			continue;
-        } 
-		
+        }
+
 		{% for n in range(0, conditions|length) %}
 		{% if n == 0 %}
 		if (abs({{ conditions[n] }}) < u_ui.y) {
@@ -64,6 +64,20 @@ void main() {
 		{% endif %}
 		{% endfor %}
 
+        {% if conditions|length > 0 %}
+		if ( (
+            {% for n in range(0, conditions|length) %}
+            {% if n == 0 %}
+            {{ conditions[n] }} > u_ui.y
+            {% else %}
+            && {{ conditions[n] }} > u_ui.y
+            {% endif %}
+            {% endfor %}
+                )) {
+			sum += vec3(0, 0.1, 0.1);
+		}
+        {% endif %}
+
 		if (abs(position.x) < u_ui.y ||
 			abs(position.y) < u_ui.y) {
             // z-axis and y-axis
@@ -72,7 +86,7 @@ void main() {
 
 		{% if regionCondition %}
 		if({{ regionCondition | safe }}) {
-            sum += vec3(0.3, 0.3, 0.);
+            sum += vec3(0.5, 0.5, 0.);
         }
 		{% endif %}
     }
