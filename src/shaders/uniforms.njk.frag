@@ -38,6 +38,7 @@ uniform int u_maxIterations;
 uniform float u_colorWeight;
 uniform bool u_displayPrism;
 uniform vec3 u_lightDirection;
+uniform vec2 u_metallicRoughness;
 {% endif %}
 uniform bool u_displaySpheirahedraSphere;
 uniform bool u_displayConvexSphere;

@@ -38,6 +38,7 @@ export default class Canvas3D extends Canvas {
         this.displayPrismWithLimitSet = false;
 
         this.lightDirection = new Vec3(-1, -1, 0).normalize();
+        this.metallicRoughness = new Vec2(0.34, 0.48);
     }
 
     init() {
@@ -149,6 +150,7 @@ export default class Canvas3D extends Canvas {
         this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_ao'));
         this.uniLocations.push(this.gl.getUniformLocation(program, 'u_lightDirection'));
+        this.uniLocations.push(this.gl.getUniformLocation(program, 'u_metallicRoughness'));
     }
 
     setRenderUniformValues(width, height, texture) {
@@ -177,7 +179,8 @@ export default class Canvas3D extends Canvas {
         const l = this.lightDirection.normalize();
         this.gl.uniform3f(this.uniLocations[i++],
                           l.x, l.y, l.z);
-
+        this.gl.uniform2f(this.uniLocations[i++],
+                          this.metallicRoughness.x, this.metallicRoughness.y);
         this.spheirahedra.setUniformValues(this.gl, this.spheirahedraUniLocations,
                                            0, this.scale);
     }

@@ -69,7 +69,14 @@
                  @input="updateRenderParameter">AO Intensity
         </div>
         <div class="uiInnerGroup">
-          <h4 class="uiGroupTitle">Light Direction</h4>
+          <h4 class="uiGroupTitle">Shading</h4>
+          <input v-model.number="canvasHandler.limitsetCanvas.metallicRoughness.x"
+                 type="number" step="0.01" min="0.0" max="1.0"
+                 @input="updateRenderParameter">Metallic<br>
+          <input v-model.number="canvasHandler.limitsetCanvas.metallicRoughness.y"
+                 type="number" step="0.01" min="0.0" max="1.0"
+                 @input="updateRenderParameter">Roughness<br>
+          Light Direction<br>
           <input v-model.number="canvasHandler.limitsetCanvas.lightDirection.x"
                  type="number" step="0.01"
                  @input="updateRenderParameter">X<br>

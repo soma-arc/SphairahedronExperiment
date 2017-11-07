@@ -8,6 +8,67 @@ precision mediump float;
 
 {% include "./raytrace.njk.frag" %}
 
+const float DIV_PI = 1.0 / PI;
+const vec3 dielectricSpecular = vec3(0.04);
+
+// This G term is used in glTF-WebGL-PBR
+// Microfacet Models for Refraction through Rough Surfaces
+float G1_GGX(float alphaSq, float NoX) {
+    float tanSq = (1.0 - NoX * NoX) / max((NoX * NoX), 0.00001);
+    return 2. / (1. + sqrt(1. + alphaSq * tanSq));
+}
+
+// 1 / (1 + delta(l)) * 1 / (1 + delta(v))
+float Smith_G(float alphaSq, float NoL, float NoV) {
+    return G1_GGX(alphaSq, NoL) * G1_GGX(alphaSq, NoV);
+}
+
+// Height-Correlated Masking and Shadowing
+// Smith Joint Masking-Shadowing Function
+float GGX_Delta(float alphaSq, float NoX) {
+    return (-1. + sqrt(1. + alphaSq * (1. / (NoX * NoX) - 1.))) / 2.;
+}
+
+float SmithJoint_G(float alphaSq, float NoL, float NoV) {
+    return 1. / (1. + GGX_Delta(alphaSq, NoL) + GGX_Delta(alphaSq, NoV));
+}
+
+float GGX_D(float alphaSq, float NoH) {
+    float c = (NoH * NoH * (alphaSq - 1.) + 1.);
+    return alphaSq / (c * c)  * DIV_PI;
+}
+
+vec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecular,
+          vec3 L, vec3 V, vec3 N) {
+    vec3 H = normalize(L+V);
+
+    float LoH = dot(L, H);
+    float NoH = dot(N, H);
+    float VoH = dot(V, H);
+    float NoL = dot(N, L);
+    float NoV = dot(N, V);
+
+    vec3 F0 = mix(dielectricSpecular, baseColor, metallic);
+    vec3 cDiff = mix(baseColor * (1. - dielectricSpecular.r),
+                     BLACK,
+                     metallic);
+    float alpha = roughness * roughness;
+    float alphaSq = alpha * alpha;
+
+    // Schlick's approximation
+    vec3 F = F0 + (vec3(1.) - F0) * pow((1. - VoH), 5.);
+
+    vec3 diffuse = (vec3(1.) - F) * cDiff * DIV_PI;
+
+    float G = SmithJoint_G(alphaSq, NoL, NoV);
+    //float G = Smith_G(alphaSq, NoL, NoV);
+
+    float D = GGX_D(alphaSq, NoH);
+
+    vec3 specular = (F * G * D) / (4. * NoL * NoV);
+    return (diffuse + specular) * NoL * PI;
+}
+
 const int ID_PRISM = 0;
 const int ID_INI_SPHERES = 1;
 
@@ -152,25 +213,28 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 
         if(isectInfo.hit) {
             vec3 matColor = isectInfo.matColor;
-            vec3 diffuse =  clamp((dot(isectInfo.normal, -u_lightDirection)), 0., 1.) * matColor;
-            vec3 ambient = matColor * AMBIENT_FACTOR;
             bool transparent = false;
             transparent =  (isectInfo.objId == ID_INI_SPHERES) ?
                 true : false;
+            vec3 ambient = matColor * AMBIENT_FACTOR;
 
             if(transparent) {
+                vec3 diffuse =  clamp((dot(isectInfo.normal, -u_lightDirection)), 0., 1.) * matColor;
                 coeff *= transparency;
                 l += (diffuse + ambient) * coeff;
                 rayPos = isectInfo.intersection + rayDir * 0.000001 * 2.;
                 isectInfo = NewIsectInfo();
                 continue;
             } else {
+                vec3 c = BRDF(matColor, u_metallicRoughness.x, u_metallicRoughness.y,
+                                 dielectricSpecular,
+                                 -u_lightDirection, -rayDir, isectInfo.normal);
                 float k = u_castShadow ? computeShadowFactor(isectInfo.intersection + 0.001 * isectInfo.normal,
                                                              -u_lightDirection,
                                                              0.1, 5., 100.) : 1.;
-                l += (diffuse * k + ambient * ambientOcclusion(isectInfo.intersection,
-                                                               isectInfo.normal,
-                                                               u_ao.x, u_ao.y )) * coeff;
+                l += (c * k + ambient * ambientOcclusion(isectInfo.intersection,
+                                                            isectInfo.normal,
+                                                            u_ao.x, u_ao.y )) * coeff;
                 break;
             }
         }
