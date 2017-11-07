@@ -152,7 +152,7 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 
         if(isectInfo.hit) {
             vec3 matColor = isectInfo.matColor;
-            vec3 diffuse =  clamp((dot(isectInfo.normal, LIGHT_DIR)), 0., 1.) * matColor;
+            vec3 diffuse =  clamp((dot(isectInfo.normal, -u_lightDirection)), 0., 1.) * matColor;
             vec3 ambient = matColor * AMBIENT_FACTOR;
             bool transparent = false;
             transparent =  (isectInfo.objId == ID_INI_SPHERES) ?
@@ -166,7 +166,7 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 continue;
             } else {
                 float k = u_castShadow ? computeShadowFactor(isectInfo.intersection + 0.001 * isectInfo.normal,
-                                                             LIGHT_DIR,
+                                                             -u_lightDirection,
                                                              0.1, 5., 100.) : 1.;
                 l += (diffuse * k + ambient * ambientOcclusion(isectInfo.intersection,
                                                                isectInfo.normal,

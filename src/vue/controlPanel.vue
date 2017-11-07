@@ -69,6 +69,18 @@
                  @input="updateRenderParameter">AO Intensity
         </div>
         <div class="uiInnerGroup">
+          <h4 class="uiGroupTitle">Light Direction</h4>
+          <input v-model.number="canvasHandler.limitsetCanvas.lightDirection.x"
+                 type="number" step="0.01"
+                 @input="updateRenderParameter">X<br>
+          <input v-model.number="canvasHandler.limitsetCanvas.lightDirection.y"
+                 type="number" step="0.01"
+                 @input="updateRenderParameter">Y<br>
+          <input v-model.number="canvasHandler.limitsetCanvas.lightDirection.z"
+                 type="number" step="0.01"
+                 @input="updateRenderParameter">Z<br>
+        </div>
+        <div class="uiInnerGroup">
           <h4 class="uiGroupTitle">Inversion Sphere</h4>
           <input type="checkbox"
                  v-model="canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere"
