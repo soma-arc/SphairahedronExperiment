@@ -259,7 +259,7 @@ vec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecul
     float D = GGX_D(alphaSq, NoH);
 
     vec3 specular = (F * G * D) / (4. * NoL * NoV);
-    return (diffuse * clamp(NoL, 0.0, 1.0)+ specular) * PI;
+    return (diffuse + specular) * clamp(NoL, 0.0, 1.0) * PI;
 }
 
 void SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {
