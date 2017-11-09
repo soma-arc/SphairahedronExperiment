@@ -1208,6 +1208,10 @@ var Spheirahedra = function () {
             var divPlanes = this.dividePlanes.map(function (p) {
                 return p.toJson();
             });
+            var convexSpheres = this.convexSpheres.map(function (p) {
+                return p.toJson();
+            });
+            var boundingSphere = this.boundingSphere.toJson();
             var data = {
                 'zb': this.zb,
                 'zc': this.zc,
@@ -1215,7 +1219,9 @@ var Spheirahedra = function () {
                 'prismPlanes': prismPlanes,
                 'prismSpheres': prismSpheres,
                 'genSpheres': genSpheres,
-                'dividePlanes': divPlanes
+                'dividePlanes': divPlanes,
+                'convexSpheres': convexSpheres,
+                'boundingSphere': boundingSphere
             };
 
             return data;
@@ -42624,11 +42630,11 @@ output += "\n    hit = (u_displayPrism) ? DistUnion(hit, vec4(DistInfSpheirahedr
 }
 else {
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 1) {
-output += "\n\treturn DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_inversionSphere.center, g_invNum),\n\t\t\t\t\t\t\t   ID_PRISM, -1, -1));\n\t";
+output += "\n\treturn DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_boundingSphere.center, g_invNum),\n\t\t\t\t\t\t\t   ID_PRISM, -1, -1));\n\t";
 ;
 }
 else {
-output += "\n\treturn DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_inversionSphere.center, g_invNum),\n\t\t\t\t\t\t\t   ID_PRISM, -1, -1));\n\t";
+output += "\n\treturn DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_boundingSphere.center, g_invNum),\n\t\t\t\t\t\t\t   ID_PRISM, -1, -1));\n\t";
 ;
 }
 ;
@@ -42639,7 +42645,7 @@ output += "\n        hit = IntersectBoundingPlane(vec3(0, 1, 0), vec3(0, u_bound
 ;
 }
 else {
-output += "\n\t\thit = IntersectBoundingSphere(u_boundingSphere.center - u_inversionSphere.center,\n                                      u_boundingSphere.r.x,\n                                      rayPos, rayDir,\n                                      tmin, tmax);\n        ";
+output += "\n\t\thit = IntersectBoundingSphere(u_boundingSphere.center - u_boundingSphere.center,\n                                      u_boundingSphere.r.x,\n                                      rayPos, rayDir,\n                                      tmin, tmax);\n        ";
 ;
 }
 output += "\n        if(hit)\n            march(rayPos, rayDir, isectInfo, tmin, tmax);\n\n\t\t";
@@ -42695,14 +42701,14 @@ output += ", -1,\n\t\t\t\t\t\t\tHsv2rgb(float(";
 output += runtime.suppressValue(t_20, env.opts.autoescape);
 output += ") * 0.3, 1., 1.),\n\t\t\t\t\t\t\tu_spheirahedraSpheres[";
 output += runtime.suppressValue(t_20, env.opts.autoescape);
-output += "].center - u_inversionSphere.center,\n\t\t\t\t\t\t\tu_spheirahedraSpheres[";
+output += "].center - u_boundingSphere.center,\n\t\t\t\t\t\t\tu_spheirahedraSpheres[";
 output += runtime.suppressValue(t_20, env.opts.autoescape);
 output += "].r.x,\n\t\t\t\t\t\t\trayPos, rayDir, isectInfo);\n\t\t\t";
 ;
 }
 }
 frame = frame.pop();
-output += "\n\t\t}\n        if(u_displayBoundingSphere) {\n            IntersectSphere(ID_INI_SPHERES, 0, -1,\n                            Hsv2rgb(0.3, 1., 1.),\n                            u_boundingSphere.center - u_inversionSphere.center,\n                            u_boundingSphere.r.x,\n                            rayPos, rayDir, isectInfo);\n        }\n\t\t";
+output += "\n\t\t}\n        if(u_displayBoundingSphere) {\n            IntersectSphere(ID_INI_SPHERES, 0, -1,\n                            Hsv2rgb(0.3, 1., 1.),\n                            u_boundingSphere.center - u_boundingSphere.center,\n                            u_boundingSphere.r.x,\n                            rayPos, rayDir, isectInfo);\n        }\n\t\t";
 ;
 }
 output += "\n\n        if(isectInfo.hit) {\n            vec3 matColor = isectInfo.matColor;\n            bool transparent = false;\n            transparent =  (isectInfo.objId == ID_INI_SPHERES) ?\n                true : false;\n            vec3 ambient = matColor * AMBIENT_FACTOR;\n\n            if(transparent) {\n                vec3 diffuse =  clamp((dot(isectInfo.normal, -u_lightDirection)), 0., 1.) * matColor;\n                coeff *= transparency;\n                l += (diffuse + ambient) * coeff;\n                rayPos = isectInfo.intersection + rayDir * 0.000001 * 2.;\n                isectInfo = NewIsectInfo();\n                continue;\n            } else {\n                vec3 c = BRDF(matColor, u_metallicRoughness.x, u_metallicRoughness.y,\n                                 dielectricSpecular,\n                                 -u_lightDirection, -rayDir, isectInfo.normal);\n                float k = u_castShadow ? computeShadowFactor(isectInfo.intersection + 0.001 * isectInfo.normal,\n                                                             -u_lightDirection,\n                                                             0.1, 5., 100.) : 1.;\n                l += (c * k + ambient * ambientOcclusion(isectInfo.intersection,\n                                                            isectInfo.normal,\n                                                            u_ao.x, u_ao.y )) * coeff;\n                break;\n            }\n        }\n        //        alpha = 0.;\n        break;\n    }\n\n    return vec4(l, alpha);\n}\n\nout vec4 outColor;\nvoid main() {\n    vec3 sum = vec3(0);\n    vec2 coordOffset = Rand2n(gl_FragCoord.xy, u_numSamples);\n    vec3 ray = CalcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,\n                       u_resolution, gl_FragCoord.xy + coordOffset);\n    vec3 org = u_camera.pos;\n    // vec3 rayOrtho = CalcRayOrtho(u_camera.pos, u_camera.target, u_camera.up, 1.0,\n    //                              u_resolution, gl_FragCoord.xy + coordOffset, org);\n    vec4 texCol = texture(u_accTexture, gl_FragCoord.xy / u_resolution);\n\n\toutColor = vec4(mix(computeColor(org, ray), texCol, u_textureWeight));\n}\n";
