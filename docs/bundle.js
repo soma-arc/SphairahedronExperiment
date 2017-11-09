@@ -1392,8 +1392,8 @@ var Spheirahedra = function () {
             return sphairahedralPrism;
         }
     }, {
-        key: 'invertSphairahedralPrismMesh',
-        value: function invertSphairahedralPrismMesh() {
+        key: 'reflectSphairahedralPrismMesh',
+        value: function reflectSphairahedralPrismMesh() {
             var invertedSphairahedron = new Spheirahedra(0, 0);
 
             var invPlane = this.planes[2];
@@ -1486,9 +1486,12 @@ var Spheirahedra = function () {
             return invertedSphairahedron.buildPrismMeshWithCSG();
         }
     }, {
+        key: 'applyReflection',
+        value: function applyReflection() {}
+    }, {
         key: 'invertedSphairahedronMesh',
         value: function invertedSphairahedronMesh() {
-            var index = 1;
+            var index = 0;
             var inversionSphere = this.prismSpheres[index];
 
             var spheres = [];
@@ -20863,11 +20866,11 @@ output += "]),\n\t\t\td);\n\t";
 frame = frame.pop();
 output += "\n    return d;\n}\n\n";
 if(runtime.contextOrFrameLookup(context, frame, "shaderType") == runtime.contextOrFrameLookup(context, frame, "SHADER_TYPE_LIMITSET")) {
-output += "\nvoid SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {\n    vec3 diff = pos - center;\n    float lenSq = dot(diff, diff);\n    float k = r.y / lenSq;\n    dr *= k; // (r * r) / lenSq\n    pos = (diff * k) + center;\n}\n\n";
+output += "\nconst float DIV_PI = 1.0 / PI;\nconst vec3 dielectricSpecular = vec3(0.04);\n\n// This G term is used in glTF-WebGL-PBR\n// Microfacet Models for Refraction through Rough Surfaces\nfloat G1_GGX(float alphaSq, float NoX) {\n    float tanSq = (1.0 - NoX * NoX) / max((NoX * NoX), 0.00001);\n    return 2. / (1. + sqrt(1. + alphaSq * tanSq));\n}\n\n// 1 / (1 + delta(l)) * 1 / (1 + delta(v))\nfloat Smith_G(float alphaSq, float NoL, float NoV) {\n    return G1_GGX(alphaSq, NoL) * G1_GGX(alphaSq, NoV);\n}\n\n// Height-Correlated Masking and Shadowing\n// Smith Joint Masking-Shadowing Function\nfloat GGX_Delta(float alphaSq, float NoX) {\n    return (-1. + sqrt(1. + alphaSq * (1. / (NoX * NoX) - 1.))) / 2.;\n}\n\nfloat SmithJoint_G(float alphaSq, float NoL, float NoV) {\n    return 1. / (1. + GGX_Delta(alphaSq, NoL) + GGX_Delta(alphaSq, NoV));\n}\n\nfloat GGX_D(float alphaSq, float NoH) {\n    float c = (NoH * NoH * (alphaSq - 1.) + 1.);\n    return alphaSq / (c * c)  * DIV_PI;\n}\n\nvec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecular,\n          vec3 L, vec3 V, vec3 N) {\n    vec3 H = normalize(L+V);\n\n    float LoH = dot(L, H);\n    float NoH = dot(N, H);\n    float VoH = dot(V, H);\n    float NoL = dot(N, L);\n    float NoV = dot(N, V);\n\n    vec3 F0 = mix(dielectricSpecular, baseColor, metallic);\n    vec3 cDiff = mix(baseColor * (1. - dielectricSpecular.r),\n                     BLACK,\n                     metallic);\n    float alpha = roughness * roughness;\n    float alphaSq = alpha * alpha;\n\n    // Schlick's approximation\n    vec3 F = F0 + (vec3(1.) - F0) * pow((1. - VoH), 5.);\n\n    vec3 diffuse = (vec3(1.) - F) * cDiff * DIV_PI;\n\n    float G = SmithJoint_G(alphaSq, NoL, NoV);\n    //float G = Smith_G(alphaSq, NoL, NoV);\n\n    float D = GGX_D(alphaSq, NoH);\n\n    vec3 specular = (F * G * D) / (4. * NoL * NoV);\n    return (diffuse * clamp(NoL, 0.0, 1.0)+ specular) * PI;\n}\n\nvoid SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {\n    vec3 diff = pos - center;\n    float lenSq = dot(diff, diff);\n    float k = r.y / lenSq;\n    dr *= k; // (r * r) / lenSq\n    pos = (diff * k) + center;\n}\n\n";
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 0) {
 output += "\nfloat DistLimitsetTerrain(vec3 pos, out float invNum) {\n    float dr = 1.;\n    invNum = 0.;\n\tfloat d;\n    for(int i = 0; i < 1000; i++) {\n        if(u_maxIterations <= i) break;\n        bool inFund = true;\n\t\t";
 frame = frame.push();
-var t_39 = (lineno = 219, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
+var t_39 = (lineno = 280, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
 if(t_39) {var t_38 = t_39.length;
 for(var t_37=0; t_37 < t_39.length; t_37++) {
 var t_40 = t_39[t_37];
@@ -20896,7 +20899,7 @@ output += "].r);\n\t\t\tcontinue;\n\t\t}\n\t\t";
 frame = frame.pop();
 output += "\n\n\t\t";
 frame = frame.push();
-var t_43 = (lineno = 229, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismPlanes")]));
+var t_43 = (lineno = 290, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismPlanes")]));
 if(t_43) {var t_42 = t_43.length;
 for(var t_41=0; t_41 < t_43.length; t_41++) {
 var t_44 = t_43[t_41];
@@ -20932,7 +20935,7 @@ else {
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 1) {
 output += "\nfloat DistLimitsetFromSeedSpheres(vec3 pos, out float invNum) {\n    float dr = 1.;\n    invNum = 0.;\n    for(int i = 0; i < 1000; i++) {\n        if(u_maxIterations <= i) break;\n        bool inFund = true;\n\t\t";
 frame = frame.push();
-var t_47 = (lineno = 253, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
+var t_47 = (lineno = 314, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
 if(t_47) {var t_46 = t_47.length;
 for(var t_45=0; t_45 < t_47.length; t_45++) {
 var t_48 = t_47[t_45];
@@ -20961,7 +20964,7 @@ output += "].r);\n\t\t\tcontinue;\n\t\t}\n\t\t";
 frame = frame.pop();
 output += "\n        if(inFund) break;\n    }\n\n    float minDist = 9999999.;\n\n\t";
 frame = frame.push();
-var t_51 = (lineno = 267, colno = 16, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSeedSpheres")]));
+var t_51 = (lineno = 328, colno = 16, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSeedSpheres")]));
 if(t_51) {var t_50 = t_51.length;
 for(var t_49=0; t_49 < t_51.length; t_49++) {
 var t_52 = t_51[t_49];
@@ -20986,7 +20989,7 @@ output += "\n\n    return minDist;\n}\n";
 else {
 output += "\nfloat DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {\n    float dr = 1.;\n    invNum = 0.;\n    for(int i = 0; i < 1000; i++) {\n        if(u_maxIterations <= i) break;\n        bool inFund = true;\n\t\t";
 frame = frame.push();
-var t_55 = (lineno = 281, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
+var t_55 = (lineno = 342, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
 if(t_55) {var t_54 = t_55.length;
 for(var t_53=0; t_53 < t_55.length; t_53++) {
 var t_56 = t_55[t_53];
@@ -42614,7 +42617,7 @@ output += result;
 callback(null);
 });
 env.waterfall(tasks, function(){
-output += "\n\nconst float DIV_PI = 1.0 / PI;\nconst vec3 dielectricSpecular = vec3(0.04);\n\n// This G term is used in glTF-WebGL-PBR\n// Microfacet Models for Refraction through Rough Surfaces\nfloat G1_GGX(float alphaSq, float NoX) {\n    float tanSq = (1.0 - NoX * NoX) / max((NoX * NoX), 0.00001);\n    return 2. / (1. + sqrt(1. + alphaSq * tanSq));\n}\n\n// 1 / (1 + delta(l)) * 1 / (1 + delta(v))\nfloat Smith_G(float alphaSq, float NoL, float NoV) {\n    return G1_GGX(alphaSq, NoL) * G1_GGX(alphaSq, NoV);\n}\n\n// Height-Correlated Masking and Shadowing\n// Smith Joint Masking-Shadowing Function\nfloat GGX_Delta(float alphaSq, float NoX) {\n    return (-1. + sqrt(1. + alphaSq * (1. / (NoX * NoX) - 1.))) / 2.;\n}\n\nfloat SmithJoint_G(float alphaSq, float NoL, float NoV) {\n    return 1. / (1. + GGX_Delta(alphaSq, NoL) + GGX_Delta(alphaSq, NoV));\n}\n\nfloat GGX_D(float alphaSq, float NoH) {\n    float c = (NoH * NoH * (alphaSq - 1.) + 1.);\n    return alphaSq / (c * c)  * DIV_PI;\n}\n\nvec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecular,\n          vec3 L, vec3 V, vec3 N) {\n    vec3 H = normalize(L+V);\n\n    float LoH = dot(L, H);\n    float NoH = dot(N, H);\n    float VoH = dot(V, H);\n    float NoL = dot(N, L);\n    float NoV = dot(N, V);\n\n    vec3 F0 = mix(dielectricSpecular, baseColor, metallic);\n    vec3 cDiff = mix(baseColor * (1. - dielectricSpecular.r),\n                     BLACK,\n                     metallic);\n    float alpha = roughness * roughness;\n    float alphaSq = alpha * alpha;\n\n    // Schlick's approximation\n    vec3 F = F0 + (vec3(1.) - F0) * pow((1. - VoH), 5.);\n\n    vec3 diffuse = (vec3(1.) - F) * cDiff * DIV_PI;\n\n    float G = SmithJoint_G(alphaSq, NoL, NoV);\n    //float G = Smith_G(alphaSq, NoL, NoV);\n\n    float D = GGX_D(alphaSq, NoH);\n\n    vec3 specular = (F * G * D) / (4. * NoL * NoV);\n    return (diffuse + specular) * NoL * PI;\n}\n\nconst int ID_PRISM = 0;\nconst int ID_INI_SPHERES = 1;\n\nfloat g_invNum;\nvec4 distFunc(const vec3 pos) {\n    vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);\n\t";
+output += "\n\nconst int ID_PRISM = 0;\nconst int ID_INI_SPHERES = 1;\n\nfloat g_invNum;\nvec4 distFunc(const vec3 pos) {\n    vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);\n\t";
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 0) {
 output += "\n    hit = (u_displayPrism) ? DistUnion(hit, vec4(DistInfSpheirahedraAll(pos), ID_PRISM, -1, -1)) : hit;\n    return DistUnion(hit, vec4(DistLimitsetTerrain(pos, g_invNum),\n\t\t\t\t\t\t\t   ID_PRISM, -1, -1));\n\t";
 ;
@@ -42643,7 +42646,7 @@ output += "\n        if(hit)\n            march(rayPos, rayDir, isectInfo, tmin,
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 0) {
 output += "\n\t\tif(u_displaySpheirahedraSphere) {\n\t\t\t";
 frame = frame.push();
-var t_15 = (lineno = 186, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
+var t_15 = (lineno = 125, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
 if(t_15) {var t_14 = t_15.length;
 for(var t_13=0; t_13 < t_15.length; t_13++) {
 var t_16 = t_15[t_13];
@@ -42674,7 +42677,7 @@ output += "\n\t\t}\n\t\t";
 else {
 output += "\n\t\tif(u_displaySpheirahedraSphere) {\n\t\t\t";
 frame = frame.push();
-var t_19 = (lineno = 196, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
+var t_19 = (lineno = 135, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
 if(t_19) {var t_18 = t_19.length;
 for(var t_17=0; t_17 < t_19.length; t_17++) {
 var t_20 = t_19[t_17];

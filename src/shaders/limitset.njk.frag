@@ -8,67 +8,6 @@ precision mediump float;
 
 {% include "./raytrace.njk.frag" %}
 
-const float DIV_PI = 1.0 / PI;
-const vec3 dielectricSpecular = vec3(0.04);
-
-// This G term is used in glTF-WebGL-PBR
-// Microfacet Models for Refraction through Rough Surfaces
-float G1_GGX(float alphaSq, float NoX) {
-    float tanSq = (1.0 - NoX * NoX) / max((NoX * NoX), 0.00001);
-    return 2. / (1. + sqrt(1. + alphaSq * tanSq));
-}
-
-// 1 / (1 + delta(l)) * 1 / (1 + delta(v))
-float Smith_G(float alphaSq, float NoL, float NoV) {
-    return G1_GGX(alphaSq, NoL) * G1_GGX(alphaSq, NoV);
-}
-
-// Height-Correlated Masking and Shadowing
-// Smith Joint Masking-Shadowing Function
-float GGX_Delta(float alphaSq, float NoX) {
-    return (-1. + sqrt(1. + alphaSq * (1. / (NoX * NoX) - 1.))) / 2.;
-}
-
-float SmithJoint_G(float alphaSq, float NoL, float NoV) {
-    return 1. / (1. + GGX_Delta(alphaSq, NoL) + GGX_Delta(alphaSq, NoV));
-}
-
-float GGX_D(float alphaSq, float NoH) {
-    float c = (NoH * NoH * (alphaSq - 1.) + 1.);
-    return alphaSq / (c * c)  * DIV_PI;
-}
-
-vec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecular,
-          vec3 L, vec3 V, vec3 N) {
-    vec3 H = normalize(L+V);
-
-    float LoH = dot(L, H);
-    float NoH = dot(N, H);
-    float VoH = dot(V, H);
-    float NoL = dot(N, L);
-    float NoV = dot(N, V);
-
-    vec3 F0 = mix(dielectricSpecular, baseColor, metallic);
-    vec3 cDiff = mix(baseColor * (1. - dielectricSpecular.r),
-                     BLACK,
-                     metallic);
-    float alpha = roughness * roughness;
-    float alphaSq = alpha * alpha;
-
-    // Schlick's approximation
-    vec3 F = F0 + (vec3(1.) - F0) * pow((1. - VoH), 5.);
-
-    vec3 diffuse = (vec3(1.) - F) * cDiff * DIV_PI;
-
-    float G = SmithJoint_G(alphaSq, NoL, NoV);
-    //float G = Smith_G(alphaSq, NoL, NoV);
-
-    float D = GGX_D(alphaSq, NoH);
-
-    vec3 specular = (F * G * D) / (4. * NoL * NoV);
-    return (diffuse + specular) * NoL * PI;
-}
-
 const int ID_PRISM = 0;
 const int ID_INI_SPHERES = 1;
 
