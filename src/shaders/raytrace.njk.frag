@@ -235,10 +235,10 @@ vec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecul
           vec3 L, vec3 V, vec3 N) {
     vec3 H = normalize(L+V);
 
-    float LoH = dot(L, H);
-    float NoH = dot(N, H);
-    float VoH = dot(V, H);
-    float NoL = dot(N, L);
+    float LoH = clamp(dot(L, H), 0.0, 1.0);
+    float NoH = clamp(dot(N, H), 0.0, 1.0);
+    float VoH = clamp(dot(V, H), 0.0, 1.0);
+    float NoL = clamp(dot(N, L), 0.0, 1.0);
     float NoV = dot(N, V);
 
     vec3 F0 = mix(dielectricSpecular, baseColor, metallic);
@@ -253,13 +253,13 @@ vec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecul
 
     vec3 diffuse = (vec3(1.) - F) * cDiff * DIV_PI;
 
-    float G = SmithJoint_G(alphaSq, NoL, NoV);
-    //float G = Smith_G(alphaSq, NoL, NoV);
+    //float G = SmithJoint_G(alphaSq, NoL, NoV);
+    float G = Smith_G(alphaSq, NoL, NoV);
 
     float D = GGX_D(alphaSq, NoH);
 
     vec3 specular = (F * G * D) / (4. * NoL * NoV);
-    return (diffuse + specular) * clamp(NoL, 0.0, 1.0) * PI;
+    return (diffuse + specular) * clamp(NoL, 0.0, 1.0);
 }
 
 void SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {
