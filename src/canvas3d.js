@@ -11,7 +11,6 @@ const RENDER_FRAGMENT = require('./shaders/render.frag');
 const RENDER_FLIPPED_VERTEX = require('./shaders/renderFlipped.vert');
 
 const BRDF_LUT = require('./img/brdfLUT.png');
-const ARC_TEST = require('./img/arc.png');
 
 export default class Canvas3D extends Canvas {
     constructor(canvasId, spheirahedra) {

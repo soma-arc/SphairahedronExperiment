@@ -16,6 +16,7 @@ struct Plane {
 };
 
 uniform sampler2D u_accTexture;
+uniform sampler2D u_brdfLUT;
 uniform float u_textureWeight;
 uniform float u_numSamples;
 uniform vec2 u_resolution;

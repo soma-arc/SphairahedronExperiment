@@ -231,6 +231,22 @@ float GGX_D(float alphaSq, float NoH) {
     return alphaSq / (c * c)  * DIV_PI;
 }
 
+vec3 computeIBL(vec3 diffuseColor, vec3 specularColor,
+                vec3 reflection, vec3 L,
+                float NoL, float NoV) {
+    float mixFact = (exp(1. * NoL) - 1.) / (exp(1.) - 1.);
+    vec3 diffuse = diffuseColor * mix(vec3(0.2), vec3(1), mixFact);
+
+    vec2 brdf = texture(u_brdfLUT,
+                        vec2(NoV,
+                             u_metallicRoughness.y)).rg;
+    float LoReflect = clamp(dot(L, reflection), 0.0, 1.0);
+    mixFact = (exp(2. * LoReflect) - 1.)/(exp(2.) - 1.);
+    vec3 specularLight = mix(vec3(0.1, 0.1, 0.3), vec3(1, 1, 1), mixFact);
+    vec3 specular = specularLight * (specularColor * brdf.x + brdf.y);
+    return diffuse + specular;
+}
+
 vec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecular,
           vec3 L, vec3 V, vec3 N) {
     vec3 H = normalize(L+V);
@@ -239,7 +255,7 @@ vec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecul
     float NoH = clamp(dot(N, H), 0.0, 1.0);
     float VoH = clamp(dot(V, H), 0.0, 1.0);
     float NoL = clamp(dot(N, L), 0.0, 1.0);
-    float NoV = dot(N, V);
+    float NoV = abs(dot(N, V));
 
     vec3 F0 = mix(dielectricSpecular, baseColor, metallic);
     vec3 cDiff = mix(baseColor * (1. - dielectricSpecular.r),
@@ -259,7 +275,9 @@ vec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecul
     float D = GGX_D(alphaSq, NoH);
 
     vec3 specular = (F * G * D) / (4. * NoL * NoV);
-    return (diffuse + specular) * clamp(NoL, 0.0, 1.0);
+    vec3  c = clamp((diffuse + specular) * NoL, 0.0, 1.0);
+    c += computeIBL(cDiff, F0, normalize(reflect(-V, N)), L, NoL, NoV);
+    return c;
 }
 
 void SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {

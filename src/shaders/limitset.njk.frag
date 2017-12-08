@@ -17,7 +17,11 @@ vec4 distFunc(const vec3 pos) {
 	{% if renderMode == 0 %}
     hit = (u_displayPrism) ? DistUnion(hit, vec4(DistInfSpheirahedraAll(pos), ID_PRISM, -1, -1)) : hit;
     return DistUnion(hit, vec4(DistLimitsetTerrain(pos, g_invNum),
-							   ID_PRISM, -1, -1));
+                             ID_PRISM, -1, -1));
+    // Sphere s;
+    // s.r.x = 1.;
+    //     return DistUnion(hit, vec4(DistSphere(pos, s),
+    //                            ID_PRISM, -1, -1));
 	{% elif renderMode == 1 %}
 	return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_boundingSphere.center, g_invNum),
 							   ID_PRISM, -1, -1));
@@ -94,7 +98,7 @@ float computeShadowFactor (const vec3 rayOrg, const vec3 rayDir,
 }
 
 const vec3 AMBIENT_FACTOR = vec3(0.3);
-const vec3 LIGHT_DIR = normalize(vec3(1, 0.8, 0));
+const vec3 LIGHT_DIR = normalize(vec3(0, 1, 0));
 vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
     IsectInfo isectInfo = NewIsectInfo();
     vec3 rayPos = rayOrg;
@@ -109,9 +113,9 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 		float tmax = MAX_FLOAT;
 		bool hit = true;
 		{% if renderMode == 0 %}
-		hit = IntersectBoundingPlane(vec3(0, 1, 0), vec3(0, u_boundingPlaneY, 0),
-									 rayPos, rayDir,
-									 tmin, tmax);
+        hit = IntersectBoundingPlane(vec3(0, 1, 0), vec3(0, u_boundingPlaneY, 0),
+		 							 rayPos, rayDir,
+		 							 tmin, tmax);
 		{% else %}
 		hit = IntersectBoundingSphere(u_boundingSphere.center - u_boundingSphere.center,
                                       u_boundingSphere.r.x,
@@ -166,14 +170,15 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 continue;
             } else {
                 vec3 c = BRDF(matColor, u_metallicRoughness.x, u_metallicRoughness.y,
-                                 dielectricSpecular,
-                                 -u_lightDirection, -rayDir, isectInfo.normal);
-                float k = u_castShadow ? computeShadowFactor(isectInfo.intersection + 0.001 * isectInfo.normal,
-                                                             -u_lightDirection,
-                                                             0.1, 5., 100.) : 1.;
+                              dielectricSpecular,
+                              -u_lightDirection, -rayDir, isectInfo.normal);
+                float k = u_castShadow ?
+                    computeShadowFactor(isectInfo.intersection + 0.0001 * isectInfo.normal,
+                                        -u_lightDirection,
+                                        0.001, 5., 100.) : 1.;
                 l += (c * k + ambient * ambientOcclusion(isectInfo.intersection,
-                                                            isectInfo.normal,
-                                                            u_ao.x, u_ao.y )) * coeff;
+                                                      isectInfo.normal,
+                                                        u_ao.x, u_ao.y )) * coeff;
                 break;
             }
         }
@@ -194,6 +199,5 @@ void main() {
     // vec3 rayOrtho = CalcRayOrtho(u_camera.pos, u_camera.target, u_camera.up, 1.0,
     //                              u_resolution, gl_FragCoord.xy + coordOffset, org);
     vec4 texCol = texture(u_accTexture, gl_FragCoord.xy / u_resolution);
-
-	outColor = vec4(mix(computeColor(org, ray), texCol, u_textureWeight));
+	outColor = vec4(mix(clamp(computeColor(org, ray), 0., 1.), texCol, u_textureWeight));
 }
