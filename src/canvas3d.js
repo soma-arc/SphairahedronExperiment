@@ -3,11 +3,15 @@ import Vec2 from './vector2d.js';
 import Vec3 from './vector3d.js';
 import { CameraOnSphere, FlyCamera } from './camera.js';
 import { GetWebGL2Context, CreateSquareVbo, AttachShader,
-         LinkProgram, CreateRGBATextures } from './glUtils';
+         LinkProgram, CreateRGBATextures, CreateRGBAImageTexture2D,
+         CreateFloatTextures } from './glUtils';
 
 const RENDER_VERTEX = require('./shaders/render.vert');
 const RENDER_FRAGMENT = require('./shaders/render.frag');
 const RENDER_FLIPPED_VERTEX = require('./shaders/renderFlipped.vert');
+
+const BRDF_LUT = require('./img/brdfLUT.png');
+const ARC_TEST = require('./img/arc.png');
 
 export default class Canvas3D extends Canvas {
     constructor(canvasId, spheirahedra) {
@@ -83,19 +87,25 @@ export default class Canvas3D extends Canvas {
         this.isProductRendering = false;
         this.productRenderResolution = new Vec2(0, 0);
         this.productRenderFramebuffer = this.gl.createFramebuffer();
+
+        const img = new Image();
+        img.src = BRDF_LUT;
+        img.addEventListener('load', () => {
+            this.brdfLUT = CreateRGBAImageTexture2D(this.gl, 256, 256, img);
+        });
     }
 
     initRenderTextures() {
-        this.renderTextures = CreateRGBATextures(this.gl, this.canvas.width,
-                                                 this.canvas.height, 2);
-        this.lowResTextures = CreateRGBATextures(this.gl,
-                                                 this.canvas.width * this.lowResRatio,
-                                                 this.canvas.height * this.lowResRatio, 2);
+        this.renderTextures = CreateFloatTextures(this.gl, this.canvas.width,
+                                                  this.canvas.height, 2);
+        this.lowResTextures = CreateFloatTextures(this.gl,
+                                                  this.canvas.width * this.lowResRatio,
+                                                  this.canvas.height * this.lowResRatio, 2)
     }
 
     initProductRenderTextures(width, height) {
-        this.productRenderTextures = CreateRGBATextures(this.gl,
-                                                        width, height, 2);
+        this.productRenderTextures = CreateFloatTextures(this.gl,
+                                                         width, height, 2);
         this.productRenderResultTexture = CreateRGBATextures(this.gl, width, height, 1)[0];
     }
 
@@ -116,6 +126,8 @@ export default class Canvas3D extends Canvas {
         this.uniLocations = [];
         this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_accTexture'));
+        this.uniLocations.push(this.gl.getUniformLocation(program,
+                                                          'u_brdfLUT'));
         this.uniLocations.push(this.gl.getUniformLocation(program,
                                                           'u_textureWeight'));
         this.uniLocations.push(this.gl.getUniformLocation(program,
@@ -158,6 +170,9 @@ export default class Canvas3D extends Canvas {
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
         this.gl.uniform1i(this.uniLocations[i++], 0);
+        this.gl.activeTexture(this.gl.TEXTURE1);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.brdfLUT);
+        this.gl.uniform1i(this.uniLocations[i++], 1);
         this.gl.uniform1f(this.uniLocations[i++], this.numSamples / (this.numSamples + 1));
         this.gl.uniform1f(this.uniLocations[i++], this.numSamples)
 
@@ -186,6 +201,7 @@ export default class Canvas3D extends Canvas {
     }
 
     renderToTexture(textures, width, height) {
+        this.gl.getExtension("EXT_color_buffer_float");
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.texturesFrameBuffer);
         this.gl.viewport(0, 0, width, height);
         this.gl.useProgram(this.spheirahedraProgram);

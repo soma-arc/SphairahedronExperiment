@@ -46,5 +46,8 @@
         "start": "webpack-dev-server",
         "lint": "eslint src/**/*.js",
         "test": "webpack --config=webpack.config-test.js && mocha --require source-map-support/register tmp/test-bundle.js"
+    },
+    "dependencies": {
+        "url-loader": "^0.6.2"
     }
 }
