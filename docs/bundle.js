@@ -20873,7 +20873,7 @@ var colno = null;
 var output = "";
 try {
 var parentTemplate = null;
-output += "vec3 CalcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,\n              const vec2 resolution, const vec2 coord){\n    float imagePlane = (resolution.y * .5) / tan(fov * .5);\n    vec3 v = normalize(target - eye);\n    vec3 xaxis = normalize(cross(v, up));\n    vec3 yaxis =  normalize(cross(v, xaxis));\n    vec3 center = v * imagePlane;\n    vec3 origin = center - (xaxis * (resolution.x  *.5)) - (yaxis * (resolution.y * .5));\n    return normalize(origin + (xaxis * coord.x) + (yaxis * (resolution.y - coord.y)));\n}\n\nvec3 CalcRayOrtho (const vec3 eye, const vec3 target, const vec3 up, const float orthoWidth,\n                   const vec2 resolution, const vec2 coord,\n                   out vec3 rayOrigin){\n    vec3 v = normalize(target - eye);\n    vec3 xaxis = normalize(cross(v, up));\n    vec3 yaxis =  normalize(cross(v, xaxis));\n    vec2 orthoPlane = vec2(orthoWidth, orthoWidth * resolution.y / resolution.x);\n    vec3 planeOrigin = eye - (xaxis * (orthoPlane.x * .5)) - (yaxis * (orthoPlane.y * .5));\n    rayOrigin = planeOrigin + (xaxis * orthoPlane.x * coord.x / resolution.x) + (yaxis * orthoPlane.y * coord.y / resolution.y);\n    return v;\n}\n\nstruct IsectInfo {\n    int objId;\n    int objIndex;\n    int objComponentId;\n    vec3 normal;\n    vec3 intersection;\n    float mint;\n    float maxt;\n    vec3 matColor;\n    bool hit;\n};\n\nfloat MAX_FLOAT = 1e20;\nconst float THRESHOLD = 0.001;\n\nIsectInfo NewIsectInfo() {\n    IsectInfo isectInfo;\n    isectInfo.objId = -1;\n    isectInfo.objIndex = -1;\n    isectInfo.objComponentId = -1;\n    isectInfo.mint = MAX_FLOAT;\n    isectInfo.maxt = 9999999.;\n    isectInfo.hit = false;\n    return isectInfo;\n}\n\nbool IntersectBoundingSphere(vec3 sphereCenter, float radius,\n                             vec3 rayOrigin, vec3 rayDir,\n                             out float t0, out float t1){\n\tvec3 v = rayOrigin - sphereCenter;\n\tfloat b = dot(rayDir, v);\n\tfloat c = dot(v, v) - radius * radius;\n\tfloat d = b * b - c;\n\tconst float EPSILON = 0.0001;\n\tif(d >= 0.){\n\t\tfloat s = sqrt(d);\n\t\tfloat tm = -b - s;\n\t\tt0 = tm;\n\t\tif(tm <= EPSILON){\n\t\t\ttm = -b + s;\n            t1 = tm;\n\t\t\tt0 = 0.;\n\t\t}else{\n\t\t\tt1 = -b + s;\n\t\t}\n\t\tif(EPSILON < tm){\n\t\t\treturn true;\n\t\t}\n\t}\n    t0 = 0.;\n    t1 = MAX_FLOAT;\n\treturn false;\n}\n\nbool IntersectBoundingPlane(const vec3 n, const vec3 p,\n\t\t\t\t\t\t\tconst vec3 rayOrigin, const vec3 rayDir,\n\t\t\t\t\t\t\tout float t0, out float t1) {\n\tfloat d = -dot(p, n);\n    float v = dot(n, rayDir);\n    float t = -(dot(n, rayOrigin) + d) / v;\n    if(THRESHOLD < t){\n\t\tif(v < 0.) {\n\t\t\tt0 = t;\n\t\t\tt1 = MAX_FLOAT;\n\t\t} else {\n\t\t\tt0 = 0.;\n\t\t\tt1 = t;\n\t\t}\n\t\treturn true;\n    }\n    t0 = 0.;\n    t1 = MAX_FLOAT;\n\treturn (v < 0.);\n}\n\nvec2 Rand2n(const vec2 co, const float sampleIndex) {\n    vec2 seed = co * (sampleIndex + 1.0);\n    seed+=vec2(-1,1);\n    // implementation based on: lumina.sourceforge.net/Tutorials/Noise.html\n    return vec2(fract(sin(dot(seed.xy ,vec2(12.9898,78.233))) * 43758.5453),\n                fract(cos(dot(seed.xy ,vec2(4.898,7.23))) * 23421.631));\n}\n\nvec4 DistUnion(vec4 t1, vec4 t2) {\n    return (t1.x < t2.x) ? t1 : t2;\n}\n\nfloat DistPlane(const vec3 pos, const vec3 p, const vec3 normal) {\n    return dot(pos - p, normal);\n}\n\nvoid IntersectSphere(const int objId, const int objIndex, const int objComponentId,\n                     const vec3 matColor,\n                     const vec3 sphereCenter, const float radius,\n                     const vec3 rayOrigin, const vec3 rayDir, inout IsectInfo isectInfo){\n    vec3 v = rayOrigin - sphereCenter;\n    float b = dot(rayDir, v);\n    float c = dot(v, v) - radius * radius;\n    float d = b * b - c;\n    if(d >= 0.){\n        float s = sqrt(d);\n        float t = -b - s;\n        if(t <= THRESHOLD) t = -b + s;\n        if(THRESHOLD < t && t < isectInfo.mint){\n            isectInfo.objId = objId;\n            isectInfo.objIndex = objIndex;\n            isectInfo.objComponentId = objComponentId;\n            isectInfo.matColor = matColor;\n            isectInfo.mint = t;\n            isectInfo.intersection = (rayOrigin + t * rayDir);\n            isectInfo.normal = normalize(isectInfo.intersection - sphereCenter);\n            isectInfo.hit = true;\n        }\n    }\n}\n\nfloat DistSphere(const vec3 pos, const Sphere sphere) {\n    return distance(pos, sphere.center) - sphere.r.x;\n}\n\nfloat DistPrism(const vec3 pos) {\n    float d = -1.;\n\t";
+output += "vec3 CalcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,\n              const vec2 resolution, const vec2 coord){\n    float imagePlane = (resolution.y * .5) / tan(fov * .5);\n    vec3 v = normalize(target - eye);\n    vec3 xaxis = normalize(cross(v, up));\n    vec3 yaxis =  normalize(cross(v, xaxis));\n    vec3 center = v * imagePlane;\n    vec3 origin = center - (xaxis * (resolution.x  *.5)) - (yaxis * (resolution.y * .5));\n    return normalize(origin + (xaxis * coord.x) + (yaxis * (resolution.y - coord.y)));\n}\n\nvec3 CalcRayOrtho (const vec3 eye, const vec3 target, const vec3 up, const float orthoWidth,\n                   const vec2 resolution, const vec2 coord,\n                   out vec3 rayOrigin){\n    vec3 v = normalize(target - eye);\n    vec3 xaxis = normalize(cross(v, up));\n    vec3 yaxis =  normalize(cross(v, xaxis));\n    vec2 orthoPlane = vec2(orthoWidth, orthoWidth * resolution.y / resolution.x);\n    vec3 planeOrigin = eye - (xaxis * (orthoPlane.x * .5)) - (yaxis * (orthoPlane.y * .5));\n    rayOrigin = planeOrigin + (xaxis * orthoPlane.x * coord.x / resolution.x) + (yaxis * orthoPlane.y * coord.y / resolution.y);\n    return v;\n}\n\nstruct IsectInfo {\n    int objId;\n    int objIndex;\n    int objComponentId;\n    vec3 normal;\n    vec3 intersection;\n    float mint;\n    float maxt;\n    vec3 matColor;\n    bool hit;\n};\n\nfloat MAX_FLOAT = 1e20;\nconst float THRESHOLD = 0.001;\n\nIsectInfo NewIsectInfo() {\n    IsectInfo isectInfo;\n    isectInfo.objId = -1;\n    isectInfo.objIndex = -1;\n    isectInfo.objComponentId = -1;\n    isectInfo.mint = MAX_FLOAT;\n    isectInfo.maxt = 9999999.;\n    isectInfo.hit = false;\n    return isectInfo;\n}\n\nbool IntersectBoundingSphere(vec3 sphereCenter, float radius,\n                             vec3 rayOrigin, vec3 rayDir,\n                             out float t0, out float t1){\n\tvec3 v = rayOrigin - sphereCenter;\n\tfloat b = dot(rayDir, v);\n\tfloat c = dot(v, v) - radius * radius;\n\tfloat d = b * b - c;\n\tconst float EPSILON = 0.0001;\n\tif(d >= 0.){\n\t\tfloat s = sqrt(d);\n\t\tfloat tm = -b - s;\n\t\tt0 = tm;\n\t\tif(tm <= EPSILON){\n\t\t\ttm = -b + s;\n            t1 = tm;\n\t\t\tt0 = 0.;\n\t\t}else{\n\t\t\tt1 = -b + s;\n\t\t}\n\t\tif(EPSILON < tm){\n\t\t\treturn true;\n\t\t}\n\t}\n    t0 = 0.;\n    t1 = MAX_FLOAT;\n\treturn false;\n}\n\nbool IntersectBoundingPlane(const vec3 n, const vec3 p,\n\t\t\t\t\t\t\tconst vec3 rayOrigin, const vec3 rayDir,\n\t\t\t\t\t\t\tinout float t0, inout float t1) {\n\tfloat d = -dot(p, n);\n    float v = dot(n, rayDir);\n    float t = -(dot(n, rayOrigin) + d) / v;\n    if(THRESHOLD < t){\n\t\tif(v < 0.) {\n\t\t\tt0 = max(t, t0);\n\t\t\tt1 = MAX_FLOAT;\n\t\t} else {\n\t\t\tt0 = t0;\n\t\t\tt1 = t;\n\t\t}\n\t\treturn true;\n    }\n    t0 = t0;\n    t1 = MAX_FLOAT;\n\treturn (v < 0.);\n}\n\nvec2 Rand2n(const vec2 co, const float sampleIndex) {\n    vec2 seed = co * (sampleIndex + 1.0);\n    seed+=vec2(-1,1);\n    // implementation based on: lumina.sourceforge.net/Tutorials/Noise.html\n    return vec2(fract(sin(dot(seed.xy ,vec2(12.9898,78.233))) * 43758.5453),\n                fract(cos(dot(seed.xy ,vec2(4.898,7.23))) * 23421.631));\n}\n\nvec4 DistUnion(vec4 t1, vec4 t2) {\n    return (t1.x < t2.x) ? t1 : t2;\n}\n\nfloat DistPlane(const vec3 pos, const vec3 p, const vec3 normal) {\n    return dot(pos - p, normal);\n}\n\nvoid IntersectSphere(const int objId, const int objIndex, const int objComponentId,\n                     const vec3 matColor,\n                     const vec3 sphereCenter, const float radius,\n                     const vec3 rayOrigin, const vec3 rayDir, inout IsectInfo isectInfo){\n    vec3 v = rayOrigin - sphereCenter;\n    float b = dot(rayDir, v);\n    float c = dot(v, v) - radius * radius;\n    float d = b * b - c;\n    if(d >= 0.){\n        float s = sqrt(d);\n        float t = -b - s;\n        if(t <= THRESHOLD) t = -b + s;\n        if(THRESHOLD < t && t < isectInfo.mint){\n            isectInfo.objId = objId;\n            isectInfo.objIndex = objIndex;\n            isectInfo.objComponentId = objComponentId;\n            isectInfo.matColor = matColor;\n            isectInfo.mint = t;\n            isectInfo.intersection = (rayOrigin + t * rayDir);\n            isectInfo.normal = normalize(isectInfo.intersection - sphereCenter);\n            isectInfo.hit = true;\n        }\n    }\n}\n\nfloat DistSphere(const vec3 pos, const Sphere sphere) {\n    return distance(pos, sphere.center) - sphere.r.x;\n}\n\nfloat DistPrism(const vec3 pos) {\n    float d = -1.;\n\t";
 frame = frame.push();
 var t_3 = (lineno = 145, colno = 16, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismPlanes")]));
 if(t_3) {var t_2 = t_3.length;
@@ -21075,9 +21075,9 @@ output += "\n    return d;\n}\n\n";
 if(runtime.contextOrFrameLookup(context, frame, "shaderType") == runtime.contextOrFrameLookup(context, frame, "SHADER_TYPE_LIMITSET")) {
 output += "\nconst float DIV_PI = 1.0 / PI;\nconst vec3 dielectricSpecular = vec3(0.04);\n\n// This G term is used in glTF-WebGL-PBR\n// Microfacet Models for Refraction through Rough Surfaces\nfloat G1_GGX(float alphaSq, float NoX) {\n    float tanSq = (1.0 - NoX * NoX) / max((NoX * NoX), 0.00001);\n    return 2. / (1. + sqrt(1. + alphaSq * tanSq));\n}\n\n// 1 / (1 + delta(l)) * 1 / (1 + delta(v))\nfloat Smith_G(float alphaSq, float NoL, float NoV) {\n    return G1_GGX(alphaSq, NoL) * G1_GGX(alphaSq, NoV);\n}\n\n// Height-Correlated Masking and Shadowing\n// Smith Joint Masking-Shadowing Function\nfloat GGX_Delta(float alphaSq, float NoX) {\n    return (-1. + sqrt(1. + alphaSq * (1. / (NoX * NoX) - 1.))) / 2.;\n}\n\nfloat SmithJoint_G(float alphaSq, float NoL, float NoV) {\n    return 1. / (1. + GGX_Delta(alphaSq, NoL) + GGX_Delta(alphaSq, NoV));\n}\n\nfloat GGX_D(float alphaSq, float NoH) {\n    float c = (NoH * NoH * (alphaSq - 1.) + 1.);\n    return alphaSq / (c * c)  * DIV_PI;\n}\n\nvec3 computeIBL(vec3 diffuseColor, vec3 specularColor,\n                vec3 reflection, vec3 L,\n                float NoL, float NoV) {\n    float mixFact = (exp(1. * NoL) - 1.) / (exp(1.) - 1.);\n    vec3 diffuse = diffuseColor * mix(vec3(0.2), vec3(1), mixFact);\n\n    vec2 brdf = texture(u_brdfLUT,\n                        vec2(NoV,\n                             u_metallicRoughness.y)).rg;\n    float LoReflect = clamp(dot(L, reflection), 0.0, 1.0);\n    mixFact = (exp(2. * LoReflect) - 1.)/(exp(2.) - 1.);\n    vec3 specularLight = mix(vec3(0.1, 0.1, 0.3), vec3(1, 1, 1), mixFact);\n    vec3 specular = specularLight * (specularColor * brdf.x + brdf.y);\n    return diffuse + specular;\n}\n\nvec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecular,\n          vec3 L, vec3 V, vec3 N) {\n    vec3 H = normalize(L+V);\n\n    float LoH = clamp(dot(L, H), 0.0, 1.0);\n    float NoH = clamp(dot(N, H), 0.0, 1.0);\n    float VoH = clamp(dot(V, H), 0.0, 1.0);\n    float NoL = clamp(dot(N, L), 0.0, 1.0);\n    float NoV = abs(dot(N, V));\n\n    vec3 F0 = mix(dielectricSpecular, baseColor, metallic);\n    vec3 cDiff = mix(baseColor * (1. - dielectricSpecular.r),\n                     BLACK,\n                     metallic);\n    float alpha = roughness * roughness;\n    float alphaSq = alpha * alpha;\n\n    // Schlick's approximation\n    vec3 F = F0 + (vec3(1.) - F0) * pow((1. - VoH), 5.);\n\n    vec3 diffuse = (vec3(1.) - F) * cDiff * DIV_PI;\n\n    //float G = SmithJoint_G(alphaSq, NoL, NoV);\n    float G = Smith_G(alphaSq, NoL, NoV);\n\n    float D = GGX_D(alphaSq, NoH);\n\n    vec3 specular = (F * G * D) / (4. * NoL * NoV);\n    vec3  c = clamp((diffuse + specular) * NoL, 0.0, 1.0);\n    c += computeIBL(cDiff, F0, normalize(reflect(-V, N)), L, NoL, NoV);\n    return c;\n}\n\nvoid SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {\n    vec3 diff = pos - center;\n    float lenSq = dot(diff, diff);\n    float k = r.y / lenSq;\n    dr *= k; // (r * r) / lenSq\n    pos = (diff * k) + center;\n}\n\n";
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 0) {
-output += "\nfloat DistLimitsetTerrain(vec3 pos, out float invNum) {\n    float dr = 1.;\n    invNum = 0.;\n\tfloat d;\n    for(int i = 0; i < 1000; i++) {\n        if(u_maxIterations <= i) break;\n        bool inFund = true;\n\t\t";
+output += "\nfloat DistLimitsetTerrain(vec3 pos, out float invNum) {\n    float dr = 1.;\n    invNum = 0.;\n\n\tfloat dd = -1.;\n    // const vec3 tp1 = vec3(1., 0, -sqrt(3.) );\n    // const vec3 tp2 = vec3(-(1. + 0.5 + 0.5), 0, -sqrt(3.) );\n    // const vec3 tp3 = vec3(-0.5 , 0, sqrt(3.) * 0.5 ); \n    // dd = max(DistPlane(pos, tp1,\n\t// \t\t\t\t  vec3(0.5, 0, -0.8660254037844388)),\n\t// \t\tdd);\n    // dd = max(DistPlane(pos, tp1,\n\t// \t\t\t\t  vec3(1, 0, 0)),\n\t// \t\tdd);\n    // dd = max(DistPlane(pos, tp2,\n    //                   vec3(-0.5,\n    //                        0,\n    //                        -0.8660254037844388)),\n\t// \t\tdd);\n    // dd = max(DistPlane(pos, tp2,\n\t// \t\t\t\t  vec3(-1, 0, 0)),\n\t// \t\tdd);\n    // dd = max(DistPlane(pos, tp3,\n\t// \t\t\t\t  vec3(0.5,\n    //                        0,\n    //                        0.8660254037844388)),\n\t// \t\tdd);\n    // dd = max(DistPlane(pos, tp3,\n\t// \t\t\t\t  vec3(-0.5,\n    //                        0,\n    //                        0.8660254037844388)),\n\t// \t\tdd);\n    // return d;\n    float d;\n    for(int i = 0; i < 1000; i++) {\n        if(u_maxIterations <= i) break;\n        bool inFund = true;\n\t\t";
 frame = frame.push();
-var t_39 = (lineno = 298, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
+var t_39 = (lineno = 328, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
 if(t_39) {var t_38 = t_39.length;
 for(var t_37=0; t_37 < t_39.length; t_37++) {
 var t_40 = t_39[t_37];
@@ -21106,7 +21106,7 @@ output += "].r);\n\t\t\tcontinue;\n\t\t}\n\t\t";
 frame = frame.pop();
 output += "\n\n\t\t";
 frame = frame.push();
-var t_43 = (lineno = 308, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismPlanes")]));
+var t_43 = (lineno = 338, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismPlanes")]));
 if(t_43) {var t_42 = t_43.length;
 for(var t_41=0; t_41 < t_43.length; t_41++) {
 var t_44 = t_43[t_41];
@@ -21135,14 +21135,14 @@ output += "].origin;\n\t\t";
 }
 }
 frame = frame.pop();
-output += "\n\n        if(inFund) break;\n    }\n\n    return DistInfSpheirahedra(pos) / abs(dr) * u_fudgeFactor;\n}\n";
+output += "\n\n        if(inFund) break;\n    }\n    //invNum = invNum == 0. ? 10. : invNum;\n    //dd = max(DistInfSpheirahedra(pos) / abs(dr) * u_fudgeFactor, dd * 0.999);\n    //return dd;\n    return DistInfSpheirahedra(pos) / abs(dr) * u_fudgeFactor;\n}\n";
 ;
 }
 else {
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 1) {
 output += "\nfloat DistLimitsetFromSeedSpheres(vec3 pos, out float invNum) {\n    float dr = 1.;\n    invNum = 0.;\n    for(int i = 0; i < 1000; i++) {\n        if(u_maxIterations <= i) break;\n        bool inFund = true;\n\t\t";
 frame = frame.push();
-var t_47 = (lineno = 332, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
+var t_47 = (lineno = 364, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
 if(t_47) {var t_46 = t_47.length;
 for(var t_45=0; t_45 < t_47.length; t_45++) {
 var t_48 = t_47[t_45];
@@ -21171,7 +21171,7 @@ output += "].r);\n\t\t\tcontinue;\n\t\t}\n\t\t";
 frame = frame.pop();
 output += "\n        if(inFund) break;\n    }\n\n    float minDist = 9999999.;\n\n\t";
 frame = frame.push();
-var t_51 = (lineno = 346, colno = 16, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSeedSpheres")]));
+var t_51 = (lineno = 378, colno = 16, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSeedSpheres")]));
 if(t_51) {var t_50 = t_51.length;
 for(var t_49=0; t_49 < t_51.length; t_49++) {
 var t_52 = t_51[t_49];
@@ -21196,7 +21196,7 @@ output += "\n\n    return minDist;\n}\n";
 else {
 output += "\nfloat DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {\n    float dr = 1.;\n    invNum = 0.;\n    for(int i = 0; i < 1000; i++) {\n        if(u_maxIterations <= i) break;\n        bool inFund = true;\n\t\t";
 frame = frame.push();
-var t_55 = (lineno = 360, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
+var t_55 = (lineno = 392, colno = 17, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
 if(t_55) {var t_54 = t_55.length;
 for(var t_53=0; t_53 < t_55.length; t_53++) {
 var t_56 = t_55[t_53];
@@ -40618,11 +40618,11 @@ var SpheirahedraHandler = function () {
     }, {
         key: 'saveSphairahedraPrismMesh',
         value: function saveSphairahedraPrismMesh() {
-            //        const mesh = this.currentSpheirahedra.buildPrismMeshWithCSG();
+            var mesh = this.currentSpheirahedra.buildPrismMeshWithCSG();
             //        const mesh = this.currentSpheirahedra.invertSphairahedralPrismMesh();
             //const mesh = this.currentSpheirahedra.invertedSphairahedronMesh();
             //const mesh = this.currentSpheirahedra.reflectSphairahedralPrismMesh()[1].invertedSphairahedronMesh();
-            var mesh = this.currentSpheirahedra.applyInversion()[0];
+            // const mesh = this.currentSpheirahedra.applyInversion()[0];
             var binary = CSG_IO.stlSerializer.serialize(mesh, { 'binary': true });
             var blob = new Blob(binary);
 
@@ -42877,9 +42877,9 @@ output += "\n\treturn DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_b
 }
 ;
 }
-output += "\n}\n\nconst vec2 NORMAL_COEFF = vec2(0.001, 0.);\nvec3 computeNormal(const vec3 p) {\n    return normalize(vec3(distFunc(p + NORMAL_COEFF.xyy).x - distFunc(p - NORMAL_COEFF.xyy).x,\n                          distFunc(p + NORMAL_COEFF.yxy).x - distFunc(p - NORMAL_COEFF.yxy).x,\n                          distFunc(p + NORMAL_COEFF.yyx).x - distFunc(p - NORMAL_COEFF.yyx).x));\n}\n\nconst int MAX_MARCHING_LOOP = 3000;\nconst float MARCHING_THRESHOLD = 0.001;\nvoid march(const vec3 rayOrg, const vec3 rayDir,\n           inout IsectInfo isectInfo,\n\t\t   float tmin, float tmax) {\n    float rayLength = tmin;\n    vec3 rayPos = rayOrg + rayDir * rayLength;\n    vec4 dist = vec4(-1);\n    for(int i = 0 ; i < MAX_MARCHING_LOOP ; i++) {\n        if(rayLength > tmax) break;\n        dist = distFunc(rayPos);\n        rayLength += dist.x;\n        rayPos = rayOrg + rayDir * rayLength;\n        if(dist.x < u_marchingThreshold) {\n            isectInfo.objId = int(dist.y);\n            //isectInfo.objIndex = int(dist.z);\n            //isectInfo.objComponentId = int(dist.w);\n\t\t\tisectInfo.matColor = Hsv2rgb((1., -0.13 + (g_invNum) * 0.01), 1., 1.);\n            isectInfo.intersection = rayPos;\n            isectInfo.normal = computeNormal(rayPos);\n            isectInfo.mint = rayLength;\n            isectInfo.hit = true;\n            break;\n        }\n    }\n}\n\n// This function is based on FractalLab's implementation\n// http://hirnsohle.de/test/fractalLab/\nfloat ambientOcclusion(vec3 p, vec3 n, float eps, float aoIntensity ){\n    float o = 1.0;\n    float k = aoIntensity;\n    float d = 2.0 * eps;\n\n    for (int i = 0; i < 5; i++) {\n        o -= (d - distFunc(p + n * d).x) * k;\n        d += eps;\n        k *= 0.5;\n    }\n\n    return clamp(o, 0.0, 1.0);\n}\n\nfloat computeShadowFactor (const vec3 rayOrg, const vec3 rayDir,\n                           const float mint, const float maxt, const float k) {\n    float shadowFactor = 1.0;\n    for(float t = mint ; t < maxt ;){\n        float d = distFunc(rayOrg + rayDir * t).x;\n        if(d < u_marchingThreshold) {\n            shadowFactor = 0.;\n            break;\n        }\n\n        shadowFactor = min(shadowFactor, k * d / t);\n        t += d;\n    }\n    return clamp(shadowFactor, 0.0, 1.0);\n}\n\nconst vec3 AMBIENT_FACTOR = vec3(0.3);\nconst vec3 LIGHT_DIR = normalize(vec3(0, 1, 0));\nvec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {\n    IsectInfo isectInfo = NewIsectInfo();\n    vec3 rayPos = rayOrg;\n\n    vec3 l = vec3(0);\n    float alpha = 1.;\n\n    float transparency = 0.8;\n    float coeff = 1.;\n    for(int depth = 0 ; depth < 8; depth++){\n\t\tfloat tmin = 0.;\n\t\tfloat tmax = MAX_FLOAT;\n\t\tbool hit = true;\n\t\t";
+output += "\n}\n\nconst vec2 NORMAL_COEFF = vec2(0.001, 0.);\nvec3 computeNormal(const vec3 p) {\n    return normalize(vec3(distFunc(p + NORMAL_COEFF.xyy).x - distFunc(p - NORMAL_COEFF.xyy).x,\n                          distFunc(p + NORMAL_COEFF.yxy).x - distFunc(p - NORMAL_COEFF.yxy).x,\n                          distFunc(p + NORMAL_COEFF.yyx).x - distFunc(p - NORMAL_COEFF.yyx).x));\n}\n\nconst int MAX_MARCHING_LOOP = 3000;\nconst float MARCHING_THRESHOLD = 0.0001;\nvoid march(const vec3 rayOrg, const vec3 rayDir,\n           inout IsectInfo isectInfo,\n\t\t   float tmin, float tmax) {\n    float rayLength = tmin;\n    vec3 rayPos = rayOrg + rayDir * rayLength;\n    vec4 dist = vec4(-1);\n    for(int i = 0 ; i < MAX_MARCHING_LOOP ; i++) {\n        if(rayLength > tmax) break;\n        dist = distFunc(rayPos);\n        rayLength += dist.x;\n        rayPos = rayOrg + rayDir * rayLength;\n        if(dist.x < u_marchingThreshold) {\n            isectInfo.objId = int(dist.y);\n            //isectInfo.objIndex = int(dist.z);\n            //isectInfo.objComponentId = int(dist.w);\n\t\t\tisectInfo.matColor = Hsv2rgb((1., -0.13 + (g_invNum) * 0.01), 1., 1.);\n            isectInfo.intersection = rayPos;\n            isectInfo.normal = computeNormal(rayPos);\n            isectInfo.mint = rayLength;\n            isectInfo.hit = true;\n            break;\n        }\n    }\n}\n\n// This function is based on FractalLab's implementation\n// http://hirnsohle.de/test/fractalLab/\nfloat ambientOcclusion(vec3 p, vec3 n, float eps, float aoIntensity ){\n    float o = 1.0;\n    float k = aoIntensity;\n    float d = 2.0 * eps;\n\n    for (int i = 0; i < 5; i++) {\n        o -= (d - distFunc(p + n * d).x) * k;\n        d += eps;\n        k *= 0.5;\n    }\n\n    return clamp(o, 0.0, 1.0);\n}\n\nfloat computeShadowFactor (const vec3 rayOrg, const vec3 rayDir,\n                           const float mint, const float maxt, const float k) {\n    float shadowFactor = 1.0;\n    for(float t = mint ; t < maxt ;){\n        float d = distFunc(rayOrg + rayDir * t).x;\n        if(d < u_marchingThreshold) {\n            shadowFactor = 0.;\n            break;\n        }\n\n        shadowFactor = min(shadowFactor, k * d / t);\n        t += d;\n    }\n    return clamp(shadowFactor, 0.0, 1.0);\n}\n\nconst vec3 AMBIENT_FACTOR = vec3(0.3);\nconst vec3 LIGHT_DIR = normalize(vec3(0, 1, 0));\nvec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {\n    IsectInfo isectInfo = NewIsectInfo();\n    vec3 rayPos = rayOrg;\n\n    vec3 l = vec3(0);\n    float alpha = 1.;\n\n    float transparency = 0.8;\n    float coeff = 1.;\n\n    for(int depth = 0 ; depth < 8; depth++){\n\t\tfloat tmin = 0.;\n\t\tfloat tmax = MAX_FLOAT;\n\t\tbool hit = true;\n\t\t";
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 0) {
-output += "\n        hit = IntersectBoundingPlane(vec3(0, 1, 0), vec3(0, u_boundingPlaneY, 0),\n\t\t \t\t\t\t\t\t\t rayPos, rayDir,\n\t\t \t\t\t\t\t\t\t tmin, tmax);\n\t\t";
+output += "\n        hit = IntersectBoundingPlane(vec3(0, 1, 0), vec3(0, u_boundingPlaneY, 0),\n\t\t  \t\t\t\t\t\t\t rayPos, rayDir,\n                                     tmin, tmax);\n\t\t";
 ;
 }
 else {
@@ -42890,7 +42890,7 @@ output += "\n        if(hit)\n            march(rayPos, rayDir, isectInfo, tmin,
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 0) {
 output += "\n\t\tif(u_displaySpheirahedraSphere) {\n\t\t\t";
 frame = frame.push();
-var t_15 = (lineno = 129, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
+var t_15 = (lineno = 130, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
 if(t_15) {var t_14 = t_15.length;
 for(var t_13=0; t_13 < t_15.length; t_13++) {
 var t_16 = t_15[t_13];
@@ -42921,7 +42921,7 @@ output += "\n\t\t}\n\t\t";
 else {
 output += "\n\t\tif(u_displaySpheirahedraSphere) {\n\t\t\t";
 frame = frame.push();
-var t_19 = (lineno = 139, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
+var t_19 = (lineno = 140, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
 if(t_19) {var t_18 = t_19.length;
 for(var t_17=0; t_17 < t_19.length; t_17++) {
 var t_20 = t_19[t_17];
@@ -42949,7 +42949,7 @@ frame = frame.pop();
 output += "\n\t\t}\n        if(u_displayBoundingSphere) {\n            IntersectSphere(ID_INI_SPHERES, 0, -1,\n                            Hsv2rgb(0.3, 1., 1.),\n                            u_boundingSphere.center - u_boundingSphere.center,\n                            u_boundingSphere.r.x,\n                            rayPos, rayDir, isectInfo);\n        }\n\t\t";
 ;
 }
-output += "\n\n        if(isectInfo.hit) {\n            vec3 matColor = isectInfo.matColor;\n            bool transparent = false;\n            transparent =  (isectInfo.objId == ID_INI_SPHERES) ?\n                true : false;\n            vec3 ambient = matColor * AMBIENT_FACTOR;\n\n            if(transparent) {\n                vec3 diffuse =  clamp((dot(isectInfo.normal, -u_lightDirection)), 0., 1.) * matColor;\n                coeff *= transparency;\n                l += (diffuse + ambient) * coeff;\n                rayPos = isectInfo.intersection + rayDir * 0.000001 * 2.;\n                isectInfo = NewIsectInfo();\n                continue;\n            } else {\n                vec3 c = BRDF(matColor, u_metallicRoughness.x, u_metallicRoughness.y,\n                              dielectricSpecular,\n                              -u_lightDirection, -rayDir, isectInfo.normal);\n                float k = u_castShadow ?\n                    computeShadowFactor(isectInfo.intersection + 0.0001 * isectInfo.normal,\n                                        -u_lightDirection,\n                                        0.001, 5., 100.) : 1.;\n                l += (c * k + ambient * ambientOcclusion(isectInfo.intersection,\n                                                      isectInfo.normal,\n                                                        u_ao.x, u_ao.y )) * coeff;\n                break;\n            }\n        }\n        //        alpha = 0.;\n        break;\n    }\n\n    return vec4(l, alpha);\n}\n\nout vec4 outColor;\nvoid main() {\n    vec3 sum = vec3(0);\n    vec2 coordOffset = Rand2n(gl_FragCoord.xy, u_numSamples);\n    vec3 ray = CalcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,\n                       u_resolution, gl_FragCoord.xy + coordOffset);\n    vec3 org = u_camera.pos;\n    // vec3 rayOrtho = CalcRayOrtho(u_camera.pos, u_camera.target, u_camera.up, 1.0,\n    //                              u_resolution, gl_FragCoord.xy + coordOffset, org);\n    vec4 texCol = texture(u_accTexture, gl_FragCoord.xy / u_resolution);\n\toutColor = vec4(mix(clamp(computeColor(org, ray), 0., 1.), texCol, u_textureWeight));\n}\n";
+output += "\n\n        if(isectInfo.hit) {\n            vec3 matColor = isectInfo.matColor;\n            bool transparent = false;\n            transparent =  (isectInfo.objId == ID_INI_SPHERES) ?\n                true : false;\n            vec3 ambient = matColor * AMBIENT_FACTOR;\n\n            if(transparent) {\n                vec3 diffuse =  clamp((dot(isectInfo.normal, -u_lightDirection)), 0., 1.) * matColor;\n                coeff *= transparency;\n                l += (diffuse + ambient) * coeff;\n                rayPos = isectInfo.intersection + rayDir * 0.000001 * 2.;\n                isectInfo = NewIsectInfo();\n                continue;\n            } else {\n                vec3 c = BRDF(matColor, u_metallicRoughness.x, u_metallicRoughness.y,\n                              dielectricSpecular,\n                              -u_lightDirection, -rayDir, isectInfo.normal);\n                float k = u_castShadow ?\n                    computeShadowFactor(isectInfo.intersection + 0.0001 * isectInfo.normal,\n                                        -u_lightDirection,\n                                        0.001, 5., 100.) : 1.;\n                l += (c * k + ambient * ambientOcclusion(isectInfo.intersection,\n                                                      isectInfo.normal,\n                                                        u_ao.x, u_ao.y )) * coeff;\n                break;\n            }\n        }\n        // alpha = 0.;\n        break;\n    }\n\n    return vec4(l, alpha);\n}\n\nout vec4 outColor;\nvoid main() {\n    vec3 sum = vec3(0);\n    vec2 coordOffset = Rand2n(gl_FragCoord.xy, u_numSamples);\n    vec3 ray = CalcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,\n                       u_resolution, gl_FragCoord.xy + coordOffset);\n    vec3 org = u_camera.pos;\n    // vec3 rayOrtho = CalcRayOrtho(u_camera.pos, u_camera.target, u_camera.up, 1.0,\n    //                              u_resolution, gl_FragCoord.xy + coordOffset, org);\n    vec4 texCol = texture(u_accTexture, gl_FragCoord.xy / u_resolution);\n\toutColor = vec4(mix(clamp(computeColor(org, ray), 0., 1.), texCol, u_textureWeight));\n}\n";
 if(parentTemplate) {
 parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);
 } else {
@@ -54493,7 +54493,7 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADT
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_root_vue__ = __webpack_require__(208);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_root_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_root_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_11bba1e4_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_root_vue__ = __webpack_require__(231);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_11bba1e4_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_root_vue__ = __webpack_require__(232);
 function injectStyle (ssrContext) {
   __webpack_require__(205)
 }
@@ -54597,7 +54597,7 @@ var _canvasPanel = __webpack_require__(209);
 
 var _canvasPanel2 = _interopRequireDefault(_canvasPanel);
 
-var _controlPanel = __webpack_require__(226);
+var _controlPanel = __webpack_require__(227);
 
 var _controlPanel2 = _interopRequireDefault(_controlPanel);
 
@@ -54722,7 +54722,7 @@ exports = module.exports = __webpack_require__(88)(undefined);
 
 
 // module
-exports.push([module.i, "#rootPanel{width:100%;flex:1;display:flex;flex-direction:column;border-style:ridge;border-color:gray}#topPanel{flex:2}#bottomPanel{flex:1}.subPanel{display:flex;flex-direction:row;flex:1}#infoPanel,.canvasParent{flex:1;border-style:ridge;border-color:gray}#infoPanel{padding:5px}canvas{width:100%;height:100%}canvas:focus{outline:none}", ""]);
+exports.push([module.i, "#rootPanel{width:100%;flex:1;display:flex;flex-direction:column;border-style:ridge;border-color:gray}#topPanel{flex:2}#bottomPanel{flex:1}.subPanel{display:flex;flex-direction:row;flex:1}#infoPanel,.canvasParent{flex:1;border-style:ridge;border-color:gray}#infoPanel{padding:5px}canvas{width:100%;height:100%}canvas:focus{outline:none}.infoPanel{border:5px}h3,h4{padding:5px}#usage-list,h3,h4{margin:0}img{padding:5px}", ""]);
 
 // exports
 
@@ -54756,6 +54756,13 @@ var _sphaiahedraCanvas2 = _interopRequireDefault(_sphaiahedraCanvas);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -55049,21 +55056,27 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 
 "use strict";
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{attrs:{"id":"rootPanel"}},[_c('div',{staticClass:"subPanel",attrs:{"id":"topPanel"}},[_c('div',{staticClass:"canvasParent"},[_c('keep-alive',[_c(_vm.canvasHandler.topLeftCanvas,{tag:"component"})],1)],1),_vm._v(" "),_c('div',{staticClass:"canvasParent"},[_c(_vm.canvasHandler.topRightCanvas,{tag:"component"})],1)]),_vm._v(" "),_c('div',{staticClass:"subPanel",attrs:{"id":"bottomPanel"}},[_c('div',{staticClass:"subPanel"},[_c('div',{staticClass:"canvasParent"},[_c('keep-alive',[_c(_vm.canvasHandler.bottomLeftCanvas,{tag:"component"})],1)],1),_vm._v(" "),_c('div',{staticClass:"canvasParent"},[_c(_vm.canvasHandler.bottomRightCanvas,{tag:"component"})],1)]),_vm._v(" "),_vm._m(0)])])}
-var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"subPanel"},[_c('div',{attrs:{"id":"infoPanel"}},[_vm._v("\n      Left Button + dragging : rotate camera / tweak parameter (parameter view)"),_c('br'),_vm._v("\n      Right Button + dragging : move camera"),_c('br'),_vm._v("\n      Wheel : zoom"),_c('br'),_vm._v(" "),_c('a',{attrs:{"href":"https://github.com/soma-arc/SpheirahedronExperiment"}},[_vm._v("Source code on GitHub")]),_c('br')])])}]
+var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"subPanel"},[_c('div',{attrs:{"id":"infoPanel"}},[_c('h3',[_vm._v("Sphairahedron-based Fractal Renderer")]),_vm._v(" "),_c('h4',[_vm._v("Usage")]),_vm._v(" "),_c('ul',{attrs:{"id":"usage-list"}},[_c('li',[_vm._v("Left Button + dragging : rotate camera / tweak parameter ")]),_vm._v(" "),_c('li',[_vm._v("Right Button + dragging : move camera")]),_vm._v(" "),_c('li',[_vm._v("Wheel : zoom")])]),_vm._v(" "),_c('a',{attrs:{"href":"https://github.com/soma-arc/SpheirahedronExperiment","target":"_blank"}},[_c('img',{attrs:{"src":__webpack_require__(226),"width":"32px"}})])])])}]
 var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
 
 /***/ }),
 /* 226 */
+/***/ (function(module, exports) {
+
+module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpFNTE3OEEyQTk5QTAxMUUyOUExNUJDMTA0NkE4OTA0RCIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpFNTE3OEEyQjk5QTAxMUUyOUExNUJDMTA0NkE4OTA0RCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkU1MTc4QTI4OTlBMDExRTI5QTE1QkMxMDQ2QTg5MDREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkU1MTc4QTI5OTlBMDExRTI5QTE1QkMxMDQ2QTg5MDREIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+m4QGuQAAAyRJREFUeNrEl21ojWEYx895TDPbMNlBK46IUiNmPvHBSUjaqc0H8pF5+aDUKPEBqU2NhRQpX5Rv5jWlDIWlMCv7MMSWsWwmb3tpXub4XXWdPHvc9/Gc41nu+nedc7/8r/99PffLdYdDPsvkwsgkTBwsA/PADJCnzX2gHTwBt8Hl7p537/3whn04XoDZDcpBlk+9P8AFcAghzRkJwPF4zGGw0Y9QS0mAM2AnQj77FqCzrtcwB1Hk81SYojHK4DyGuQ6mhIIrBWB9Xm7ug/6B/nZrBHBegrkFxoVGpnwBMSLR9EcEcC4qb8pP14BWcBcUgewMnF3T34VqhWMFkThLJAalwnENOAKiHpJq1FZgI2AT6HZtuxZwR9GidSHtI30jOrbawxlVX78/AbNfhHlomEUJJI89O2MqeE79T8/nk8nMBm/dK576hZgmA3cp/R4l9/UeSxiHLVIlNm4nFfT0bxyuIj7LHRTKai+zdJobwMKzcZSJb0ePV5PKN+BqAAKE47UlMnERELMM3EdYP/yrd+XYb2mOiYBiQ8OQnoRBlXrl9JZix7D1pHTazu4MoyBcnYamqAjIMTR8G4FT8LuhLsexXYYjICBiqhQBvYb6fLZIJCjPypVvaOoVAW2WcasCnL2Nq82xHJNSqlCeFcDshaPK0twkAhosjZL31QYw+1rlMpWGMArl23SBsZZO58F2tlJXmjOXS+s4WGvpMiBJT/I2PInZ6lIs9/hBsNS1hS6BG0DSqmYEDRlCXQrmy50P1oDRKTSegmNbUsA0zDMwRhPJXeCE3vWLPQMvan6X8AgIa1vcR4AkGZkDR4ejJ1UHpsaVI0g2LInpOsNFUud1rhxSV+fzC9Woz2EZkWQuja7/B+jUrgtIMpy9YCW4n4K41YfzRneW5E1KJTe4B2Zq1Q5EHEtj4U3AfEzR5SVY4l7QYQPJdN2as7RKBF0BPZqqH4VgMAMBL8Byxr7y8zCZiDlnOcEKIPmUpgB5Z2ww5RdOiiRiNajUmWda5IG6WbhsyY2fx6m8gLcoJDJFkH219M3We1+cnda93pfycZpIJEL/s/wSYADmOAwAQgdpBAAAAABJRU5ErkJggg=="
+
+/***/ }),
+/* 227 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_controlPanel_vue__ = __webpack_require__(229);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_controlPanel_vue__ = __webpack_require__(230);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_controlPanel_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_controlPanel_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_4a35f653_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_controlPanel_vue__ = __webpack_require__(230);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_4a35f653_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_controlPanel_vue__ = __webpack_require__(231);
 function injectStyle (ssrContext) {
-  __webpack_require__(227)
+  __webpack_require__(228)
 }
 var normalizeComponent = __webpack_require__(36)
 /* script */
@@ -55091,20 +55104,20 @@ var Component = normalizeComponent(
 
 
 /***/ }),
-/* 227 */
+/* 228 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(228);
+var content = __webpack_require__(229);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var update = __webpack_require__(89)("74a31a92", content, true);
 
 /***/ }),
-/* 228 */
+/* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(88)(undefined);
@@ -55118,7 +55131,7 @@ exports.push([module.i, "#controlPanel{border-style:ridge;width:300px;flex-basis
 
 
 /***/ }),
-/* 229 */
+/* 230 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55392,7 +55405,7 @@ exports.default = {
 };
 
 /***/ }),
-/* 230 */
+/* 231 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -55402,7 +55415,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
 
 /***/ }),
-/* 231 */
+/* 232 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

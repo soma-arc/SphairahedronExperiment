@@ -23,10 +23,17 @@
       </div>
       <div class="subPanel">
         <div id="infoPanel">
-        Left Button + dragging : rotate camera / tweak parameter (parameter view)<br>
-        Right Button + dragging : move camera<br>
-        Wheel : zoom<br>
-        <a href="https://github.com/soma-arc/SpheirahedronExperiment">Source code on GitHub</a><br>
+          <h3>Sphairahedron-based Fractal Renderer</h3>
+          <h4>Usage</h4>
+          <ul id="usage-list">
+            <li>Left Button + dragging : rotate camera / tweak parameter </li>
+            <li>Right Button + dragging : move camera</li>
+            <li>Wheel : zoom</li>
+          </ul>
+          <a href="https://github.com/soma-arc/SpheirahedronExperiment"
+             target="_blank">
+            <img src="../img/GitHub-Mark-32px.png" width="32px"/>
+          </a>
         </div>
       </div>
     </div>
@@ -91,6 +98,28 @@ canvas {
 
 canvas:focus {
     outline: none;
+}
+
+.infoPanel {
+    border: 5px;
+}
+
+h4 {
+    margin: 0;
+    padding: 5px;
+}
+
+h3 {
+    margin: 0;
+    padding: 5px;
+}
+
+#usage-list {
+    margin: 0;
+}
+
+img {
+    padding: 5px;
 }
 
 </style>

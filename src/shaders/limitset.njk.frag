@@ -39,7 +39,7 @@ vec3 computeNormal(const vec3 p) {
 }
 
 const int MAX_MARCHING_LOOP = 3000;
-const float MARCHING_THRESHOLD = 0.001;
+const float MARCHING_THRESHOLD = 0.0001;
 void march(const vec3 rayOrg, const vec3 rayDir,
            inout IsectInfo isectInfo,
 		   float tmin, float tmax) {
