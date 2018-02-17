@@ -17,6 +17,15 @@ export class Camera {
         this.up = up;
     }
 
+    toJson() {
+        return {
+            'pos': [this.pos.x, this.pos.y, this.pos.z],
+            'target': [this.target.x, this.target.y, this.target.z],
+            'fov': this.fov,
+            'up': [this.up.x, this.up.y, this.up.z]
+        };
+    }
+
     /**
      *
      * @param {number} screenWidth
@@ -198,7 +207,7 @@ export class CameraOnSphere extends Camera {
         this.phi = Math.asin(d.y);
 
         this.prevThetaPhi = new Vec2(this.theta, this.phi);
-        this.cameraDistScale = 1.25;
+        this.cameraDistScale = 1.1;
         this.update();
     }
 

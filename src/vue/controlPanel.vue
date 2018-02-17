@@ -260,6 +260,7 @@ export default {
         },
         saveSceneParamJson: function(event) {
             const data = this.spheirahedraHandler.currentSpheirahedra.toJson();
+            data['camera'] = this.canvasHandler.limitsetCanvas.camera.toJson();
             const blob = new Blob([JSON.stringify(data, null, '    ')],
                                   { type: 'text/plain' });
             const a = document.createElement('a');
