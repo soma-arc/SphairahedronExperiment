@@ -49,6 +49,17 @@ export default class Spheirahedra {
         const prismSpheres = this.prismSpheres.map((s) => { return s.toJson(); });
         const genSpheres = this.gSpheres.map((s) => { return s.toJson(); });
         const divPlanes = this.dividePlanes.map((p) => { return p.toJson(); })
+        const convexSpheres = this.convexSpheres.map((p) => { return p.toJson(); })
+        const boundingSphere = this.boundingSphere.toJson();
+
+        const boundingPlanes = divPlanes;
+
+        const bboxMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
+        const bboxMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
+        for (const p: boundingPlanes) {
+
+        }
+
         const data = {
             'zb': this.zb,
             'zc': this.zc,
@@ -56,7 +67,12 @@ export default class Spheirahedra {
             'prismPlanes': prismPlanes,
             'prismSpheres': prismSpheres,
             'genSpheres': genSpheres,
-            'dividePlanes': divPlanes
+            'dividePlanes': divPlanes,
+            'convexSpheres': convexSpheres,
+            'boundingSphere': boundingSphere,
+            'boundingPlanes': boundingPlanes,
+            'bboxMin': bboxMin,
+            'bboxMax': bboxMax
         };
 
         return data;
