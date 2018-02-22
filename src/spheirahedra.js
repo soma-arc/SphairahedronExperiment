@@ -54,10 +54,22 @@ export default class Spheirahedra {
 
         const boundingPlanes = divPlanes;
 
+        const intersections = [];
+        intersections.push(Plane.computeIntersection(this.planes[0], this.planes[1]));
+        intersections.push(Plane.computeIntersection(this.planes[0], this.planes[2]));
+        intersections.push(Plane.computeIntersection(this.planes[1], this.planes[2]));
+        console.log(intersections);
+
         const bboxMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
         const bboxMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
-        for (const p: boundingPlanes) {
+        for (const p of intersections) {
+            bboxMin[0] = Math.min(bboxMin[0], p.x);
+            bboxMin[1] = Math.min(bboxMin[0], p.y);
+            bboxMin[2] = Math.min(bboxMin[0], p.z);
 
+            bboxMax[0] = Math.max(bboxMax[0], p.x);
+            bboxMax[1] = Math.max(bboxMax[0], p.y);
+            bboxMax[2] = Math.max(bboxMax[0], p.z);
         }
 
         const data = {

@@ -60,4 +60,29 @@ export default class Plane {
         pos = pos.sub(this.normal.scale(2 * dp));
         return pos.add(this.p1);
     }
+
+    /**
+     *
+     * @param {Plane} l1
+     * @param {Plane} l2
+     */
+    static computeIntersection(l1, l2) {
+        const l1p1 = l1.p1;
+        const l1p2 = l1.p2;
+        const l2p1 = l2.p2;
+        const l2p2 = l2.p3;
+        // const a1 = (l1p2.z - l1p1.z) / (l1p2.x - l1p1.x);
+        // const a3 = (l2p2.z - l2p1.z) / (l2p2.x - l2p1.x);
+
+        // const x = (a1 * l1p1.x - l1p1.z - a3 * l2p1.x + l2p1.z) / (a1 - a3);
+        // const z = (l1p2.z - l1p1.z) / ((l1p2.x - l1p1.x) * (x - l1p1.x)) + l1p1.z;
+
+        const s1 = ((l2p2.x - l1p2.x) * (l1p1.z - l1p2.z) - (l2p2.z - l1p2.z) * (l1p1.x - l1p2.x)) * 0.5;
+        const s2 = ((l2p2.x - l1p2.x) * (l1p2.z - l2p1.z) - (l2p2.z - l1p2.z) * (l1p2.x - l2p1.x)) * 0.5;
+
+        const x = l1p1.x + (l2p1.x - l1p1.x) * s1 / (s1 + s2);
+        const z = l1p1.y + (l2p1.y - l1p1.y) * s1 / (s1 + s2);
+
+        return new Vec3(x, 0, z);
+    }
 }
