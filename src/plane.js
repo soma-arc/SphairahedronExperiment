@@ -1,4 +1,5 @@
 import Vec3 from './vector3d.js';
+import Vec2 from './vector2d.js';
 import Sphere from './sphere.js';
 
 export default class Plane {
@@ -40,9 +41,9 @@ export default class Plane {
     }
 
     /**
-     * 
+     *
      * @param {Sphere} sphere
-     * @returns {Sphere} 
+     * @returns {Sphere}
      */
     invertOnSphere(sphere) {
         const nc = this.invertOnPoint(sphere.center);
@@ -50,9 +51,9 @@ export default class Plane {
     }
 
     /**
-     * 
+     *
      * @param {Vec3} p
-     * @returns {Vec3} 
+     * @returns {Vec3}
      */
     invertOnPoint(p) {
         let pos = p.sub(this.p1);
@@ -67,22 +68,71 @@ export default class Plane {
      * @param {Plane} l2
      */
     static computeIntersection(l1, l2) {
-        const l1p1 = l1.p1;
-        const l1p2 = l1.p2;
-        const l2p1 = l2.p2;
-        const l2p2 = l2.p3;
-        // const a1 = (l1p2.z - l1p1.z) / (l1p2.x - l1p1.x);
-        // const a3 = (l2p2.z - l2p1.z) / (l2p2.x - l2p1.x);
+        const l1Eq = Plane.computeLineEquation(new Vec2(l1.p1.x, l1.p1.z),
+                                               new Vec2(l1.p2.x, l1.p2.z));
+        const l2Eq = Plane.computeLineEquation(new Vec2(l2.p1.x, l2.p1.z),
+                                               new Vec2(l2.p3.x, l2.p3.z));
 
-        // const x = (a1 * l1p1.x - l1p1.z - a3 * l2p1.x + l2p1.z) / (a1 - a3);
-        // const z = (l1p2.z - l1p1.z) / ((l1p2.x - l1p1.x) * (x - l1p1.x)) + l1p1.z;
+        if (Math.abs(l1Eq.z) < 0.000001 && Math.abs(l2Eq.z) < 0.000001) {
+            const x1 = 1.;
+            const x2 = 5.;
+            const y1 = Plane.calcY(l1Eq, x1);
+            const y2 = Plane.calcY(l1Eq, x2);
 
-        const s1 = ((l2p2.x - l1p2.x) * (l1p1.z - l1p2.z) - (l2p2.z - l1p2.z) * (l1p1.x - l1p2.x)) * 0.5;
-        const s2 = ((l2p2.x - l1p2.x) * (l1p2.z - l2p1.z) - (l2p2.z - l1p2.z) * (l1p2.x - l2p1.x)) * 0.5;
+            const x3 = 4.;
+            const x4 = 8.;
+            const y3 = Plane.calcY(l2Eq, x3);
+            const y4 = Plane.calcY(l2Eq, x4);
 
-        const x = l1p1.x + (l2p1.x - l1p1.x) * s1 / (s1 + s2);
-        const z = l1p1.y + (l2p1.y - l1p1.y) * s1 / (s1 + s2);
+            // http://mf-atelier.sakura.ne.jp/mf-atelier/modules/tips/program/algorithm/a1.html
+            const ksi   = ( y4-y3 )*( x4-x1 ) - ( x4-x3 )*( y4-y1 );
+            const eta   = ( x2-x1 )*( y4-y1 ) - ( y2-y1 )*( x4-x1 );
+            const delta = ( x2-x1 )*( y4-y3 ) - ( y2-y1 )*( x4-x3 );
 
-        return new Vec3(x, 0, z);
+            const lambda = ksi / delta;
+            const mu    = eta / delta;
+
+            return new Vec3(x1 + lambda*( x2-x1 ), 0, y1 + lambda*( y2-y1 ));
+        } else {
+            if (l1Eq.x === 1.0) {
+                return new Vec3(l1Eq.z, 0, Plane.calcY(l2Eq, l1Eq.z));
+            } else if (l1Eq.y === 1.0) {
+                return new Vec3(Plane.calcX(l2Eq, l1Eq.z), 0, l1Eq.z);
+            } else if (l2Eq.x === 1.0) {
+                return new Vec3(l2Eq.z, 0, Plane.calcY(l1Eq, l2Eq.z));
+            }
+            return new Vec3(Plane.calcX(l1Eq, l2Eq.z), 0, l2Eq.z);
+        }
+    }
+
+    static computeLineEquation(p1, p2) {
+        const xDiff = p2.x - p1.x;
+        const yDiff = p2.y - p1.y;
+        if (Math.abs(xDiff) < 0.000001) {
+            // x = c
+            return new Vec3(1, 0, p1.x);
+        } else if (Math.abs(yDiff) < 0.000001) {
+            // y = c
+            return new Vec3(0, 1, p1.y);
+        } else {
+            // y = ax + b
+            return new Vec3(yDiff / xDiff, p1.y - p1.x * (yDiff / xDiff), 0);
+        }
+    }
+
+    static calcX(line, y) {
+        if (line.z === 0.0) {
+            return (y - line.y) / line.x;
+        } else {
+            return line.z;
+        }
+    }
+
+    static calcY(line, x) {
+        if (line.z === 0.0) {
+            return line.x * x + line.y;
+        } else {
+            return line.z;
+        }
     }
 }

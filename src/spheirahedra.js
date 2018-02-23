@@ -55,21 +55,31 @@ export default class Spheirahedra {
         const boundingPlanes = divPlanes;
 
         const intersections = [];
-        intersections.push(Plane.computeIntersection(this.planes[0], this.planes[1]));
-        intersections.push(Plane.computeIntersection(this.planes[0], this.planes[2]));
-        intersections.push(Plane.computeIntersection(this.planes[1], this.planes[2]));
-        console.log(intersections);
+        const planeIntersectionIndexes3 = [[0, 1], [0, 2], [1, 2]];
+        const planeIntersectionIndexes4 = [[0, 1], [0, 3],
+                                           [2, 1], [2, 3]];
+        if (this.planes.length === 3) {
+            for (const indexes of planeIntersectionIndexes3) {
+                intersections.push(Plane.computeIntersection(this.planes[indexes[0]],
+                                                             this.planes[indexes[1]]));
+            }
+        } else if (this.planes.length === 4) {
+            for (const indexes of planeIntersectionIndexes4) {
+                intersections.push(Plane.computeIntersection(this.planes[indexes[0]],
+                                                             this.planes[indexes[1]]));
+            }
+        }
 
         const bboxMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
         const bboxMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
         for (const p of intersections) {
             bboxMin[0] = Math.min(bboxMin[0], p.x);
-            bboxMin[1] = Math.min(bboxMin[0], p.y);
-            bboxMin[2] = Math.min(bboxMin[0], p.z);
+            bboxMin[1] = Math.min(bboxMin[1], p.y);
+            bboxMin[2] = Math.min(bboxMin[2], p.z);
 
             bboxMax[0] = Math.max(bboxMax[0], p.x);
-            bboxMax[1] = Math.max(bboxMax[0], p.y);
-            bboxMax[2] = Math.max(bboxMax[0], p.z);
+            bboxMax[1] = Math.max(bboxMax[1], p.y);
+            bboxMax[2] = Math.max(bboxMax[2], p.z);
         }
 
         const data = {
