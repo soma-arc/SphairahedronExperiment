@@ -52,7 +52,7 @@ export default class Spheirahedra {
         const convexSpheres = this.convexSpheres.map((p) => { return p.toJson(); })
         const boundingSphere = this.boundingSphere.toJson();
 
-        const boundingPlanes = divPlanes;
+        const boundingPlanes = prismPlanes;
 
         const intersections = [];
         const planeIntersectionIndexes3 = [[0, 1], [0, 2], [1, 2]];
@@ -74,12 +74,17 @@ export default class Spheirahedra {
         const bboxMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
         for (const p of intersections) {
             bboxMin[0] = Math.min(bboxMin[0], p.x);
-            bboxMin[1] = Math.min(bboxMin[1], p.y);
+            // bboxMin[1] = Math.min(bboxMin[1], p.y);
             bboxMin[2] = Math.min(bboxMin[2], p.z);
 
             bboxMax[0] = Math.max(bboxMax[0], p.x);
-            bboxMax[1] = Math.max(bboxMax[1], p.y);
+            // bboxMax[1] = Math.max(bboxMax[1], p.y);
             bboxMax[2] = Math.max(bboxMax[2], p.z);
+        }
+
+        for (const s of this.prismSpheres) {
+            bboxMin[1] = Math.min(bboxMin[1], s.center.y - 0.0001);
+            bboxMax[1] = Math.max(bboxMax[1], s.center.y + 0.0001);
         }
 
         const data = {
