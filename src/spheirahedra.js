@@ -47,7 +47,7 @@ export default class Spheirahedra {
     toJson() {
         const prismPlanes = this.planes.map((p) => { return p.toJson(); });
         const prismSpheres = this.prismSpheres.map((s) => { return s.toJson(); });
-        const genSpheres = this.gSpheres.map((s) => { return s.toJson(); });
+        const finiteSpheres = this.gSpheres.map((s) => { return s.toJson(); });
         const divPlanes = this.dividePlanes.map((p) => { return p.toJson(); })
         const convexSpheres = this.convexSpheres.map((p) => { return p.toJson(); })
         const boundingSphere = this.boundingSphere.toJson();
@@ -73,18 +73,18 @@ export default class Spheirahedra {
         const bboxMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
         const bboxMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
         for (const p of intersections) {
-            bboxMin[0] = Math.min(bboxMin[0], p.x);
+            bboxMin[0] = Math.min(bboxMin[0], p.x * 1.1);
             // bboxMin[1] = Math.min(bboxMin[1], p.y);
-            bboxMin[2] = Math.min(bboxMin[2], p.z);
+            bboxMin[2] = Math.min(bboxMin[2], p.z * 1.1);
 
-            bboxMax[0] = Math.max(bboxMax[0], p.x);
+            bboxMax[0] = Math.max(bboxMax[0], p.x * 1.1);
             // bboxMax[1] = Math.max(bboxMax[1], p.y);
-            bboxMax[2] = Math.max(bboxMax[2], p.z);
+            bboxMax[2] = Math.max(bboxMax[2], p.z * 1.1);
         }
 
         for (const s of this.prismSpheres) {
-            bboxMin[1] = Math.min(bboxMin[1], s.center.y - 0.0001);
-            bboxMax[1] = Math.max(bboxMax[1], s.center.y + 0.0001);
+            bboxMin[1] = Math.min(bboxMin[1], s.center.y - 0.1);
+            bboxMax[1] = Math.max(bboxMax[1], s.center.y + 0.1);
         }
 
         const data = {
@@ -93,13 +93,13 @@ export default class Spheirahedra {
             'inversionSphere': this.inversionSphere.toJson(),
             'prismPlanes': prismPlanes,
             'prismSpheres': prismSpheres,
-            'genSpheres': genSpheres,
+            'finiteSpheres': finiteSpheres,
             'dividePlanes': divPlanes,
             'convexSpheres': convexSpheres,
             'boundingSphere': boundingSphere,
             'boundingPlanes': boundingPlanes,
             'bboxMin': bboxMin,
-            'bboxMax': bboxMax
+            'bboxMax': bboxMax,
         };
 
         return data;
