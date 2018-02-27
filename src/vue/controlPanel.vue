@@ -86,6 +86,16 @@
           <input v-model.number="canvasHandler.limitsetCanvas.lightDirection.z"
                  type="number" step="0.01"
                  @input="updateRenderParameter">Z<br>
+          Light Direction<br>
+          <input v-model.number="canvasHandler.prismCanvas.lightDirection.x"
+                 type="number" step="0.01"
+                 @input="reRenderAll">X<br>
+          <input v-model.number="canvasHandler.prismCanvas.lightDirection.y"
+                 type="number" step="0.01"
+                 @input="reRenderAll">Y<br>
+          <input v-model.number="canvasHandler.prismCanvas.lightDirection.z"
+                 type="number" step="0.01"
+                 @input="reRenderAll">Z<br>
         </div>
         <div class="uiInnerGroup">
           <h4 class="uiGroupTitle">Inversion Sphere</h4>
@@ -173,6 +183,12 @@
                @change="renderPrismCanvas">
         <label>Raw Prism</label>
       </div>
+      <div class="uiGroup">
+        <input v-model.number="reflectionIndex"
+               type="number" min="0">ReflectionIndex
+        <button @click="applyReflection">Reflection</button>
+        <button @click="resetReflections">reset</button>
+      </div>
       <div id="saveGroup" class="uiGroup">
         <h4 class="uiGroupTitle">Save</h4>
         <input v-model.number="productRenderWidth"
@@ -193,6 +209,8 @@
 </template>
 
 <script>
+import Vec3 from '../vector3d.js';
+import Plane from '../plane.js';
 export default {
     props: ['canvasHandler', 'spheirahedraHandler'],
     data: function() {
@@ -201,7 +219,8 @@ export default {
             currentRoute: window.location.pathname,
             productRenderWidth: 1024,
             productRenderHeight: 1024,
-            productRenderMaxSamples: 1
+            productRenderMaxSamples: 1,
+            reflectionIndex: 0,
         }
     },
     methods: {
@@ -267,6 +286,114 @@ export default {
             a.href = URL.createObjectURL(blob);
             a.download = 'scene.json';
             a.click();
+        },
+        applyReflection: function(event) {
+            if (this.spheirahedraHandler.currentSpheirahedra.planes <= this.reflectionIndex) {
+                return;
+
+            }
+            const initialTile = this.spheirahedraHandler.currentSpheirahedra.planes;
+            const planeIntersectionIndexes3 = [[0, 1], [0, 2], [1, 2]];
+            const planeIntersectionIndexes4 = [[0, 1], [0, 3],
+                                               [2, 1], [2, 3]];
+            const intersections = [];
+            if (initialTile.length === 3) {
+                for (const indexes of planeIntersectionIndexes3) {
+                    intersections.push(Plane.computeIntersection(initialTile[indexes[0]],
+                                                                 initialTile[indexes[1]]));
+                }
+            } else if (initialTile.length === 4) {
+                for (const indexes of planeIntersectionIndexes4) {
+                    intersections.push(Plane.computeIntersection(initialTile[indexes[0]],
+                                                                 initialTile[indexes[1]]));
+                }
+            }
+
+            const bboxMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
+            const bboxMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
+            for (const p of intersections) {
+                bboxMin[0] = Math.min(bboxMin[0], p.x * 1.1);
+                // bboxMin[1] = Math.min(bboxMin[1], p.y);
+                bboxMin[2] = Math.min(bboxMin[2], p.z * 1.1);
+
+                bboxMax[0] = Math.max(bboxMax[0], p.x * 1.1);
+                // bboxMax[1] = Math.max(bboxMax[1], p.y);
+                bboxMax[2] = Math.max(bboxMax[2], p.z * 1.1);
+            }
+
+            const numPlanes = initialTile.length;
+            const nplanes = [];
+            let li = intersections;
+            if (numPlanes === 3) {
+                let targetPlane = initialTile[this.reflectionIndex % numPlanes];
+                const reflectPlanes = [initialTile[(this.reflectionIndex + 1) % numPlanes],
+                                       initialTile[(this.reflectionIndex + 2) % numPlanes]];
+                nplanes.push(targetPlane);
+                for (let i = 0; i < 12; i++) {
+                    targetPlane = reflectPlanes[i % (numPlanes - 1)].invertOnPlane(targetPlane);
+                    nplanes.push(targetPlane);
+                    const newList = [];
+                    for (const p of li) {
+                        const np = reflectPlanes[i % (numPlanes - 1)].invertOnPoint(p);
+                        bboxMin[0] = Math.min(bboxMin[0], np.x * 1.1);
+                        // bboxMin[1] = Math.min(bboxMin[1], p.y);
+                        bboxMin[2] = Math.min(bboxMin[2], np.z * 1.1);
+
+                        bboxMax[0] = Math.max(bboxMax[0], np.x * 1.1);
+                        // bboxMax[1] = Math.max(bboxMax[1], p.y);
+                        bboxMax[2] = Math.max(bboxMax[2], np.z * 1.1);
+                        newList.push(np);
+                    }
+                    li = newList
+                }
+            } else if (numPlanes === 4) {
+                let targetPlane1 = initialTile[this.reflectionIndex % numPlanes];
+                let targetPlane2 = initialTile[(this.reflectionIndex + 1) % numPlanes];
+                const reflectPlanes = [initialTile[(this.reflectionIndex + 2) % numPlanes],
+                                       initialTile[(this.reflectionIndex + 3) % numPlanes]];
+                nplanes.push(targetPlane1, targetPlane2);
+                for (let i = 0; i < 12; i++) {
+                    targetPlane1 = reflectPlanes[i % 2].invertOnPlane(targetPlane1);
+                    targetPlane2 = reflectPlanes[i % 2].invertOnPlane(targetPlane2);
+                    nplanes.push(targetPlane1);
+                    nplanes.push(targetPlane2);
+                    const newList = [];
+                    for (const p of li) {
+                        const np = reflectPlanes[i % 2].invertOnPoint(p);
+                        bboxMin[0] = Math.min(bboxMin[0], np.x * 1.1);
+                        // bboxMin[1] = Math.min(bboxMin[1], p.y);
+                        bboxMin[2] = Math.min(bboxMin[2], np.z * 1.1);
+
+                        bboxMax[0] = Math.max(bboxMax[0], np.x * 1.1);
+                        // bboxMax[1] = Math.max(bboxMax[1], p.y);
+                        bboxMax[2] = Math.max(bboxMax[2], np.z * 1.1);
+                        newList.push(np);
+                    }
+                    li = newList
+                }
+            }
+
+            const filteredPlanes = [];
+            for (const newPlane of nplanes) {
+                let noDuplication = true;
+                for (const fp of filteredPlanes) {
+                    if (Vec3.dot(newPlane.normal, fp.normal) > 0.9999) {
+                        noDuplication = false;
+                        break;
+                    }
+                }
+                if (noDuplication) {
+                    filteredPlanes.push(newPlane);
+                }
+            }
+            this.spheirahedraHandler.currentSpheirahedra.boundingPlanes = filteredPlanes;
+            this.spheirahedraHandler.currentSpheirahedra.bboxMin = bboxMin;
+            this.spheirahedraHandler.currentSpheirahedra.bboxMax = bboxMax;
+            this.canvasHandler.reRenderCanvases();
+        },
+        resetReflections: function(event) {
+            this.spheirahedraHandler.currentSpheirahedra.boundingPlanes = [];
+            this.canvasHandler.reRenderCanvases();
         }
     }
 }

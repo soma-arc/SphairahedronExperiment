@@ -16,12 +16,16 @@ vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
 	{% if renderMode == 0 %}
     hit = (u_displayPrism) ? DistUnion(hit, vec4(DistInfSpheirahedraAll(pos), ID_PRISM, -1, -1)) : hit;
-    return DistUnion(hit, vec4(DistLimitsetTerrain(pos, g_invNum),
-                             ID_PRISM, -1, -1));
-    // Sphere s;
-    // s.r.x = 1.;
-    //     return DistUnion(hit, vec4(DistSphere(pos, s),
-    //                            ID_PRISM, -1, -1));
+
+    float dd = DistLimitsetTerrain(pos, g_invNum);
+    {% for n in range(0, numBoundingPlanes) %}
+    dd = max(DistPlane(pos, u_boundingPlanes[{{ n }}].origin,
+                       u_boundingPlanes[{{ n }}].normal),
+             dd);
+    {% endfor %}
+
+    return DistUnion(hit, vec4(dd,
+                               ID_PRISM, -1, -1));
 	{% elif renderMode == 1 %}
 	return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_boundingSphere.center, g_invNum),
 							   ID_PRISM, -1, -1));

@@ -28,6 +28,7 @@ uniform Sphere u_spheirahedraSpheres[{{ numSpheirahedraSpheres }}];
 uniform Sphere u_seedSpheres[{{ numSeedSpheres }}];
 uniform Plane u_dividePlanes[{{ numDividePlanes }}];
 uniform Sphere u_convexSpheres[{{ numDividePlanes }}];
+uniform Plane u_boundingPlanes[{{ numBoundingPlanes }}];
 {% if numExcavationSpheres > 0 %}
 uniform Sphere u_excavationPrismSpheres[{{ numExcavationSpheres }}];
 uniform Sphere u_excavationSpheres[{{ numExcavationSpheres }}];
@@ -38,9 +39,9 @@ uniform float u_marchingThreshold;
 uniform int u_maxIterations;
 uniform float u_colorWeight;
 uniform bool u_displayPrism;
+{% endif %}
 uniform vec3 u_lightDirection;
 uniform vec2 u_metallicRoughness;
-{% endif %}
 uniform bool u_displaySpheirahedraSphere;
 uniform bool u_displayConvexSphere;
 uniform bool u_displayInversionSphere;

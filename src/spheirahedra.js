@@ -38,6 +38,7 @@ export default class Spheirahedra {
 
         this.prismSpheres = new Array(3);
         this.planes = [];
+        this.boundingPlanes = [];
 
         //        this.update();
         this.constrainsInversionSphere = true;
@@ -51,8 +52,6 @@ export default class Spheirahedra {
         const divPlanes = this.dividePlanes.map((p) => { return p.toJson(); })
         const convexSpheres = this.convexSpheres.map((p) => { return p.toJson(); })
         const boundingSphere = this.boundingSphere.toJson();
-
-        const boundingPlanes = prismPlanes;
 
         const intersections = [];
         const planeIntersectionIndexes3 = [[0, 1], [0, 2], [1, 2]];
@@ -70,21 +69,21 @@ export default class Spheirahedra {
             }
         }
 
-        const bboxMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
-        const bboxMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
-        for (const p of intersections) {
-            bboxMin[0] = Math.min(bboxMin[0], p.x * 1.1);
-            // bboxMin[1] = Math.min(bboxMin[1], p.y);
-            bboxMin[2] = Math.min(bboxMin[2], p.z * 1.1);
+        // const bboxMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
+        // const bboxMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
+        // for (const p of intersections) {
+        //     bboxMin[0] = Math.min(bboxMin[0], p.x * 1.1);
+        //     // bboxMin[1] = Math.min(bboxMin[1], p.y);
+        //     bboxMin[2] = Math.min(bboxMin[2], p.z * 1.1);
 
-            bboxMax[0] = Math.max(bboxMax[0], p.x * 1.1);
-            // bboxMax[1] = Math.max(bboxMax[1], p.y);
-            bboxMax[2] = Math.max(bboxMax[2], p.z * 1.1);
-        }
+        //     bboxMax[0] = Math.max(bboxMax[0], p.x * 1.1);
+        //     // bboxMax[1] = Math.max(bboxMax[1], p.y);
+        //     bboxMax[2] = Math.max(bboxMax[2], p.z * 1.1);
+        // }
 
         for (const s of this.prismSpheres) {
-            bboxMin[1] = Math.min(bboxMin[1], s.center.y - 0.1);
-            bboxMax[1] = Math.max(bboxMax[1], s.center.y + 0.1);
+            this.bboxMin[1] = Math.min(this.bboxMin[1], s.center.y - 0.1);
+            this.bboxMax[1] = Math.max(this.bboxMax[1], s.center.y + 0.1);
         }
 
         const data = {
@@ -97,9 +96,9 @@ export default class Spheirahedra {
             'dividePlanes': divPlanes,
             'convexSpheres': convexSpheres,
             'boundingSphere': boundingSphere,
-            'boundingPlanes': boundingPlanes,
-            'bboxMin': bboxMin,
-            'bboxMax': bboxMax,
+            'boundingPlanes': this.boundingPlanes.map((p) => { return p.toJson(); }),
+            'bboxMin': this.bboxMin,
+            'bboxMax': this.bboxMax,
         };
 
         return data;
@@ -424,6 +423,11 @@ export default class Spheirahedra {
             uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[' + i + '].r'));
         }
 
+        for (let i = 0; i < 12; i++) {
+            uniLocations.push(gl.getUniformLocation(program, `u_boundingPlanes[${i}].origin`));
+            uniLocations.push(gl.getUniformLocation(program, `u_boundingPlanes[${i}].normal`));
+        }
+
         return uniLocations;
     }
 
@@ -498,6 +502,13 @@ export default class Spheirahedra {
                          this.seedSpheres[i].center.x, this.seedSpheres[i].center.y, this.seedSpheres[i].center.z);
             gl.uniform2f(uniLocations[uniI++],
                          this.seedSpheres[i].r, this.seedSpheres[i].rSq);
+        }
+
+        for (let i = 0; i < this.boundingPlanes.length; i++) {
+            gl.uniform3f(uniLocations[uniI++],
+                         this.boundingPlanes[i].p1.x, this.boundingPlanes[i].p1.y, this.boundingPlanes[i].p1.z);
+            gl.uniform3f(uniLocations[uniI++],
+                         this.boundingPlanes[i].normal.x, this.boundingPlanes[i].normal.y, this.boundingPlanes[i].normal.z);
         }
 
         return uniI;
@@ -608,6 +619,7 @@ export default class Spheirahedra {
             'numSeedSpheres': this.numVertexes,
             'numDividePlanes': this.numDividePlanes,
             'numExcavationSpheres': this.numExcavationSpheres,
+            'numBoundingPlanes': 12,
             'SHADER_TYPE_PRISM': Spheirahedra.SHADER_TYPE_PRISM,
             'SHADER_TYPE_SPHAIRAHEDRA': Spheirahedra.SHADER_TYPE_SPHAIRAHEDRA,
             'SHADER_TYPE_LIMITSET': Spheirahedra.SHADER_TYPE_LIMITSET,
