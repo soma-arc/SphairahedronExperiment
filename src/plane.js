@@ -72,15 +72,22 @@ export default class Plane {
                                                new Vec2(l1.p2.x, l1.p2.z));
         const l2Eq = Plane.computeLineEquation(new Vec2(l2.p1.x, l2.p1.z),
                                                new Vec2(l2.p3.x, l2.p3.z));
-
-        if (Math.abs(l1Eq.z) < 0.000001 && Math.abs(l2Eq.z) < 0.000001) {
-            const x1 = 1.;
-            const x2 = 5.;
+        if (l1Eq.x === 1 && l1Eq.y === 0) {
+            return new Vec3(l1Eq.z, 0, Plane.calcY(l2Eq, l1Eq.z));
+        } else if (l1Eq.x === 0 && l1Eq.y === 1) {
+            return new Vec3(Plane.calcX(l2Eq, l1Eq.z), 0, l1Eq.z);
+        } else if (l2Eq.x === 1 && l2Eq.y === 0) {
+            return new Vec3(l2Eq.z, 0, Plane.calcY(l1Eq, l2Eq.z));
+        } else if (l2Eq.x === 0 && l2Eq.y === 1) {
+            return new Vec3(Plane.calcX(l1Eq, l2Eq.z), 0, l2Eq.z);
+        } else {
+            const x1 = 1.0;
+            const x2 = 5.0;
             const y1 = Plane.calcY(l1Eq, x1);
             const y2 = Plane.calcY(l1Eq, x2);
 
-            const x3 = 4.;
-            const x4 = 8.;
+            const x3 = 4.0;
+            const x4 = 8.0;
             const y3 = Plane.calcY(l2Eq, x3);
             const y4 = Plane.calcY(l2Eq, x4);
 
@@ -93,15 +100,6 @@ export default class Plane {
             const mu    = eta / delta;
 
             return new Vec3(x1 + lambda*( x2-x1 ), 0, y1 + lambda*( y2-y1 ));
-        } else {
-            if (l1Eq.x === 1.0) {
-                return new Vec3(l1Eq.z, 0, Plane.calcY(l2Eq, l1Eq.z));
-            } else if (l1Eq.y === 1.0) {
-                return new Vec3(Plane.calcX(l2Eq, l1Eq.z), 0, l1Eq.z);
-            } else if (l2Eq.x === 1.0) {
-                return new Vec3(l2Eq.z, 0, Plane.calcY(l1Eq, l2Eq.z));
-            }
-            return new Vec3(Plane.calcX(l1Eq, l2Eq.z), 0, l2Eq.z);
         }
     }
 
@@ -121,7 +119,7 @@ export default class Plane {
     }
 
     static calcX(line, y) {
-        if (line.z === 0.0) {
+        if (line.z === 0) {
             return (y - line.y) / line.x;
         } else {
             return line.z;
@@ -129,7 +127,7 @@ export default class Plane {
     }
 
     static calcY(line, x) {
-        if (line.z === 0.0) {
+        if (line.z === 0) {
             return line.x * x + line.y;
         } else {
             return line.z;
