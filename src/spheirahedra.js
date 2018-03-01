@@ -43,6 +43,9 @@ export default class Spheirahedra {
         //        this.update();
         this.constrainsInversionSphere = true;
         this.inversionSphere = new Sphere(0, 0, 0, 1);
+
+        this.bboxMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
+        this.bboxMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
     }
 
     toJson() {
@@ -68,18 +71,6 @@ export default class Spheirahedra {
                                                              this.planes[indexes[1]]));
             }
         }
-
-        // const bboxMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
-        // const bboxMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
-        // for (const p of intersections) {
-        //     bboxMin[0] = Math.min(bboxMin[0], p.x * 1.1);
-        //     // bboxMin[1] = Math.min(bboxMin[1], p.y);
-        //     bboxMin[2] = Math.min(bboxMin[2], p.z * 1.1);
-
-        //     bboxMax[0] = Math.max(bboxMax[0], p.x * 1.1);
-        //     // bboxMax[1] = Math.max(bboxMax[1], p.y);
-        //     bboxMax[2] = Math.max(bboxMax[2], p.z * 1.1);
-        // }
 
         for (const s of this.prismSpheres) {
             this.bboxMin[1] = Math.min(this.bboxMin[1], s.center.y - 0.1);
