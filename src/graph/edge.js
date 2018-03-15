@@ -12,4 +12,14 @@ export default class Edge {
         this.n1.addFreeAngleEdge(this);
         this.n2.addFixedAngleEdge(this);
     }
+
+    draw(ctx) {
+        ctx.strokeStyle = 'rgb(0, 0, 0)';
+
+        ctx.beginPath();
+        ctx.moveTo(this.n1.x, this.n1.y);
+        ctx.lineTo(this.n2.x, this.n2.y);
+
+        ctx.stroke();
+    }
 }
