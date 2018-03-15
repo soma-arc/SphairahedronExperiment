@@ -25,7 +25,7 @@ vec3 computeNormal(const vec3 p) {
 }
 
 const int MAX_MARCHING_LOOP = 3000;
-const float MARCHING_THRESHOLD = 0.001;
+const float MARCHING_THRESHOLD = 0.0001;
 void march(const vec3 rayOrg, const vec3 rayDir,
            inout IsectInfo isectInfo) {
     float rayLength = 0.;
@@ -49,6 +49,22 @@ void march(const vec3 rayOrg, const vec3 rayDir,
             break;
         }
     }
+}
+
+// This function is based on FractalLab's implementation
+// http://hirnsohle.de/test/fractalLab/
+float ambientOcclusion(vec3 p, vec3 n, float eps, float aoIntensity ){
+    float o = 1.0;
+    float k = aoIntensity;
+    float d = 2.0 * eps;
+
+    for (int i = 0; i < 5; i++) {
+        o -= (d - distFunc(p + n * d).x) * k;
+        d += eps;
+        k *= 0.5;
+    }
+
+    return clamp(o, 0.0, 1.0);
 }
 
 float computeShadowFactor (const vec3 rayOrg, const vec3 rayDir,
@@ -120,11 +136,24 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 isectInfo = NewIsectInfo();
                 continue;
             } else {
-                l += (diffuse + ambient) * coeff;
+
+                vec3 c = BRDF(matColor, u_metallicRoughness.x, u_metallicRoughness.y,
+                              dielectricSpecular,
+                              -u_lightDirection, -rayDir, isectInfo.normal);
+                float k = u_castShadow ?
+                    computeShadowFactor(isectInfo.intersection + 0.0001 * isectInfo.normal,
+                                        -u_lightDirection,
+                                        0.001, 1., 30.) : 1.;
+                k = 1.;
+                l += (c * k + ambient * ambientOcclusion(isectInfo.intersection,
+                                                         isectInfo.normal,
+                                                         u_ao.x, u_ao.y * 1. )) * coeff;
+
+                //                l += (diffuse + ambient) * coeff;
                 break;
             }
         }
-        //        alpha = (depth == 0) ? 0. : alpha;
+        //alpha = (depth == 0) ? 0. : alpha;
         break;
     }
 

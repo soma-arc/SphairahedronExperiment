@@ -77,21 +77,21 @@ bool IntersectBoundingSphere(vec3 sphereCenter, float radius,
 
 bool IntersectBoundingPlane(const vec3 n, const vec3 p,
 							const vec3 rayOrigin, const vec3 rayDir,
-							out float t0, out float t1) {
+							inout float t0, inout float t1) {
 	float d = -dot(p, n);
     float v = dot(n, rayDir);
     float t = -(dot(n, rayOrigin) + d) / v;
     if(THRESHOLD < t){
 		if(v < 0.) {
-			t0 = t;
+			t0 = max(t, t0);
 			t1 = MAX_FLOAT;
 		} else {
-			t0 = 0.;
+			t0 = t0;
 			t1 = t;
 		}
 		return true;
     }
-    t0 = 0.;
+    t0 = t0;
     t1 = MAX_FLOAT;
 	return (v < 0.);
 }
@@ -200,7 +200,6 @@ float DistSpheirahedra(vec3 pos) {
     return d;
 }
 
-{% if shaderType == SHADER_TYPE_LIMITSET %}
 const float DIV_PI = 1.0 / PI;
 const vec3 dielectricSpecular = vec3(0.04);
 
@@ -237,9 +236,9 @@ vec3 computeIBL(vec3 diffuseColor, vec3 specularColor,
     float mixFact = (exp(1. * NoL) - 1.) / (exp(1.) - 1.);
     vec3 diffuse = diffuseColor * mix(vec3(0.2), vec3(1), mixFact);
 
-    vec2 brdf = texture(u_brdfLUT,
-                        vec2(NoV,
-                             u_metallicRoughness.y)).rg;
+    vec2 brdf = textureLod(u_brdfLUT,
+                           vec2(NoV,
+                                u_metallicRoughness.y), 0.0).rg;
     float LoReflect = clamp(dot(L, reflection), 0.0, 1.0);
     mixFact = (exp(2. * LoReflect) - 1.)/(exp(2.) - 1.);
     vec3 specularLight = mix(vec3(0.1, 0.1, 0.3), vec3(1, 1, 1), mixFact);
@@ -280,6 +279,7 @@ vec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecul
     return c;
 }
 
+{% if shaderType == SHADER_TYPE_LIMITSET %}
 void SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {
     vec3 diff = pos - center;
     float lenSq = dot(diff, diff);
@@ -292,8 +292,9 @@ void SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {
 float DistLimitsetTerrain(vec3 pos, out float invNum) {
     float dr = 1.;
     invNum = 0.;
-	float d;
-    for(int i = 0; i < 1000; i++) {
+
+    float d;
+    for(int i = 0; i < 2000; i++) {
         if(u_maxIterations <= i) break;
         bool inFund = true;
 		{% for n in range(0, numPrismSpheres) %}
@@ -310,7 +311,7 @@ float DistLimitsetTerrain(vec3 pos, out float invNum) {
 		pos -= u_prismPlanes[{{ n }}].origin;
 		d = dot(pos, u_prismPlanes[{{ n }}].normal);
 		if(d > 0.) {
-            invNum += (float({{ (n + 1) *  10 }}) + invNum) * u_colorWeight + 1.;
+            invNum += (float({{ (n + 1 + numPrismSpheres) *  10 }}) + invNum) * u_colorWeight + 1.;
 			pos -= 2. * d * u_prismPlanes[{{ n }}].normal;
 			pos += u_prismPlanes[{{ n }}].origin;
 			continue;
@@ -320,7 +321,6 @@ float DistLimitsetTerrain(vec3 pos, out float invNum) {
 
         if(inFund) break;
     }
-
     return DistInfSpheirahedra(pos) / abs(dr) * u_fudgeFactor;
 }
 {% elif renderMode == 1 %}

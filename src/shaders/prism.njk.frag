@@ -54,6 +54,22 @@ void march(const vec3 rayOrg, const vec3 rayDir,
     }
 }
 
+// This function is based on FractalLab's implementation
+// http://hirnsohle.de/test/fractalLab/
+float ambientOcclusion(vec3 p, vec3 n, float eps, float aoIntensity ){
+    float o = 1.0;
+    float k = aoIntensity;
+    float d = 2.0 * eps;
+
+    for (int i = 0; i < 5; i++) {
+        o -= (d - distFunc(p + n * d).x) * k;
+        d += eps;
+        k *= 0.5;
+    }
+
+    return clamp(o, 0.0, 1.0);
+}
+
 float computeShadowFactor (const vec3 rayOrg, const vec3 rayDir,
                            const float mint, const float maxt, const float k) {
     float shadowFactor = 1.0;
@@ -117,12 +133,23 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 // float k = computeShadowFactor(isectInfo.intersection + 0.001 * isectInfo.normal,
                 //                               LIGHT_DIR,
                 //                               0.001, 30., 60.);
-                l += (diffuse + ambient) * coeff;
+                // l += (diffuse + ambient) * coeff;
+
+                vec3 c = BRDF(matColor, u_metallicRoughness.x, u_metallicRoughness.y,
+                              dielectricSpecular,
+                              -u_lightDirection, -rayDir, isectInfo.normal);
+                float k = u_castShadow ?
+                    computeShadowFactor(isectInfo.intersection + 0.0001 * isectInfo.normal,
+                                        -u_lightDirection,
+                                        0.01, 5., 60.) : 1.;
+                l += (c * k + ambient * ambientOcclusion(isectInfo.intersection,
+                                                         isectInfo.normal,
+                                                         u_ao.x, u_ao.y * 1.5 )) * coeff;
                 break;
             }
         }
-        //        l += vec3(0) * coeff;
-        //        alpha = (depth == 0) ? 0. : alpha;
+        // l += vec3(0) * coeff;
+        // alpha = (depth == 0) ? 0. : alpha;
         break;
     }
 
@@ -132,7 +159,7 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 out vec4 outColor;
 void main() {
     vec4 sum = vec4(0);
-    float MAX_SAMPLES = 5.;
+    float MAX_SAMPLES = 10.;
     for (float i = 0. ; i < MAX_SAMPLES ; i++) {
         vec2 coordOffset = Rand2n(gl_FragCoord.xy, i);
         vec3 ray = CalcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,

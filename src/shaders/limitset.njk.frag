@@ -42,8 +42,7 @@ vec3 computeNormal(const vec3 p) {
                           distFunc(p + NORMAL_COEFF.yyx).x - distFunc(p - NORMAL_COEFF.yyx).x));
 }
 
-const int MAX_MARCHING_LOOP = 3000;
-const float MARCHING_THRESHOLD = 0.0001;
+const int MAX_MARCHING_LOOP = 5000;
 void march(const vec3 rayOrg, const vec3 rayDir,
            inout IsectInfo isectInfo,
 		   float tmin, float tmax) {
@@ -112,20 +111,23 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 
     float transparency = 0.8;
     float coeff = 1.;
+
     for(int depth = 0 ; depth < 8; depth++){
 		float tmin = 0.;
 		float tmax = MAX_FLOAT;
 		bool hit = true;
+
 		{% if renderMode == 0 %}
         hit = IntersectBoundingPlane(vec3(0, 1, 0), vec3(0, u_boundingPlaneY, 0),
-		 							 rayPos, rayDir,
-		 							 tmin, tmax);
+		  							 rayPos, rayDir,
+                                     tmin, tmax);
 		{% else %}
 		hit = IntersectBoundingSphere(u_boundingSphere.center - u_boundingSphere.center,
                                       u_boundingSphere.r.x,
                                       rayPos, rayDir,
                                       tmin, tmax);
         {% endif %}
+
         if(hit)
             march(rayPos, rayDir, isectInfo, tmin, tmax);
 
@@ -202,6 +204,6 @@ void main() {
     vec3 org = u_camera.pos;
     // vec3 rayOrtho = CalcRayOrtho(u_camera.pos, u_camera.target, u_camera.up, 1.0,
     //                              u_resolution, gl_FragCoord.xy + coordOffset, org);
-    vec4 texCol = texture(u_accTexture, gl_FragCoord.xy / u_resolution);
+    vec4 texCol = textureLod(u_accTexture, gl_FragCoord.xy / u_resolution, 0.0);
 	outColor = vec4(mix(clamp(computeColor(org, ray), 0., 1.), texCol, u_textureWeight));
 }
