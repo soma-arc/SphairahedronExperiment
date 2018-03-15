@@ -11,6 +11,7 @@ const RT_3_INV = 1.0 / Math.sqrt(3);
 const RENDER_PRISM_TMPL = require('./shaders/prism.njk.frag');
 const RENDER_SPHEIRAHEDRA_TMPL = require('./shaders/spheirahedra.njk.frag');
 const RENDER_LIMIT_SET_TMPL = require('./shaders/limitset.njk.frag');
+const RENDER_LIMIT_SET_PATH_TRACE_TMPL = require('./shaders/limitsetPathtrace.njk.frag');
 const RENDER_PARAMETER_SPACE_TMPL = require('./shaders/parameter.njk.frag');
 
 export default class Spheirahedra {
@@ -163,7 +164,7 @@ export default class Spheirahedra {
         return sphairahedralPrism;
     }
 
-    invertSphairahedralPrismMesh() {
+    reflectSphairahedralPrismMesh() {
         const invertedSphairahedron = new Spheirahedra(0, 0);
 
         const invPlane = this.planes[2];
@@ -187,11 +188,86 @@ export default class Spheirahedra {
         }
         invertedSphairahedron.prismSpheres = newSpheres;
 
-        return invertedSphairahedron.buildPrismMeshWithCSG();
+        return [invertedSphairahedron.buildPrismMeshWithCSG(), invertedSphairahedron];
+    }
+
+    applyInversion() {
+        const ref = this.reflectSphairahedralPrismMesh()[1];
+        const s = ref.invertedSphairahedronMesh()[1];
+//        const s = this.invertedSphairahedronMesh()[1];
+        const index = 3;
+        const inversionSphere = s.prismSpheres[index];
+
+        const spheres = [];
+
+        for (let i = 0; i < s.prismSpheres.length; i++) {
+            if (index === i) continue;
+            spheres.push(inversionSphere.invertOnSphere(s.prismSpheres[i]));
+        }
+
+        const divideSpheres = [];
+        for (const p of s.dividePlanes) {
+            divideSpheres.push(inversionSphere.invertOnPlane(p));
+        }
+
+        for (const ss of s.divideSpheres) {
+            divideSpheres.push(inversionSphere.invertOnSphere(ss));
+        }
+
+        let sphairahedron = CSG.sphere({
+            center: [inversionSphere.center.x,
+                     inversionSphere.center.y,
+                     inversionSphere.center.z],
+            radius: inversionSphere.r,
+            resolution: 64
+        });
+
+        console.log('subtract');
+        let progress = 1;
+        for (const ss of spheres) {
+            console.log(` ${progress} / ${spheres.length}`);
+            progress++;
+//            console.log(ss);
+            sphairahedron = sphairahedron.subtract(CSG.sphere({
+                center: [ss.center.x, ss.center.y, ss.center.z],
+                radius: ss.r * 1.001,
+                resolution: 64
+            }));
+        }
+
+        const invPlane = this.planes[2];
+        const newPlanes = [];
+        for (const p of this.planes) {
+            newPlanes.push(invPlane.invertOnPlane(p));
+        }
+
+        for (const p of newPlanes) {
+            sphairahedron = sphairahedron.cutByPlane(CSG.Plane.fromNormalAndPoint(
+                [p.normal.x, p.normal.y, p.normal.z],
+                [p.p1.x, p.p1.y, p.p1.z]));
+        }
+
+        // for (const p of s.dividePlanes) {
+        //     sphairahedron = sphairahedron.cutByPlane(CSG.Plane.fromNormalAndPoint(
+        //         [p.normal.x, p.normal.y, p.normal.z],
+        //         [p.p1.x, p.p1.y, p.p1.z]));
+        // }
+
+        // for (const ss of divideSpheres) {
+        //     console.log(` ${progress} / ${spheres.length}`);
+        //     progress++;
+        //     sphairahedron = sphairahedron.subtract(CSG.sphere({
+        //         center: [ss.center.x, ss.center.y, ss.center.z],
+        //         radius: ss.r,
+        //         resolution: 64
+        //     }));
+        // }
+
+        return [sphairahedron];
     }
 
     invertedSphairahedronMesh() {
-        const index = 1;
+        const index = 0;
         const inversionSphere = this.prismSpheres[index];
 
         const spheres = [];
@@ -236,16 +312,23 @@ export default class Spheirahedra {
                 [p.p1.x, p.p1.y, p.p1.z]));
         }
 
-        // for (const s of divideSpheres) {
-        //     console.log(` ${progress} / ${spheres.length}`);
-        //     progress++;
-        //     sphairahedron = sphairahedron.intersect(CSG.sphere({
-        //         center: [s.center.x, s.center.y, s.center.z],
-        //         radius: s.r,
-        //         resolution: 64
-        //     }));
-        // }
-        return sphairahedron;
+        for (const s of divideSpheres) {
+            console.log(` ${progress} / ${spheres.length}`);
+            progress++;
+            sphairahedron = sphairahedron.subtract(CSG.sphere({
+                center: [s.center.x, s.center.y, s.center.z],
+                radius: s.r,
+                resolution: 64
+            }));
+        }
+
+        const invertedSphairahedron = new Spheirahedra(0, 0);
+//        spheres.push(inversionSphere);
+        invertedSphairahedron.prismSpheres = spheres;
+        invertedSphairahedron.divideSpheres = divideSpheres;
+        invertedSphairahedron.dividePlanes = this.dividePlanes;
+
+        return [sphairahedron, invertedSphairahedron];
     }
 
     addUpdateListener(listener) {
@@ -287,6 +370,7 @@ export default class Spheirahedra {
                                                        this.gSpheres[vert[1]],
                                                        this.gSpheres[vert[2]]));
         }
+        console.log(this.vertexes)
     }
 
     /**
@@ -312,7 +396,8 @@ export default class Spheirahedra {
 
     computeDividePlanes() {
         this.dividePlanes = [];
-        this.dividePlanes.push(this.computePlane(0, 1, 2));
+        //this.dividePlanes.push(this.computePlane(0, 1, 2));
+        this.dividePlanes.push(this.computePlane(0, 3, 5));
     }
 
     computeExcavationSpheres() {

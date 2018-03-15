@@ -160,6 +160,8 @@ export default class SpheirahedraHandler {
         const mesh = this.currentSpheirahedra.buildPrismMeshWithCSG();
         //        const mesh = this.currentSpheirahedra.invertSphairahedralPrismMesh();
         //const mesh = this.currentSpheirahedra.invertedSphairahedronMesh();
+        //const mesh = this.currentSpheirahedra.reflectSphairahedralPrismMesh()[1].invertedSphairahedronMesh();
+        // const mesh = this.currentSpheirahedra.applyInversion()[0];
         const binary = CSG_IO.stlSerializer.serialize(mesh, { 'binary': true });
         const blob = new Blob(binary);
 
