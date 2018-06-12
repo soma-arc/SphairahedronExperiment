@@ -29,6 +29,7 @@
                @input="reRenderAll" style="width: 80px;"
                step="0.01">
         <label>Zc</label><br>
+        <button @click="resetInversions">Reset</button>
       </div>
       <div class="uiGroup">
         <h4 class="uiGroupTitle">Limit Set&nbsp;&nbsp;-&nbsp;&nbsp;Samples: {{ canvasHandler.limitsetCanvas.numSamples }} of {{ canvasHandler.limitsetCanvas.maxSamples }}</h4>
@@ -393,6 +394,12 @@ export default {
         },
         resetReflections: function(event) {
             this.spheirahedraHandler.currentSpheirahedra.boundingPlanes = [];
+            this.canvasHandler.reRenderCanvases();
+        },
+        resetInversions: function(event) {
+            this.canvasHandler.limitsetCanvas.maxIterations = 0;
+            this.canvasHandler.limitsetCanvas.colorWeight = 1.0;
+            this.resetCamera();
             this.canvasHandler.reRenderCanvases();
         }
     }

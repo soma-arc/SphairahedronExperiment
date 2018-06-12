@@ -370,7 +370,6 @@ export default class Spheirahedra {
                                                        this.gSpheres[vert[1]],
                                                        this.gSpheres[vert[2]]));
         }
-        console.log(this.vertexes)
     }
 
     /**
