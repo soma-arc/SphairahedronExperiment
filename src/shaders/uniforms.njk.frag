@@ -29,14 +29,14 @@ uniform Sphere u_seedSpheres[{{ numSeedSpheres }}];
 uniform Plane u_dividePlanes[{{ numDividePlanes }}];
 uniform Sphere u_convexSpheres[{{ numDividePlanes }}];
 uniform Plane u_boundingPlanes[{{ numBoundingPlanes }}];
+uniform float u_fudgeFactor;
+uniform int u_maxIterations;
 {% if numExcavationSpheres > 0 %}
 uniform Sphere u_excavationPrismSpheres[{{ numExcavationSpheres }}];
 uniform Sphere u_excavationSpheres[{{ numExcavationSpheres }}];
 {% endif %}
 {% if shaderType == SHADER_TYPE_LIMITSET %}
-uniform float u_fudgeFactor;
 uniform float u_marchingThreshold;
-uniform int u_maxIterations;
 uniform float u_colorWeight;
 uniform bool u_displayPrism;
 {% endif %}
@@ -51,6 +51,7 @@ uniform bool u_displeyRawSpheirahedralPrism;
 uniform float u_boundingPlaneY;
 uniform vec2 u_ao;
 uniform Sphere u_boundingSphere;
+uniform bool u_twoDividePlanes;
 
 const int RENDER_LIMIT_TERRAIN = 0;
 const int RENDER_LIMIT_SEED_SPHERE = 1;

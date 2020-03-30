@@ -46,6 +46,8 @@ export default class Spheirahedra {
 
         this.bboxMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
         this.bboxMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
+
+        this.twoDividePlanes = false;
     }
 
     toJson() {
@@ -313,6 +315,7 @@ export default class Spheirahedra {
     computeDividePlanes() {
         this.dividePlanes = [];
         this.dividePlanes.push(this.computePlane(0, 1, 2));
+        //this.dividePlanes.push(this.computePlane(1, 3, 5));
     }
 
     computeExcavationSpheres() {
@@ -368,6 +371,8 @@ export default class Spheirahedra {
 
         uniLocations.push(gl.getUniformLocation(program, 'u_inversionSphere.center'));
         uniLocations.push(gl.getUniformLocation(program, 'u_inversionSphere.r'));
+
+        uniLocations.push(gl.getUniformLocation(program, 'u_twoDividePlanes'));
 
         for (let i = 0; i < this.numDividePlanes; i++) {
             uniLocations.push(gl.getUniformLocation(program, 'u_dividePlanes[' + i + '].origin'));
@@ -432,6 +437,8 @@ export default class Spheirahedra {
                      this.inversionSphere.center.x, this.inversionSphere.center.y, this.inversionSphere.center.z);
         gl.uniform2f(uniLocations[uniI++],
                      this.inversionSphere.r, this.inversionSphere.rSq);
+
+        gl.uniform1i(uniLocations[uniI++], this.twoDividePlanes);
 
         for (let i = 0; i < this.numDividePlanes; i++) {
             gl.uniform3f(uniLocations[uniI++],

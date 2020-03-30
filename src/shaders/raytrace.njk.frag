@@ -181,6 +181,18 @@ float DistInfSpheirahedra(const vec3 pos) {
 	d = max(-DistSphere(pos, u_prismSpheres[{{ n }}]),
 			d);
 	{% endfor %}
+    if(u_twoDividePlanes && u_prismSpheres[1].center.y > 0.) {
+        float d2 = DistPrism(pos);
+        d2 = max(-DistPlane(pos, u_prismSpheres[0].center,
+                          vec3(0, -1, 0)),
+                 d2);
+        {% for n in range(0, numPrismSpheres) %}
+        d2 = max(-DistSphere(pos, u_prismSpheres[{{ n }}]),
+                 d2);
+        {% endfor %}
+    
+        d = min(d, d2);
+    }
     return d;
 }
 
