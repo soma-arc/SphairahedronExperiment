@@ -141,6 +141,10 @@ float DistSphere(const vec3 pos, const Sphere sphere) {
     return distance(pos, sphere.center) - sphere.r.x;
 }
 
+float DistSphere2(const vec3 pos, const Sphere sphere) {
+    return distance(pos, sphere.center) - sphere.r.x;
+}
+
 float DistPrism(const vec3 pos) {
     float d = -1.;
 	{% for n in range(0, numPrismPlanes) %}
@@ -199,9 +203,9 @@ float DistInfSpheirahedra(const vec3 pos) {
 float DistSpheirahedra(vec3 pos) {
     float d = MAX_FLOAT;
     {% for n in range(0, numDividePlanes) %}
-    d = min(d, DistSphere(pos, u_convexSpheres[{{ n }}]));
+    d = min(d, DistSphere2(pos, u_convexSpheres[{{ n }}] ));
     {% endfor %}
-    {% for n in range(0, numExcavationSpheres) %}
+     {% for n in range(0, numExcavationSpheres) %}
 	d = max(-DistSphere(pos, u_excavationSpheres[{{ n }}]),
 			d);
 	{% endfor %}
@@ -387,3 +391,78 @@ float DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {
 
 {% endif %}
 {% endif %}
+
+vec3 sphereInv(vec3 pos, vec4 sphere){
+	vec3 diff = pos - sphere.xyz;
+    float d = length(diff);
+	return (diff * sphere.w * sphere.w)/(d * d) + sphere.xyz;
+}
+
+const float schottkyRadius = 30.;
+// vec4 schottky1 = vec4(30, 30, 0, schottkyRadius);
+// vec4 schottky2 = vec4(30, -30, 0, schottkyRadius);
+// vec4 schottky3 = vec4(-30, 30, 0, schottkyRadius);
+// vec4 schottky4 = vec4(-30, -30, 0, schottkyRadius);
+// vec4 schottky5 = vec4(0, 0, 42.426, schottkyRadius);
+// vec4 schottky6 = vec4(0, 0, -42.426, schottkyRadius);
+// vec4 baseSphere = vec4(0, 0, 0, 12.5);
+
+vec4 schottky1 = vec4(0, 0, 2. / sqrt(3.), 1);
+vec4 schottky2 = vec4(1, 0, -1. / sqrt(3.), 1);
+vec4 schottky3 = vec4(-1, 0, -1. / sqrt(3.), 1);
+vec4 schottky4 = vec4(0, (2. / 3.) * sqrt(6.), 0, 1);
+vec4 baseSphere = vec4(0, 1. / sqrt(6.), 0, sqrt(6.) / 2. - 1.);
+
+int MAX_KLEIN_ITARATION = 20;
+float DistSpheres(vec3 pos, out float invNum) {
+    float scalingFactor= 0.1;
+    invNum = 0.;
+    float dr = 1.;
+    bool loopEnd = true;
+    for(int i = 0 ; i < 1000 ; i++){
+        if(u_maxIterations <= i) break;
+
+        loopEnd = true;
+        if(distance(pos, schottky1.xyz) < schottky1.w){
+            vec3 diff = (pos - schottky1.xyz);
+            dr *= (schottky1.w * schottky1.w) / dot(diff, diff);
+            pos = sphereInv(pos, schottky1);
+            loopEnd = false;
+            invNum++;
+        }else if(distance(pos, schottky2.xyz) < schottky2.w){
+            vec3 diff = (pos- schottky2.xyz);
+            dr *= (schottky2.w * schottky2.w) / dot(diff, diff);
+            pos = sphereInv(pos, schottky2);
+            loopEnd = false;
+            invNum++;
+        }else if(distance(pos, schottky3.xyz) < schottky3.w){
+            vec3 diff = (pos- schottky3.xyz);
+            dr *= (schottky3.w * schottky3.w) / dot(diff, diff);
+            pos = sphereInv(pos, schottky3);
+            loopEnd = false;
+            invNum++;
+        }else if(distance(pos, schottky4.xyz) < schottky4.w){
+            vec3 diff = (pos- schottky4.xyz);
+            dr *= (schottky4.w * schottky4.w) / dot(diff, diff);
+            pos = sphereInv(pos, schottky4);
+            loopEnd = false;
+            invNum++;
+        }//else if(distance(pos, schottky5.xyz) < schottky5.w){
+        //     vec3 diff = (pos- schottky5.xyz);
+        //     dr *= (schottky5.w * schottky5.w) / dot(diff, diff);
+        //     pos = sphereInv(pos, schottky5);
+        //     loopEnd = false;
+        //     invNum++;
+        // }else if(distance(pos, schottky6.xyz) < schottky6.w){
+        //     vec3 diff = (pos- schottky6.xyz);
+        //     dr *= (schottky6.w * schottky6.w) / dot(diff, diff);
+        //     pos = sphereInv(pos, schottky6);
+        //     loopEnd = false;
+        //     invNum++;
+        // }
+        if(loopEnd == true) break;
+    }
+  
+    return (distance(pos, baseSphere.xyz) - baseSphere.w) / abs(dr) * u_fudgeFactor;
+}
+

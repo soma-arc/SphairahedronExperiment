@@ -148,8 +148,8 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 break;
             }
         }
-        // l += vec3(0) * coeff;
-        // alpha = (depth == 0) ? 0. : alpha;
+        l += vec3(1) * coeff;
+         alpha = (depth == 0) ? 0. : alpha;
         break;
     }
 

@@ -397,9 +397,9 @@ export default class Canvas3D extends Canvas {
 
     resetCamera() {
         this.cameraMode = Canvas3D.CAMERA_MODE_SPHERE;
-        this.camera = new CameraOnSphere(new Vec3(2, 1, 0), new Vec3(0, 0, 0),
+        this.camera = new CameraOnSphere(new Vec3(0, 1, 0), new Vec3(0, 0, 0),
                                          Math.PI / 3,
-                                         new Vec3(0, 1, 0));
+                                         new Vec3(1, 0, 0));
     }
 
     keyupListener(event) {

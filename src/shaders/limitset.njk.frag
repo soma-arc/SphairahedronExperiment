@@ -30,8 +30,10 @@ vec4 distFunc(const vec3 pos) {
 	return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_boundingSphere.center, g_invNum),
 							   ID_PRISM, -1, -1));
 	{% else %}
-	return DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_boundingSphere.center, g_invNum),
+    return DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_boundingSphere.center, g_invNum),
 							   ID_PRISM, -1, -1));
+    //return DistUnion(hit, vec4(DistSpheres(pos, g_invNum),
+	//						   ID_PRISM, -1, -1));
 	{% endif %}
 }
 
@@ -59,6 +61,10 @@ void march(const vec3 rayOrg, const vec3 rayDir,
             //isectInfo.objIndex = int(dist.z);
             //isectInfo.objComponentId = int(dist.w);
 			isectInfo.matColor = Hsv2rgb((1., -0.13 + (g_invNum) * 0.01), 1., 1.);
+            //if(g_invNum == 0.)
+            //isectInfo.matColor = Hsv2rgb(0.33, 1., .77);
+            //else
+            //isectInfo.matColor = Hsv2rgb(0. + (g_invNum + 1.5) * 0.1 , 1., 1.);
             isectInfo.intersection = rayPos;
             isectInfo.normal = computeNormal(rayPos);
             isectInfo.mint = rayLength;
@@ -122,14 +128,16 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 		  							 rayPos, rayDir,
                                      tmin, tmax);
 		{% else %}
+        /*
 		hit = IntersectBoundingSphere(u_boundingSphere.center - u_boundingSphere.center,
                                       u_boundingSphere.r.x,
                                       rayPos, rayDir,
                                       tmin, tmax);
+        */
         {% endif %}
 
         if(hit)
-            march(rayPos, rayDir, isectInfo, tmin, tmax);
+            march(rayPos, rayDir, isectInfo, 0.001, 1000.0);
 
 		{% if renderMode == 0 %}
 		if(u_displaySpheirahedraSphere) {
@@ -143,13 +151,36 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
 		}
 		{% else %}
 		if(u_displaySpheirahedraSphere) {
-			{% for n in range(0, numSpheirahedraSpheres) %}
-			IntersectSphere(ID_INI_SPHERES, {{ n }}, -1,
-							Hsv2rgb(float({{ n }}) * 0.3, 1., 1.),
-							u_spheirahedraSpheres[{{ n }}].center - u_boundingSphere.center,
-							u_spheirahedraSpheres[{{ n }}].r.x,
+			IntersectSphere(ID_INI_SPHERES, 0, -1,
+							vec3(0.7),
+							schottky1.xyz,
+							schottky1.w,
 							rayPos, rayDir, isectInfo);
-			{% endfor %}
+            IntersectSphere(ID_INI_SPHERES, 0, -1,
+							vec3(0.7),
+							schottky2.xyz,
+							schottky2.w,
+							rayPos, rayDir, isectInfo);
+            IntersectSphere(ID_INI_SPHERES, 0, -1,
+							vec3(0.7),
+							schottky3.xyz,
+							schottky3.w,
+							rayPos, rayDir, isectInfo);
+            IntersectSphere(ID_INI_SPHERES, 0, -1,
+							vec3(0.7),
+							schottky4.xyz,
+							schottky4.w,
+							rayPos, rayDir, isectInfo);
+            // IntersectSphere(ID_INI_SPHERES, 0, -1,
+			// 				vec3(0.7),
+			// 				schottky5.xyz,
+			// 				schottky5.w,
+			// 				rayPos, rayDir, isectInfo);
+            // IntersectSphere(ID_INI_SPHERES, 0, -1,
+			// 				vec3(0.7),
+			// 				schottky6.xyz,
+			// 				schottky6.w,
+			// 				rayPos, rayDir, isectInfo);
 		}
         if(u_displayBoundingSphere) {
             IntersectSphere(ID_INI_SPHERES, 0, -1,
@@ -188,7 +219,8 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 break;
             }
         }
-        //        alpha = 0.;
+        l += vec3(0) * coeff;
+        alpha = (depth == 0) ? 0. : alpha;
         break;
     }
 
