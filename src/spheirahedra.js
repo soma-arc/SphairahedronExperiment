@@ -315,7 +315,7 @@ export default class Spheirahedra {
     computeDividePlanes() {
         this.dividePlanes = [];
         this.dividePlanes.push(this.computePlane(0, 1, 2));
-        //this.dividePlanes.push(this.computePlane(1, 3, 5));
+        //this.dividePlanes.push(this.computePlane(3, 4, 5));
     }
 
     computeExcavationSpheres() {

@@ -198,12 +198,12 @@ class CubeI extends SpheirahedraCube {
     }
 
     computeSpheres() {
-        const r2 = (this.zb * this.zc) / 2;
-        const r4 = (this.zb * this.zb - this.zb * this.zc + 2) / (2 * SQRT_2);
-        const r6 = (this.zc * this.zc - this.zb * this.zc + 2) / (2 * SQRT_2);
+        const r2 = (this.zc * this.zc + 2 * this.zb * this.zc + 2) / 6;
+        const r4 = SQRT_2 * (-this.zc * this.zc - 2 * this.zb * this.zc + 3 * this.zb * this.zb + 4) / 12;
+        const r6 = (this.zc * this.zc - this.zb * this.zc + 2) / (3);
         const s2 = new Sphere(1 - r2, 0, 0, r2);
         const s4 = new Sphere(r4 / SQRT_2, this.zb, 1 - r4 / SQRT_2, r4);
-        const s6 = new Sphere(r6 / SQRT_2, this.zc, r6 / SQRT_2 - 1, r6);
+        const s6 = new Sphere(0, this.zc, -1 + r6, r6);
 
         this.prismSpheres = [s2, s4, s6];
     }
