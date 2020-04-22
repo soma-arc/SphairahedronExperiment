@@ -161,16 +161,16 @@ class CubeE extends SpheirahedraCube {
 class CubeH extends SpheirahedraCube {
     constructor(tb, tc) {
         super(tb, tc);
-        this.planes = Spheirahedra.PRISM_PLANES_244;
+        this.planes = Spheirahedra.PRISM_PLANES_236;
     }
 
     computeSpheres() {
-        const r2 = (this.zc * this.zc + 2 * this.zb * this.zc + 2) / 6;
-        const r4 = (-this.zc * this.zc + 3 * this.zb * this.zb - 2 * this.zb * this.zc + 4) / (6 * SQRT_2);
-        const r6 = (this.zc * this.zc - this.zb * this.zc + 2) / 3.0;
-        const s2 = new Sphere(1 - r2, 0, 0, r2);
-        const s4 = new Sphere(r4 / SQRT_2, this.zb, 1 - r4 / SQRT_2, r4);
-        const s6 = new Sphere(0, this.zc, -1 + r6, r6);
+        const r2 = (3 * this.zb * this.zb + 2 * this.zb * this.zc + 3) / (5 * SQRT_3);
+        const r4 = 2 * (this.zb * this.zb - this.zb * this.zc + 1) / (5);
+        const r6 = (-3 * this.zb * this.zb - 2 * this.zb * this.zc + 5 * this.zc * this.zc + 12) / (10 * SQRT_3);
+        const s2 = new Sphere(1 - SQRT_3 / 2 * r2, 0, r2 / 2, r2);
+        const s4 = new Sphere((1 - r4) / 2, this.zb, (1 - r4) * SQRT_3 / 2, r4);
+        const s6 = new Sphere(SQRT_3 / 2 * r6 - 0.5, this.zc, (-SQRT_3 + r6) / 2, r6);
 
         this.prismSpheres = [s2, s4, s6];
     }
