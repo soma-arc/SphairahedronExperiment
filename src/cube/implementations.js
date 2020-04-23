@@ -144,7 +144,7 @@ class CubeE extends SpheirahedraCube {
     getParameterSpaceContext() {
         // It may contain mistake.
         const conditions = ['-6. * xy - yy + 9. / 4.',
-                            '(7. * xx - 6. * xy + yy + 3.)',
+                            '(7. * xx - 6. * xy - yy - 3.)',
                             'xy - yy - 24. + 14. * SQRT_3']
         let regionConditions = 'x > 0.';
         for (const cond of conditions) {
