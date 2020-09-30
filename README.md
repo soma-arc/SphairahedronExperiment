@@ -8,7 +8,6 @@
 
 Sphairahedron is geometrical concept invented by Kazushi Ahara and Yoshiaki Araki in 2003. A sphairahedron is a kind of polyhedron with spherical faces. We can make a tiling pattern of sphairahedra using inversion about their
 spherical faces. Left image shows a cube-type sphairahedron, and right image shows the tiling pattern. In many case, it has a fractal structure.
-
 This is a renderer for sphairahedron and its tilings.
 
 For more details, see [sphairahedron.net](https://sphairahedron.net) or 
