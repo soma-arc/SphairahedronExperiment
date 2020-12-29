@@ -11,7 +11,7 @@
       </div>
     </div>
     <div class="subPanel" id="bottomPanel">
-      <div class="subPanel">
+       <div class="subPanel">
         <div class="canvasParent">
           <keep-alive>
               <component v-bind:is="canvasHandler.bottomLeftCanvas"/>
@@ -23,17 +23,14 @@
       </div>
       <div class="subPanel">
         <div id="infoPanel">
-          <h3>Sphairahedron-based Fractal Renderer</h3>
           <h4>Usage</h4>
           <ul id="usage-list">
             <li>Left Button + dragging : rotate camera / tweak parameter </li>
             <li>Right Button + dragging : move camera</li>
             <li>Wheel : zoom</li>
           </ul>
-          <a href="https://github.com/soma-arc/SpheirahedronExperiment"
-             target="_blank">
-            <img src="../img/GitHub-Mark-32px.png" width="32px"/>
-          </a>
+          <h4><a href="https://www.youtube.com/watch?v=vgrGWiYf-xU" target="_blank"> Introductory Video on YouTube</a></h4>
+          <h4>More Info: <a href="https://sphairahedron.net" target="_blank">sphairahedron.net</a></h4>
         </div>
       </div>
     </div>
@@ -57,15 +54,15 @@ export default {
 <style>
 #rootPanel {
     width: 100%;
+    height: 100%;
+    overflow: hidden;
     flex: 1;
     display: flex;
     flex-direction: column;
-    border-style: ridge;
-    border-color: gray;
 }
 
 #topPanel {
-    flex: 2;
+    flex: 1;
 }
 
 #bottomPanel {
@@ -76,10 +73,13 @@ export default {
     display: flex;
     flex-direction: row;
     flex: 1;
+    height:100%;
+    overflow:auto;
 }
 
 .canvasParent {
     flex: 1;
+    height: 100%;
     border-style: ridge;
     border-color: gray;
 }

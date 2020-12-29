@@ -152,7 +152,7 @@
                  @change="updateRenderParameter">
           <label>Color Weight</label><br>
         </div>
-      </div>
+    </div>
       <div class="uiGroup">
         <h4 class="uiGroupTitle">Sphairahedron</h4>
         <input type="checkbox"
@@ -404,13 +404,14 @@ export default {
       border-style: ridge;
       width: 300px;
       flex-basis: 300px;
-      overflow-y: scroll;
+      overflow: auto;
       border-color: gray;
       display: flex;
+      height: 100%;
   }
 
   #control {
-      width: 100%;
+      overflow:auto;
       padding: 5px;
   }
 
@@ -418,12 +419,14 @@ export default {
       border-style: ridge;
       padding: 5px;
       margin: 5px;
+      overflow: auto;
   }
 
   .uiInnerGroup {
       border-style: ridge;
       padding: 5px;
       margin: 2px;
+      overflow:auto;
   }
 
   .uiGroupTitle {

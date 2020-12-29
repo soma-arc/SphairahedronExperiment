@@ -3,7 +3,7 @@ const webpack = require('webpack');
 const path = require('path');
 
 const src  = path.resolve(__dirname, 'src');
-const dist = path.resolve(__dirname, 'dist');
+const dist = path.resolve(__dirname, 'docs');
 
 module.exports = () => ({
     entry: `${src}/index.js`,
@@ -50,7 +50,7 @@ module.exports = () => ({
     },
 
     devServer: {
-        contentBase: 'dist',
+        contentBase: dist,
         port: 3000,
     },
 
