@@ -58073,6 +58073,10 @@ exports.default = {
 //
 //
 //
+//
+//
+//
+//
 
 
 /***/ }),
@@ -69499,7 +69503,7 @@ module.exports = {toPointCloud}
 var nunjucks = __webpack_require__(82);
 var env;
 if (!nunjucks.currentEnv){
-	env = nunjucks.currentEnv = new nunjucks.Environment([], undefined);
+	env = nunjucks.currentEnv = new nunjucks.Environment([], {"dev":false,"autoescape":true,"throwOnUndefined":false,"trimBlocks":false,"lstripBlocks":false});
 } else {
 	env = nunjucks.currentEnv;
 }
@@ -69638,7 +69642,7 @@ module.exports = shim(nunjucks, env, nunjucks.nunjucksPrecompiled["shaders/prism
 var nunjucks = __webpack_require__(82);
 var env;
 if (!nunjucks.currentEnv){
-	env = nunjucks.currentEnv = new nunjucks.Environment([], {"dev":false,"autoescape":true,"throwOnUndefined":false,"trimBlocks":false,"lstripBlocks":false});
+	env = nunjucks.currentEnv = new nunjucks.Environment([], undefined);
 } else {
 	env = nunjucks.currentEnv;
 }
@@ -95262,7 +95266,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_footerPanel_vue__ = __webpack_require__(263);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_footerPanel_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_footerPanel_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_footerPanel_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_footerPanel_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_44f65af0_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_footerPanel_vue__ = __webpack_require__(488);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_3aeaf3f2_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_footerPanel_vue__ = __webpack_require__(488);
 function injectStyle (ssrContext) {
   __webpack_require__(486)
 }
@@ -95282,7 +95286,7 @@ var __vue_scopeId__ = null
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_footerPanel_vue___default.a,
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_44f65af0_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_footerPanel_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_3aeaf3f2_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_footerPanel_vue__["a" /* default */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -95303,7 +95307,7 @@ var content = __webpack_require__(487);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(108)("21334ec4", content, true, {});
+var update = __webpack_require__(108)("1072883e", content, true, {});
 
 /***/ }),
 /* 487 */
@@ -95314,7 +95318,7 @@ exports = module.exports = __webpack_require__(107)(false);
 
 
 // module
-exports.push([module.i, "footer{border-style:ridge;border-color:gray;background-color:azure;justify-content:space-between;padding-right:.9rem;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;cursor:default}#left,footer{height:50px;display:flex;align-items:center}#left{justify-content:center;padding-left:10px}.imgLink{padding-top:10px;padding-left:5px}#ghLink{height:50px}", ""]);
+exports.push([module.i, "footer{border-style:ridge;border-color:gray;background-color:azure;justify-content:space-between;padding-right:.9rem;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;cursor:default}#left,footer{height:50px;display:flex;align-items:center}#left{justify-content:center;padding-left:10px}.imgLink{padding-top:10px;padding-left:5px}#ghLink{height:50px}#link{align-items:center;justify-content:center;padding-top:20px;padding-right:5px;padding-left:5px;border-right-style:ridge;border-left-style:ridge;border-right-color:gray;border-left-color:gray;text-decoration:none;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none}#link:hover{background-color:#afeeee}", ""]);
 
 // exports
 
@@ -95325,7 +95329,7 @@ exports.push([module.i, "footer{border-style:ridge;border-color:gray;background-
 
 "use strict";
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _vm._m(0)}
-var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('footer',[_c('div',{attrs:{"id":"left"}},[_c('a',{attrs:{"id":"ghLink","href":"https://github.com/soma-arc/SphairahedronExperiment","target":"_blank"}},[_c('img',{staticClass:"imgLink",attrs:{"src":__webpack_require__(489)}})])]),_vm._v(" "),_c('div',[_vm._v("\n    Created by soma_arc\n  ")])])}]
+var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('footer',[_c('div',{attrs:{"id":"left"}},[_c('a',{attrs:{"id":"ghLink","href":"https://github.com/soma-arc/SphairahedronExperiment","target":"_blank"}},[_c('img',{staticClass:"imgLink",attrs:{"src":__webpack_require__(489)}})]),_vm._v(" "),_c('a',{attrs:{"id":"link","href":"https://youtu.be/vgrGWiYf-xU","target":"_blank"}},[_vm._v("\n      Introductory video on YouTube\n    ")])]),_vm._v(" "),_c('div',[_vm._v("\n    Created by soma_arc\n  ")])])}]
 var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
 
