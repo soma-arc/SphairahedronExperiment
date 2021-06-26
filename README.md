@@ -17,6 +17,13 @@ For more details, see [sphairahedron.net](https://sphairahedron.net) or
 We can move the parameter by dragging mouse left button. The parameter can be changed in control panel.
 There is a control panel in right side.
 
+## Build
+```
+npm install  
+npm start  
+# Access to localhost:3000  
+```
+
 ## Author
 - soma_arc (Kento Nakamura)
 
