@@ -223,6 +223,11 @@ class CubeI extends SpheirahedraCube {
             'regionCondition': regionConditions
         }
     }
+
+    computeDividePlanes() {
+        this.dividePlanes = [];
+        this.dividePlanes.push(this.computePlane(0, 3, 5));
+    }
 }
 
 export default [CubeA, CubeB, CubeC, CubeD, CubeE,
