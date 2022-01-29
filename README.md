@@ -14,8 +14,8 @@ For more details, see [sphairahedron.net](https://sphairahedron.net) or
 [Introductory Video](https://www.youtube.com/watch?v=vgrGWiYf-xU) of the software.
 
 ## Usage
+Visit [https://soma-arc.net/SphairahedronExperiment/](https://soma-arc.net/SphairahedronExperiment/)  
 We can move the parameter by dragging mouse left button. The parameter can be changed in control panel.
-There is a control panel in right side.
 
 ## Build
 ```
