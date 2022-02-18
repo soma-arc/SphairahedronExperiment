@@ -1,4 +1,4 @@
-#version 300 es
+ #version 300 es
 
 precision mediump float;
 
@@ -23,7 +23,13 @@ vec4 distFunc(const vec3 pos) {
                        u_boundingPlanes[{{ n }}].normal),
              dd);
     {% endfor %}
-
+    if(u_enableSlice) {
+        for(int i = 0; i < NUM_SLICE_PLANES; i++)
+        dd = max(DistPlane(pos, u_slicePlanes[i].origin,
+                           u_slicePlanes[i].normal),
+                 dd);
+    }
+    
     return DistUnion(hit, vec4(dd,
                                ID_PRISM, -1, -1));
 	{% elif renderMode == 1 %}

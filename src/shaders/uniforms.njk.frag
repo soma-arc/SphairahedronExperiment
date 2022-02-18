@@ -52,6 +52,9 @@ uniform float u_boundingPlaneY;
 uniform vec2 u_ao;
 uniform Sphere u_boundingSphere;
 uniform bool u_twoDividePlanes;
+uniform bool u_enableSlice;
+const int NUM_SLICE_PLANES = {{ numSlicePlanes }}; 
+uniform Plane u_slicePlanes[NUM_SLICE_PLANES];
 
 const int RENDER_LIMIT_TERRAIN = 0;
 const int RENDER_LIMIT_SEED_SPHERE = 1;

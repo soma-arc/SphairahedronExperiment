@@ -151,6 +151,10 @@
                  step="0.01"
                  @change="updateRenderParameter">
           <label>Color Weight</label><br>
+          <input type="checkbox"
+                 v-model="canvasHandler.spheirahedraHandler.currentSpheirahedra.enableSlice"
+                 @change="updateRenderParameter">
+          <label>Slice</label><br>
         </div>
     </div>
       <div class="uiGroup">

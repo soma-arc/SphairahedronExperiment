@@ -35,6 +35,9 @@ export default class Spheirahedra {
         this.numVertexes = this.vertexIndexes.length;
         this.numDividePlanes = 1;
         this.numExcavationSpheres = 0;
+        this.enableSlice = false;
+        this.numSlicePlanes = 3;
+        this.slicePlanes = Spheirahedra.PRISM_PLANES_333;
 
         this.prismSpheres = new Array(3);
         this.planes = [];
@@ -365,6 +368,13 @@ export default class Spheirahedra {
 
     getUniformLocations(gl, program) {
         const uniLocations = [];
+
+        uniLocations.push(gl.getUniformLocation(program, 'u_enableSlice'));
+        for (let i = 0; i < this.numSlicePlanes; i++) {
+            uniLocations.push(gl.getUniformLocation(program, `u_slicePlanes[${i}].origin`));
+            uniLocations.push(gl.getUniformLocation(program, `u_slicePlanes[${i}].normal`));
+        }
+        
         uniLocations.push(gl.getUniformLocation(program, 'u_zbzc'));
         uniLocations.push(gl.getUniformLocation(program, 'u_ui'));
 
@@ -427,6 +437,14 @@ export default class Spheirahedra {
     }
 
     setUniformValues(gl, uniLocations, uniI, scale) {
+        gl.uniform1i(uniLocations[uniI++], this.enableSlice);
+        for (let i = 0; i < this.slicePlanes.length; i++) {
+            gl.uniform3f(uniLocations[uniI++],
+                         this.slicePlanes[i].p1.x, this.slicePlanes[i].p1.y, this.slicePlanes[i].p1.z);
+            gl.uniform3f(uniLocations[uniI++],
+                         this.slicePlanes[i].normal.x, this.slicePlanes[i].normal.y, this.slicePlanes[i].normal.z);
+        }
+
         gl.uniform2f(uniLocations[uniI++],
                      this.zb, this.zc);
         gl.uniform2f(uniLocations[uniI++],
@@ -617,6 +635,7 @@ export default class Spheirahedra {
             'numDividePlanes': this.numDividePlanes,
             'numExcavationSpheres': this.numExcavationSpheres,
             'numBoundingPlanes': 12,
+            'numSlicePlanes': this.numSlicePlanes,
             'SHADER_TYPE_PRISM': Spheirahedra.SHADER_TYPE_PRISM,
             'SHADER_TYPE_SPHAIRAHEDRA': Spheirahedra.SHADER_TYPE_SPHAIRAHEDRA,
             'SHADER_TYPE_LIMITSET': Spheirahedra.SHADER_TYPE_LIMITSET,
