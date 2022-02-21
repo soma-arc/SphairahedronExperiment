@@ -155,6 +155,14 @@
                  v-model="canvasHandler.spheirahedraHandler.currentSpheirahedra.enableSlice"
                  @change="updateRenderParameter">
           <label>Slice</label><br>
+          Slice Type
+          <select @change="changeSliceType"
+                  v-model="spheirahedraHandler.currentSpheirahedra.currentSliceIndex">
+          <option
+            v-for="(item, index) in spheirahedraHandler.currentSpheirahedra.slicePlanes">
+            {{ index }}
+          </option>
+        </select>
         </div>
     </div>
       <div class="uiGroup">
@@ -233,6 +241,9 @@ export default {
         },
         changeDihedralAngleType: function(event) {
             this.canvasHandler.changeDihedralAngleType(this.spheirahedraHandler.currentDihedralAngleIndex);
+        },
+        changeSliceType: function(event) {
+            this.canvasHandler.reRenderLimitsetCanvas();
         },
         updateRenderParameter: function(event) {
             this.canvasHandler.reRenderLimitsetCanvas();

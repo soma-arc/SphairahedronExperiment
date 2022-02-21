@@ -108,6 +108,12 @@ vec4 DistUnion(vec4 t1, vec4 t2) {
     return (t1.x < t2.x) ? t1 : t2;
 }
 
+vec4 DistSubtract(vec4 t1, vec4 t2) {
+    return (t1.x > t2.x) ? t1 : t2;
+}
+
+
+
 float DistPlane(const vec3 pos, const vec3 p, const vec3 normal) {
     return dot(pos - p, normal);
 }
@@ -301,10 +307,11 @@ void SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {
 }
 
 {% if renderMode == 0 %}
+float g_sliceInvNum = 0.;
 float DistLimitsetTerrain(vec3 pos, out float invNum) {
     float dr = 1.;
     invNum = 0.;
-
+    g_sliceInvNum = 0.;
     float d;
     for(int i = 0; i < 2000; i++) {
         if(u_maxIterations <= i) break;
@@ -312,6 +319,7 @@ float DistLimitsetTerrain(vec3 pos, out float invNum) {
 		{% for n in range(0, numPrismSpheres) %}
 		if(distance(pos, u_prismSpheres[{{ n }}].center) < u_prismSpheres[{{ n }}].r.x) {
             invNum += (float({{ (n + 1) *  10 }}) + invNum) * u_colorWeight + 1.;
+            g_sliceInvNum++;
 			SphereInvert(pos, dr,
 						 u_prismSpheres[{{ n }}].center,
 						 u_prismSpheres[{{ n }}].r);

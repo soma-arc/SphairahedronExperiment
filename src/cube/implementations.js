@@ -99,6 +99,7 @@ class CubeD extends SpheirahedraCube {
     constructor(tb, tc) {
         super(tb, tc);
         this.planes = Spheirahedra.PRISM_PLANES_236;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_236;
     }
 
     computeSpheres() {
@@ -129,6 +130,7 @@ class CubeE extends SpheirahedraCube {
     constructor(tb, tc) {
         super(tb, tc);
         this.planes = Spheirahedra.PRISM_PLANES_236;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_236;
     }
 
     computeSpheres() {
@@ -163,6 +165,7 @@ class CubeH extends SpheirahedraCube {
     constructor(tb, tc) {
         super(tb, tc);
         this.planes = Spheirahedra.PRISM_PLANES_236;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_236;
     }
 
     computeSpheres() {
@@ -196,6 +199,7 @@ class CubeI extends SpheirahedraCube {
     constructor(tb, tc) {
         super(tb, tc);
         this.planes = Spheirahedra.PRISM_PLANES_244;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_244;
     }
 
     computeSpheres() {

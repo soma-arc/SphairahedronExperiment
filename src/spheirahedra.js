@@ -36,8 +36,9 @@ export default class Spheirahedra {
         this.numDividePlanes = 1;
         this.numExcavationSpheres = 0;
         this.enableSlice = false;
-        this.numSlicePlanes = 3;
-        this.slicePlanes = Spheirahedra.PRISM_PLANES_333;
+        this.currentSliceIndex = 0;
+        this.maxSlicePlanes = 12;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_333;
 
         this.prismSpheres = new Array(3);
         this.planes = [];
@@ -241,15 +242,15 @@ export default class Spheirahedra {
                 [p.p1.x, p.p1.y, p.p1.z]));
         }
 
-        // for (const s of divideSpheres) {
-        //     console.log(` ${progress} / ${spheres.length}`);
-        //     progress++;
-        //     sphairahedron = sphairahedron.intersect(CSG.sphere({
-        //         center: [s.center.x, s.center.y, s.center.z],
-        //         radius: s.r,
-        //         resolution: 64
-        //     }));
-        // }
+        for (const s of divideSpheres) {
+            console.log(` ${progress} / ${spheres.length}`);
+            progress++;
+            sphairahedron = sphairahedron.intersect(CSG.sphere({
+                center: [s.center.x, s.center.y, s.center.z],
+                radius: s.r,
+                resolution: 64
+            }));
+        }
         return sphairahedron;
     }
 
@@ -370,11 +371,12 @@ export default class Spheirahedra {
         const uniLocations = [];
 
         uniLocations.push(gl.getUniformLocation(program, 'u_enableSlice'));
-        for (let i = 0; i < this.numSlicePlanes; i++) {
+        uniLocations.push(gl.getUniformLocation(program, 'u_numSlicePlanes'));
+        for (let i = 0; i < this.maxSlicePlanes; i++) {
             uniLocations.push(gl.getUniformLocation(program, `u_slicePlanes[${i}].origin`));
             uniLocations.push(gl.getUniformLocation(program, `u_slicePlanes[${i}].normal`));
         }
-        
+
         uniLocations.push(gl.getUniformLocation(program, 'u_zbzc'));
         uniLocations.push(gl.getUniformLocation(program, 'u_ui'));
 
@@ -438,11 +440,21 @@ export default class Spheirahedra {
 
     setUniformValues(gl, uniLocations, uniI, scale) {
         gl.uniform1i(uniLocations[uniI++], this.enableSlice);
-        for (let i = 0; i < this.slicePlanes.length; i++) {
+        gl.uniform1i(uniLocations[uniI++], this.slicePlanes[this.currentSliceIndex].length);
+        for (let i = 0; i < this.maxSlicePlanes; i++) {
+            if (i >= this.slicePlanes[this.currentSliceIndex].length) {
+                uniI++;
+                uniI++;
+                continue;
+            }
             gl.uniform3f(uniLocations[uniI++],
-                         this.slicePlanes[i].p1.x, this.slicePlanes[i].p1.y, this.slicePlanes[i].p1.z);
+                         this.slicePlanes[this.currentSliceIndex][i].p1.x,
+                         this.slicePlanes[this.currentSliceIndex][i].p1.y,
+                         this.slicePlanes[this.currentSliceIndex][i].p1.z);
             gl.uniform3f(uniLocations[uniI++],
-                         this.slicePlanes[i].normal.x, this.slicePlanes[i].normal.y, this.slicePlanes[i].normal.z);
+                         this.slicePlanes[this.currentSliceIndex][i].normal.x,
+                         this.slicePlanes[this.currentSliceIndex][i].normal.y,
+                         this.slicePlanes[this.currentSliceIndex][i].normal.z);
         }
 
         gl.uniform2f(uniLocations[uniI++],
@@ -635,7 +647,7 @@ export default class Spheirahedra {
             'numDividePlanes': this.numDividePlanes,
             'numExcavationSpheres': this.numExcavationSpheres,
             'numBoundingPlanes': 12,
-            'numSlicePlanes': this.numSlicePlanes,
+            'numSlicePlanes': this.slicePlanes[this.currentSliceIndex].length,
             'SHADER_TYPE_PRISM': Spheirahedra.SHADER_TYPE_PRISM,
             'SHADER_TYPE_SPHAIRAHEDRA': Spheirahedra.SHADER_TYPE_SPHAIRAHEDRA,
             'SHADER_TYPE_LIMITSET': Spheirahedra.SHADER_TYPE_LIMITSET,
@@ -758,5 +770,119 @@ export default class Spheirahedra {
                           new Vec3(0.5, 3, -0.5),
                           new Vec3(1, 2, 0),
                           new Vec3(0.5, 0, -0.5).normalize())];
+    }
+
+    static get SLICE_PLANES_FROM_333() {
+        const s = Spheirahedra.PRISM_PLANES_333;
+        let planes = [];
+        const slices = [s];
+        planes.push(s[0]);
+        planes.push(s[1].invertOnPlane(planes[0]));
+        planes.push(s[2].invertOnPlane(planes[0]));
+        planes.push(s[1].invertOnPlane(planes[2]));
+        planes.push(s[2].invertOnPlane(planes[1]));
+        planes.push(s[1].invertOnPlane(planes[4]));
+
+        slices.push(planes);
+        planes = [];
+
+        planes.push(s[1]);
+        planes.push(s[2].invertOnPlane(planes[0]));
+        planes.push(s[0].invertOnPlane(planes[0]));
+        planes.push(s[2].invertOnPlane(planes[2]));
+        planes.push(s[0].invertOnPlane(planes[1]));
+        planes.push(s[2].invertOnPlane(planes[4]));
+
+        slices.push(planes);
+        planes = [];
+
+        planes.push(s[2]);
+        planes.push(s[0].invertOnPlane(planes[0]));
+        planes.push(s[1].invertOnPlane(planes[0]));
+        planes.push(s[0].invertOnPlane(planes[2]));
+        planes.push(s[1].invertOnPlane(planes[1]));
+        planes.push(s[0].invertOnPlane(planes[4]));
+
+        slices.push(planes);
+        return slices;
+    }
+
+    static get SLICE_PLANES_FROM_236() {
+        const s = Spheirahedra.PRISM_PLANES_236;
+        let planes = [];
+        const slices = [s];
+        planes.push(s[0]);
+        planes.push(s[1].invertOnPlane(planes[0]));
+        planes.push(s[2].invertOnPlane(planes[0]));
+        planes.push(s[1].invertOnPlane(planes[2]));
+        planes.push(s[2].invertOnPlane(planes[1]));
+        planes.push(s[1].invertOnPlane(planes[4]));
+        planes.push(s[2].invertOnPlane(planes[3]));
+        planes.push(s[1].invertOnPlane(planes[6]));
+        planes.push(s[2].invertOnPlane(planes[5]));
+        planes.push(s[1].invertOnPlane(planes[8]));
+        planes.push(s[2].invertOnPlane(planes[7]));
+        slices.push(planes);
+        planes = [];
+
+        planes.push(s[1]);
+        planes.push(s[2].invertOnPlane(planes[0]));
+        planes.push(s[0].invertOnPlane(planes[0]));
+        planes.push(s[2].invertOnPlane(planes[2]));
+        planes.push(s[0].invertOnPlane(planes[1]));
+        planes.push(s[2].invertOnPlane(planes[4]));
+        planes.push(s[0].invertOnPlane(planes[3]));
+        planes.push(s[2].invertOnPlane(planes[6]));
+        planes.push(s[0].invertOnPlane(planes[5]));
+        slices.push(planes);
+        planes = [];
+
+        planes.push(s[2]);
+        planes.push(s[0].invertOnPlane(planes[0]));
+        planes.push(s[1].invertOnPlane(planes[0]));
+        planes.push(s[0].invertOnPlane(planes[2]));
+        planes.push(s[1].invertOnPlane(planes[1]));
+        planes.push(s[0].invertOnPlane(planes[4]));
+        planes.push(s[1].invertOnPlane(planes[3]));
+        planes.push(s[0].invertOnPlane(planes[6]));
+        planes.push(s[1].invertOnPlane(planes[5]));
+
+        slices.push(planes);
+        return slices;
+    }
+
+    static get SLICE_PLANES_FROM_244() {
+        const s = Spheirahedra.PRISM_PLANES_244;
+        let planes = [];
+        const slices = [s];
+        planes.push(s[0]);
+        planes.push(s[1].invertOnPlane(planes[0]));
+        planes.push(s[2].invertOnPlane(planes[0]));
+        planes.push(s[1].invertOnPlane(planes[2]));
+        planes.push(s[2].invertOnPlane(planes[1]));
+        planes.push(s[1].invertOnPlane(planes[4]));
+        planes.push(s[2].invertOnPlane(planes[3]));
+        slices.push(planes);
+        planes = [];
+
+        planes.push(s[1]);
+        planes.push(s[2].invertOnPlane(planes[0]));
+        planes.push(s[0].invertOnPlane(planes[0]));
+        planes.push(s[2].invertOnPlane(planes[2]));
+        planes.push(s[0].invertOnPlane(planes[1]));
+        planes.push(s[2].invertOnPlane(planes[4]));
+
+        slices.push(planes);
+        planes = [];
+
+        planes.push(s[2]);
+        planes.push(s[0].invertOnPlane(planes[0]));
+        planes.push(s[1].invertOnPlane(planes[0]));
+        planes.push(s[0].invertOnPlane(planes[2]));
+        planes.push(s[1].invertOnPlane(planes[1]));
+        planes.push(s[0].invertOnPlane(planes[4]));
+
+        slices.push(planes);
+        return slices;
     }
 }

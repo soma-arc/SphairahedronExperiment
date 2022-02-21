@@ -10,6 +10,7 @@ precision mediump float;
 
 const int ID_PRISM = 0;
 const int ID_INI_SPHERES = 1;
+const int ID_SLICE = 2;
 
 float g_invNum;
 vec4 distFunc(const vec3 pos) {
@@ -18,20 +19,20 @@ vec4 distFunc(const vec3 pos) {
     hit = (u_displayPrism) ? DistUnion(hit, vec4(DistInfSpheirahedraAll(pos), ID_PRISM, -1, -1)) : hit;
 
     float dd = DistLimitsetTerrain(pos, g_invNum);
+    hit = DistUnion(vec4(dd, ID_PRISM, -1, -1), hit);
     {% for n in range(0, numBoundingPlanes) %}
-    dd = max(DistPlane(pos, u_boundingPlanes[{{ n }}].origin,
-                       u_boundingPlanes[{{ n }}].normal),
-             dd);
+    hit = DistSubtract(vec4(DistPlane(pos, u_boundingPlanes[{{ n }}].origin,
+                                      u_boundingPlanes[{{ n }}].normal), ID_SLICE, -1, -1), hit);
     {% endfor %}
     if(u_enableSlice) {
-        for(int i = 0; i < NUM_SLICE_PLANES; i++)
-        dd = max(DistPlane(pos, u_slicePlanes[i].origin,
-                           u_slicePlanes[i].normal),
-                 dd);
+        for(int i = 0; i < 12; i++) {
+            if(i > u_numSlicePlanes) break;
+            hit = DistSubtract(vec4(DistPlane(pos, u_slicePlanes[i].origin,
+                                              u_slicePlanes[i].normal), ID_SLICE, -1, -1), hit);
+        }
     }
     
-    return DistUnion(hit, vec4(dd,
-                               ID_PRISM, -1, -1));
+    return hit;
 	{% elif renderMode == 1 %}
 	return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_boundingSphere.center, g_invNum),
 							   ID_PRISM, -1, -1));
@@ -64,7 +65,11 @@ void march(const vec3 rayOrg, const vec3 rayDir,
             isectInfo.objId = int(dist.y);
             //isectInfo.objIndex = int(dist.z);
             //isectInfo.objComponentId = int(dist.w);
-			isectInfo.matColor = Hsv2rgb((1., -0.13 + (g_invNum) * 0.01), 1., 1.);
+            if(isectInfo.objId == ID_PRISM) {
+                isectInfo.matColor = Hsv2rgb((1., -0.13 + (g_invNum) * 0.01), 1., 1.);
+            } else if(isectInfo.objId == ID_SLICE) {
+                isectInfo.matColor = Hsv2rgb(g_sliceInvNum * 0.01, 1., 1.);
+            }
             isectInfo.intersection = rayPos;
             isectInfo.normal = computeNormal(rayPos);
             isectInfo.mint = rayLength;
