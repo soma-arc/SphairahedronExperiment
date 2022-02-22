@@ -885,4 +885,15 @@ export default class Spheirahedra {
         slices.push(planes);
         return slices;
     }
+
+    static get SLICE_PLANES_FROM_2222_SQUARE() {
+        const s = Spheirahedra.PRISM_PLANES_2222_SQUARE;
+        let planes = [];
+        const slices = [Spheirahedra.PRISM_PLANES_2222_SQUARE,
+                        Spheirahedra.PRISM_PLANES_2222_SQUARE,
+                        Spheirahedra.PRISM_PLANES_2222_SQUARE,
+                        Spheirahedra.PRISM_PLANES_2222_SQUARE];
+        
+        return slices;
+    }
 }

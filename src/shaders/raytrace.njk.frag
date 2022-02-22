@@ -307,7 +307,6 @@ void SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {
 }
 
 {% if renderMode == 0 %}
-float g_sliceInvNum = 0.;
 float DistLimitsetTerrain(vec3 pos, out float invNum) {
     float dr = 1.;
     invNum = 0.;

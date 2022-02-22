@@ -14,7 +14,7 @@ export default class HexahedralCake2 extends Spheirahedra {
         this.numVertexes = this.vertexIndexes.length;
 
         this.numSlicePlanes = 4;
-        this.slicePlanes = Spheirahedra.PRISM_PLANES_2222_SQUARE;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_2222_SQUARE;
     }
 
     computeGenSpheres() {

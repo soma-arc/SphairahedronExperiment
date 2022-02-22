@@ -61,3 +61,5 @@ const int RENDER_LIMIT_SEED_SPHERE = 1;
 const int RENDER_LIMIT_SPHEIRAHEDRON = 2;
 
 const float PI = 3.14159265359;
+
+float g_sliceInvNum = 0.;
