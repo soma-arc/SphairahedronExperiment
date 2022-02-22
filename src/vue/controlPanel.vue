@@ -162,7 +162,30 @@
             v-for="(item, index) in spheirahedraHandler.currentSpheirahedra.slicePlanes">
             {{ index }}
           </option>
-        </select>
+          </select><br>
+          Slice Plane Origin<br>
+          <input v-model.number="spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1.x"
+                 type="number" step="0.001"
+                 @input="updateRenderParameter">X<br>
+          <input v-model.number="spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1.y"
+                 type="number" step="0.001"
+                 @input="updateRenderParameter">Y<br>
+          <input v-model.number="spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1.z"
+                 type="number" step="0.001"
+                 @input="updateRenderParameter">Z<br>
+          Slice Plane Normal<br>
+          <input type="checkbox"
+                 v-model="spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlaneFlipNormal"
+                 @change="updateRenderParameter"> FlipNormal<br>
+          <input v-model.number="spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal.x"
+                 type="number" step="0.01"
+                 @input="updateRenderParameter">X<br>
+          <input v-model.number="spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal.y"
+                 type="number" step="0.01"
+                 @input="updateRenderParameter">Y<br>
+          <input v-model.number="spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal.z"
+                 type="number" step="0.01"
+                 @input="updateRenderParameter">Z<br>
         </div>
     </div>
       <div class="uiGroup">

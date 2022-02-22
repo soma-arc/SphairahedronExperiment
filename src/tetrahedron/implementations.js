@@ -13,6 +13,7 @@ class TetrahedronB extends Tetrahedron {
     constructor() {
         super(0, 0);
         this.planes = Spheirahedra.PRISM_PLANES_236;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_236;
     }
 }
 
@@ -20,6 +21,7 @@ class TetrahedronC extends Tetrahedron {
     constructor() {
         super(0, 0);
         this.planes = Spheirahedra.PRISM_PLANES_244;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_244;
     }
 }
 

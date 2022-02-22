@@ -55,6 +55,7 @@ uniform bool u_twoDividePlanes;
 uniform bool u_enableSlice;
 uniform int u_numSlicePlanes;
 uniform Plane u_slicePlanes[12];
+uniform Plane u_quasiSphereSlicePlane;
 
 const int RENDER_LIMIT_TERRAIN = 0;
 const int RENDER_LIMIT_SEED_SPHERE = 1;
@@ -63,3 +64,4 @@ const int RENDER_LIMIT_SPHEIRAHEDRON = 2;
 const float PI = 3.14159265359;
 
 float g_sliceInvNum = 0.;
+

@@ -39,6 +39,11 @@ export default class Spheirahedra {
         this.currentSliceIndex = 0;
         this.maxSlicePlanes = 12;
         this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_333;
+        this.quasiSphereSlicePlane = new Plane(new Vec3(0, 0, 0),
+                                               new Vec3(0, 0, 0),
+                                               new Vec3(0, 0, 0),
+                                               new Vec3(1, 0, 0));
+        this.quasiSphereSlicePlaneFlipNormal = false;
 
         this.prismSpheres = new Array(3);
         this.planes = [];
@@ -376,6 +381,8 @@ export default class Spheirahedra {
             uniLocations.push(gl.getUniformLocation(program, `u_slicePlanes[${i}].origin`));
             uniLocations.push(gl.getUniformLocation(program, `u_slicePlanes[${i}].normal`));
         }
+        uniLocations.push(gl.getUniformLocation(program, `u_quasiSphereSlicePlane.origin`));
+        uniLocations.push(gl.getUniformLocation(program, `u_quasiSphereSlicePlane.normal`));
 
         uniLocations.push(gl.getUniformLocation(program, 'u_zbzc'));
         uniLocations.push(gl.getUniformLocation(program, 'u_ui'));
@@ -456,7 +463,21 @@ export default class Spheirahedra {
                          this.slicePlanes[this.currentSliceIndex][i].normal.y,
                          this.slicePlanes[this.currentSliceIndex][i].normal.z);
         }
-
+        gl.uniform3f(uniLocations[uniI++],
+                     this.quasiSphereSlicePlane.p1.x,
+                     this.quasiSphereSlicePlane.p1.y,
+                     this.quasiSphereSlicePlane.p1.z);
+        if (this.quasiSphereSlicePlaneFlipNormal) {
+            gl.uniform3f(uniLocations[uniI++],
+                         this.quasiSphereSlicePlane.normal.x * -1,
+                         this.quasiSphereSlicePlane.normal.y * -1,
+                         this.quasiSphereSlicePlane.normal.z * -1);
+        } else {
+            gl.uniform3f(uniLocations[uniI++],
+                         this.quasiSphereSlicePlane.normal.x,
+                         this.quasiSphereSlicePlane.normal.y,
+                         this.quasiSphereSlicePlane.normal.z);
+        }
         gl.uniform2f(uniLocations[uniI++],
                      this.zb, this.zc);
         gl.uniform2f(uniLocations[uniI++],

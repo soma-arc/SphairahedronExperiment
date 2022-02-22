@@ -37,8 +37,16 @@ vec4 distFunc(const vec3 pos) {
 	return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_boundingSphere.center, g_invNum),
 							   ID_PRISM, -1, -1));
 	{% else %}
-	return DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_boundingSphere.center, g_invNum),
+	hit = DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_boundingSphere.center, g_invNum),
 							   ID_PRISM, -1, -1));
+        if(u_enableSlice) {
+          hit = DistSubtract(vec4(DistPlane(pos,
+                                            u_quasiSphereSlicePlane.origin,
+                                            normalize(u_quasiSphereSlicePlane.normal)),
+                                  ID_SLICE, -1, -1), hit);
+          
+        }
+        return hit;
 	{% endif %}
 }
 
