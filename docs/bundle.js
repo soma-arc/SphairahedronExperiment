@@ -3515,6 +3515,12 @@ var Spheirahedra = function () {
         this.numVertexes = this.vertexIndexes.length;
         this.numDividePlanes = 1;
         this.numExcavationSpheres = 0;
+        this.enableSlice = false;
+        this.currentSliceIndex = 0;
+        this.maxSlicePlanes = 12;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_333;
+        this.quasiSphereSlicePlane = new _plane2.default(new _vector3d2.default(0, 0, 0), new _vector3d2.default(0, 0, 0), new _vector3d2.default(0, 0, 0), new _vector3d2.default(1, 0, 0));
+        this.quasiSphereSlicePlaneFlipNormal = false;
 
         this.prismSpheres = new Array(3);
         this.planes = [];
@@ -4028,16 +4034,6 @@ var Spheirahedra = function () {
 
                     sphairahedron = sphairahedron.cutByPlane(CSG.Plane.fromNormalAndPoint([_p4.normal.x, _p4.normal.y, _p4.normal.z], [_p4.p1.x, _p4.p1.y, _p4.p1.z]));
                 }
-
-                // for (const s of divideSpheres) {
-                //     console.log(` ${progress} / ${spheres.length}`);
-                //     progress++;
-                //     sphairahedron = sphairahedron.intersect(CSG.sphere({
-                //         center: [s.center.x, s.center.y, s.center.z],
-                //         radius: s.r,
-                //         resolution: 64
-                //     }));
-                // }
             } catch (err) {
                 _didIteratorError15 = true;
                 _iteratorError15 = err;
@@ -4053,25 +4049,21 @@ var Spheirahedra = function () {
                 }
             }
 
-            return sphairahedron;
-        }
-    }, {
-        key: 'addUpdateListener',
-        value: function addUpdateListener(listener) {
-            this.updateListeners.push(listener);
-        }
-    }, {
-        key: 'updated',
-        value: function updated() {
             var _iteratorNormalCompletion16 = true;
             var _didIteratorError16 = false;
             var _iteratorError16 = undefined;
 
             try {
-                for (var _iterator16 = this.updateListeners[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
-                    var listener = _step16.value;
+                for (var _iterator16 = divideSpheres[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+                    var _s2 = _step16.value;
 
-                    listener();
+                    console.log(' ' + progress + ' / ' + spheres.length);
+                    progress++;
+                    sphairahedron = sphairahedron.intersect(CSG.sphere({
+                        center: [_s2.center.x, _s2.center.y, _s2.center.z],
+                        radius: _s2.r,
+                        resolution: 64
+                    }));
                 }
             } catch (err) {
                 _didIteratorError16 = true;
@@ -4084,6 +4076,41 @@ var Spheirahedra = function () {
                 } finally {
                     if (_didIteratorError16) {
                         throw _iteratorError16;
+                    }
+                }
+            }
+
+            return sphairahedron;
+        }
+    }, {
+        key: 'addUpdateListener',
+        value: function addUpdateListener(listener) {
+            this.updateListeners.push(listener);
+        }
+    }, {
+        key: 'updated',
+        value: function updated() {
+            var _iteratorNormalCompletion17 = true;
+            var _didIteratorError17 = false;
+            var _iteratorError17 = undefined;
+
+            try {
+                for (var _iterator17 = this.updateListeners[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+                    var listener = _step17.value;
+
+                    listener();
+                }
+            } catch (err) {
+                _didIteratorError17 = true;
+                _iteratorError17 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion17 && _iterator17.return) {
+                        _iterator17.return();
+                    }
+                } finally {
+                    if (_didIteratorError17) {
+                        throw _iteratorError17;
                     }
                 }
             }
@@ -4118,27 +4145,27 @@ var Spheirahedra = function () {
         key: 'computeVertexes',
         value: function computeVertexes() {
             this.vertexes = [];
-            var _iteratorNormalCompletion17 = true;
-            var _didIteratorError17 = false;
-            var _iteratorError17 = undefined;
+            var _iteratorNormalCompletion18 = true;
+            var _didIteratorError18 = false;
+            var _iteratorError18 = undefined;
 
             try {
-                for (var _iterator17 = this.vertexIndexes[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
-                    var vert = _step17.value;
+                for (var _iterator18 = this.vertexIndexes[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+                    var vert = _step18.value;
 
                     this.vertexes.push(this.computeIdealVertex(this.gSpheres[vert[0]], this.gSpheres[vert[1]], this.gSpheres[vert[2]]));
                 }
             } catch (err) {
-                _didIteratorError17 = true;
-                _iteratorError17 = err;
+                _didIteratorError18 = true;
+                _iteratorError18 = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion17 && _iterator17.return) {
-                        _iterator17.return();
+                    if (!_iteratorNormalCompletion18 && _iterator18.return) {
+                        _iterator18.return();
                     }
                 } finally {
-                    if (_didIteratorError17) {
-                        throw _iteratorError17;
+                    if (_didIteratorError18) {
+                        throw _iteratorError18;
                     }
                 }
             }
@@ -4172,7 +4199,6 @@ var Spheirahedra = function () {
         value: function computeDividePlanes() {
             this.dividePlanes = [];
             this.dividePlanes.push(this.computePlane(0, 1, 2));
-            //this.dividePlanes.push(this.computePlane(3, 4, 5));
         }
     }, {
         key: 'computeExcavationSpheres',
@@ -4201,28 +4227,28 @@ var Spheirahedra = function () {
         value: function computeBoundingVolume() {
             this.boundingPlaneY = Number.MIN_VALUE;
             var boundingPlaneMinY = Number.MAX_VALUE;
-            var _iteratorNormalCompletion18 = true;
-            var _didIteratorError18 = false;
-            var _iteratorError18 = undefined;
+            var _iteratorNormalCompletion19 = true;
+            var _didIteratorError19 = false;
+            var _iteratorError19 = undefined;
 
             try {
-                for (var _iterator18 = this.prismSpheres[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
-                    var s = _step18.value;
+                for (var _iterator19 = this.prismSpheres[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
+                    var s = _step19.value;
 
                     this.boundingPlaneY = Math.max(this.boundingPlaneY, s.center.y);
                     boundingPlaneMinY = Math.min(boundingPlaneMinY, s.center.y);
                 }
             } catch (err) {
-                _didIteratorError18 = true;
-                _iteratorError18 = err;
+                _didIteratorError19 = true;
+                _iteratorError19 = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion18 && _iterator18.return) {
-                        _iterator18.return();
+                    if (!_iteratorNormalCompletion19 && _iterator19.return) {
+                        _iterator19.return();
                     }
                 } finally {
-                    if (_didIteratorError18) {
-                        throw _iteratorError18;
+                    if (_didIteratorError19) {
+                        throw _iteratorError19;
                     }
                 }
             }
@@ -4240,6 +4266,16 @@ var Spheirahedra = function () {
         key: 'getUniformLocations',
         value: function getUniformLocations(gl, program) {
             var uniLocations = [];
+
+            uniLocations.push(gl.getUniformLocation(program, 'u_enableSlice'));
+            uniLocations.push(gl.getUniformLocation(program, 'u_numSlicePlanes'));
+            for (var i = 0; i < this.maxSlicePlanes; i++) {
+                uniLocations.push(gl.getUniformLocation(program, 'u_slicePlanes[' + i + '].origin'));
+                uniLocations.push(gl.getUniformLocation(program, 'u_slicePlanes[' + i + '].normal'));
+            }
+            uniLocations.push(gl.getUniformLocation(program, 'u_quasiSphereSlicePlane.origin'));
+            uniLocations.push(gl.getUniformLocation(program, 'u_quasiSphereSlicePlane.normal'));
+
             uniLocations.push(gl.getUniformLocation(program, 'u_zbzc'));
             uniLocations.push(gl.getUniformLocation(program, 'u_ui'));
 
@@ -4248,20 +4284,20 @@ var Spheirahedra = function () {
 
             uniLocations.push(gl.getUniformLocation(program, 'u_twoDividePlanes'));
 
-            for (var i = 0; i < this.numDividePlanes; i++) {
-                uniLocations.push(gl.getUniformLocation(program, 'u_dividePlanes[' + i + '].origin'));
-                uniLocations.push(gl.getUniformLocation(program, 'u_dividePlanes[' + i + '].normal'));
+            for (var _i = 0; _i < this.numDividePlanes; _i++) {
+                uniLocations.push(gl.getUniformLocation(program, 'u_dividePlanes[' + _i + '].origin'));
+                uniLocations.push(gl.getUniformLocation(program, 'u_dividePlanes[' + _i + '].normal'));
 
-                uniLocations.push(gl.getUniformLocation(program, 'u_convexSpheres[' + i + '].center'));
-                uniLocations.push(gl.getUniformLocation(program, 'u_convexSpheres[' + i + '].r'));
+                uniLocations.push(gl.getUniformLocation(program, 'u_convexSpheres[' + _i + '].center'));
+                uniLocations.push(gl.getUniformLocation(program, 'u_convexSpheres[' + _i + '].r'));
             }
 
-            for (var _i = 0; _i < this.numExcavationSpheres; _i++) {
-                uniLocations.push(gl.getUniformLocation(program, 'u_excavationPrismSpheres[' + _i + '].center'));
-                uniLocations.push(gl.getUniformLocation(program, 'u_excavationPrismSpheres[' + _i + '].r'));
+            for (var _i2 = 0; _i2 < this.numExcavationSpheres; _i2++) {
+                uniLocations.push(gl.getUniformLocation(program, 'u_excavationPrismSpheres[' + _i2 + '].center'));
+                uniLocations.push(gl.getUniformLocation(program, 'u_excavationPrismSpheres[' + _i2 + '].r'));
 
-                uniLocations.push(gl.getUniformLocation(program, 'u_excavationSpheres[' + _i + '].center'));
-                uniLocations.push(gl.getUniformLocation(program, 'u_excavationSpheres[' + _i + '].r'));
+                uniLocations.push(gl.getUniformLocation(program, 'u_excavationSpheres[' + _i2 + '].center'));
+                uniLocations.push(gl.getUniformLocation(program, 'u_excavationSpheres[' + _i2 + '].r'));
             }
 
             uniLocations.push(gl.getUniformLocation(program, 'u_numPrismSpheres'));
@@ -4273,29 +4309,29 @@ var Spheirahedra = function () {
             uniLocations.push(gl.getUniformLocation(program, 'u_boundingSphere.center'));
             uniLocations.push(gl.getUniformLocation(program, 'u_boundingSphere.r'));
 
-            for (var _i2 = 0; _i2 < this.numSpheres; _i2++) {
-                uniLocations.push(gl.getUniformLocation(program, 'u_prismSpheres[' + _i2 + '].center'));
-                uniLocations.push(gl.getUniformLocation(program, 'u_prismSpheres[' + _i2 + '].r'));
+            for (var _i3 = 0; _i3 < this.numSpheres; _i3++) {
+                uniLocations.push(gl.getUniformLocation(program, 'u_prismSpheres[' + _i3 + '].center'));
+                uniLocations.push(gl.getUniformLocation(program, 'u_prismSpheres[' + _i3 + '].r'));
             }
 
-            for (var _i3 = 0; _i3 < this.numPlanes; _i3++) {
-                uniLocations.push(gl.getUniformLocation(program, 'u_prismPlanes[' + _i3 + '].origin'));
-                uniLocations.push(gl.getUniformLocation(program, 'u_prismPlanes[' + _i3 + '].normal'));
+            for (var _i4 = 0; _i4 < this.numPlanes; _i4++) {
+                uniLocations.push(gl.getUniformLocation(program, 'u_prismPlanes[' + _i4 + '].origin'));
+                uniLocations.push(gl.getUniformLocation(program, 'u_prismPlanes[' + _i4 + '].normal'));
             }
 
-            for (var _i4 = 0; _i4 < this.numFaces; _i4++) {
-                uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[' + _i4 + '].center'));
-                uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[' + _i4 + '].r'));
+            for (var _i5 = 0; _i5 < this.numFaces; _i5++) {
+                uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[' + _i5 + '].center'));
+                uniLocations.push(gl.getUniformLocation(program, 'u_spheirahedraSpheres[' + _i5 + '].r'));
             }
 
-            for (var _i5 = 0; _i5 < this.numVertexes; _i5++) {
-                uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[' + _i5 + '].center'));
-                uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[' + _i5 + '].r'));
+            for (var _i6 = 0; _i6 < this.numVertexes; _i6++) {
+                uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[' + _i6 + '].center'));
+                uniLocations.push(gl.getUniformLocation(program, 'u_seedSpheres[' + _i6 + '].r'));
             }
 
-            for (var _i6 = 0; _i6 < 12; _i6++) {
-                uniLocations.push(gl.getUniformLocation(program, 'u_boundingPlanes[' + _i6 + '].origin'));
-                uniLocations.push(gl.getUniformLocation(program, 'u_boundingPlanes[' + _i6 + '].normal'));
+            for (var _i7 = 0; _i7 < 12; _i7++) {
+                uniLocations.push(gl.getUniformLocation(program, 'u_boundingPlanes[' + _i7 + '].origin'));
+                uniLocations.push(gl.getUniformLocation(program, 'u_boundingPlanes[' + _i7 + '].normal'));
             }
 
             return uniLocations;
@@ -4303,6 +4339,23 @@ var Spheirahedra = function () {
     }, {
         key: 'setUniformValues',
         value: function setUniformValues(gl, uniLocations, uniI, scale) {
+            gl.uniform1i(uniLocations[uniI++], this.enableSlice);
+            gl.uniform1i(uniLocations[uniI++], this.slicePlanes[this.currentSliceIndex].length);
+            for (var i = 0; i < this.maxSlicePlanes; i++) {
+                if (i >= this.slicePlanes[this.currentSliceIndex].length) {
+                    uniI++;
+                    uniI++;
+                    continue;
+                }
+                gl.uniform3f(uniLocations[uniI++], this.slicePlanes[this.currentSliceIndex][i].p1.x, this.slicePlanes[this.currentSliceIndex][i].p1.y, this.slicePlanes[this.currentSliceIndex][i].p1.z);
+                gl.uniform3f(uniLocations[uniI++], this.slicePlanes[this.currentSliceIndex][i].normal.x, this.slicePlanes[this.currentSliceIndex][i].normal.y, this.slicePlanes[this.currentSliceIndex][i].normal.z);
+            }
+            gl.uniform3f(uniLocations[uniI++], this.quasiSphereSlicePlane.p1.x, this.quasiSphereSlicePlane.p1.y, this.quasiSphereSlicePlane.p1.z);
+            if (this.quasiSphereSlicePlaneFlipNormal) {
+                gl.uniform3f(uniLocations[uniI++], this.quasiSphereSlicePlane.normal.x * -1, this.quasiSphereSlicePlane.normal.y * -1, this.quasiSphereSlicePlane.normal.z * -1);
+            } else {
+                gl.uniform3f(uniLocations[uniI++], this.quasiSphereSlicePlane.normal.x, this.quasiSphereSlicePlane.normal.y, this.quasiSphereSlicePlane.normal.z);
+            }
             gl.uniform2f(uniLocations[uniI++], this.zb, this.zc);
             gl.uniform2f(uniLocations[uniI++], this.pointRadius * scale, this.lineWidth * scale);
 
@@ -4311,19 +4364,19 @@ var Spheirahedra = function () {
 
             gl.uniform1i(uniLocations[uniI++], this.twoDividePlanes);
 
-            for (var i = 0; i < this.numDividePlanes; i++) {
-                gl.uniform3f(uniLocations[uniI++], this.dividePlanes[i].p1.x, this.dividePlanes[i].p1.y, this.dividePlanes[i].p1.z);
-                gl.uniform3f(uniLocations[uniI++], this.dividePlanes[i].normal.x, this.dividePlanes[i].normal.y, this.dividePlanes[i].normal.z);
-                gl.uniform3f(uniLocations[uniI++], this.convexSpheres[i].center.x, this.convexSpheres[i].center.y, this.convexSpheres[i].center.z);
-                gl.uniform2f(uniLocations[uniI++], this.convexSpheres[i].r, this.convexSpheres[i].rSq);
+            for (var _i8 = 0; _i8 < this.numDividePlanes; _i8++) {
+                gl.uniform3f(uniLocations[uniI++], this.dividePlanes[_i8].p1.x, this.dividePlanes[_i8].p1.y, this.dividePlanes[_i8].p1.z);
+                gl.uniform3f(uniLocations[uniI++], this.dividePlanes[_i8].normal.x, this.dividePlanes[_i8].normal.y, this.dividePlanes[_i8].normal.z);
+                gl.uniform3f(uniLocations[uniI++], this.convexSpheres[_i8].center.x, this.convexSpheres[_i8].center.y, this.convexSpheres[_i8].center.z);
+                gl.uniform2f(uniLocations[uniI++], this.convexSpheres[_i8].r, this.convexSpheres[_i8].rSq);
             }
 
-            for (var _i7 = 0; _i7 < this.numExcavationSpheres; _i7++) {
-                gl.uniform3f(uniLocations[uniI++], this.excavationPrismSpheres[_i7].center.x, this.excavationPrismSpheres[_i7].center.y, this.excavationPrismSpheres[_i7].center.z);
-                gl.uniform2f(uniLocations[uniI++], this.excavationPrismSpheres[_i7].r, this.excavationPrismSpheres[_i7].rSq);
+            for (var _i9 = 0; _i9 < this.numExcavationSpheres; _i9++) {
+                gl.uniform3f(uniLocations[uniI++], this.excavationPrismSpheres[_i9].center.x, this.excavationPrismSpheres[_i9].center.y, this.excavationPrismSpheres[_i9].center.z);
+                gl.uniform2f(uniLocations[uniI++], this.excavationPrismSpheres[_i9].r, this.excavationPrismSpheres[_i9].rSq);
 
-                gl.uniform3f(uniLocations[uniI++], this.excavationSpheres[_i7].center.x, this.excavationSpheres[_i7].center.y, this.excavationSpheres[_i7].center.z);
-                gl.uniform2f(uniLocations[uniI++], this.excavationSpheres[_i7].r, this.excavationSpheres[_i7].rSq);
+                gl.uniform3f(uniLocations[uniI++], this.excavationSpheres[_i9].center.x, this.excavationSpheres[_i9].center.y, this.excavationSpheres[_i9].center.z);
+                gl.uniform2f(uniLocations[uniI++], this.excavationSpheres[_i9].r, this.excavationSpheres[_i9].rSq);
             }
 
             gl.uniform1i(uniLocations[uniI++], this.numSpheres);
@@ -4335,29 +4388,29 @@ var Spheirahedra = function () {
             gl.uniform3f(uniLocations[uniI++], this.boundingSphere.center.x, this.boundingSphere.center.y, this.boundingSphere.center.z);
             gl.uniform2f(uniLocations[uniI++], this.boundingSphere.r, this.boundingSphere.rSq);
 
-            for (var _i8 = 0; _i8 < this.numSpheres; _i8++) {
-                gl.uniform3f(uniLocations[uniI++], this.prismSpheres[_i8].center.x, this.prismSpheres[_i8].center.y, this.prismSpheres[_i8].center.z);
-                gl.uniform2f(uniLocations[uniI++], this.prismSpheres[_i8].r, this.prismSpheres[_i8].rSq);
+            for (var _i10 = 0; _i10 < this.numSpheres; _i10++) {
+                gl.uniform3f(uniLocations[uniI++], this.prismSpheres[_i10].center.x, this.prismSpheres[_i10].center.y, this.prismSpheres[_i10].center.z);
+                gl.uniform2f(uniLocations[uniI++], this.prismSpheres[_i10].r, this.prismSpheres[_i10].rSq);
             }
 
-            for (var _i9 = 0; _i9 < this.numPlanes; _i9++) {
-                gl.uniform3f(uniLocations[uniI++], this.planes[_i9].p1.x, this.planes[_i9].p1.y, this.planes[_i9].p1.z);
-                gl.uniform3f(uniLocations[uniI++], this.planes[_i9].normal.x, this.planes[_i9].normal.y, this.planes[_i9].normal.z);
+            for (var _i11 = 0; _i11 < this.numPlanes; _i11++) {
+                gl.uniform3f(uniLocations[uniI++], this.planes[_i11].p1.x, this.planes[_i11].p1.y, this.planes[_i11].p1.z);
+                gl.uniform3f(uniLocations[uniI++], this.planes[_i11].normal.x, this.planes[_i11].normal.y, this.planes[_i11].normal.z);
             }
 
-            for (var _i10 = 0; _i10 < this.numFaces; _i10++) {
-                gl.uniform3f(uniLocations[uniI++], this.gSpheres[_i10].center.x, this.gSpheres[_i10].center.y, this.gSpheres[_i10].center.z);
-                gl.uniform2f(uniLocations[uniI++], this.gSpheres[_i10].r, this.gSpheres[_i10].rSq);
+            for (var _i12 = 0; _i12 < this.numFaces; _i12++) {
+                gl.uniform3f(uniLocations[uniI++], this.gSpheres[_i12].center.x, this.gSpheres[_i12].center.y, this.gSpheres[_i12].center.z);
+                gl.uniform2f(uniLocations[uniI++], this.gSpheres[_i12].r, this.gSpheres[_i12].rSq);
             }
 
-            for (var _i11 = 0; _i11 < this.numVertexes; _i11++) {
-                gl.uniform3f(uniLocations[uniI++], this.seedSpheres[_i11].center.x, this.seedSpheres[_i11].center.y, this.seedSpheres[_i11].center.z);
-                gl.uniform2f(uniLocations[uniI++], this.seedSpheres[_i11].r, this.seedSpheres[_i11].rSq);
+            for (var _i13 = 0; _i13 < this.numVertexes; _i13++) {
+                gl.uniform3f(uniLocations[uniI++], this.seedSpheres[_i13].center.x, this.seedSpheres[_i13].center.y, this.seedSpheres[_i13].center.z);
+                gl.uniform2f(uniLocations[uniI++], this.seedSpheres[_i13].r, this.seedSpheres[_i13].rSq);
             }
 
-            for (var _i12 = 0; _i12 < this.boundingPlanes.length; _i12++) {
-                gl.uniform3f(uniLocations[uniI++], this.boundingPlanes[_i12].p1.x, this.boundingPlanes[_i12].p1.y, this.boundingPlanes[_i12].p1.z);
-                gl.uniform3f(uniLocations[uniI++], this.boundingPlanes[_i12].normal.x, this.boundingPlanes[_i12].normal.y, this.boundingPlanes[_i12].normal.z);
+            for (var _i14 = 0; _i14 < this.boundingPlanes.length; _i14++) {
+                gl.uniform3f(uniLocations[uniI++], this.boundingPlanes[_i14].p1.x, this.boundingPlanes[_i14].p1.y, this.boundingPlanes[_i14].p1.z);
+                gl.uniform3f(uniLocations[uniI++], this.boundingPlanes[_i14].normal.x, this.boundingPlanes[_i14].normal.y, this.boundingPlanes[_i14].normal.z);
             }
 
             return uniI;
@@ -4386,13 +4439,13 @@ var Spheirahedra = function () {
     }, {
         key: 'addSphereIfNotExists',
         value: function addSphereIfNotExists(spheres, sphere) {
-            var _iteratorNormalCompletion19 = true;
-            var _didIteratorError19 = false;
-            var _iteratorError19 = undefined;
+            var _iteratorNormalCompletion20 = true;
+            var _didIteratorError20 = false;
+            var _iteratorError20 = undefined;
 
             try {
-                for (var _iterator19 = spheres[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
-                    var s = _step19.value;
+                for (var _iterator20 = spheres[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
+                    var s = _step20.value;
 
                     if (Math.abs(s.r, sphere.r) < 0.00001 && _vector3d2.default.distance(s.center, sphere.center) < 0.00001) {
                         console.log('duplicate');
@@ -4400,16 +4453,16 @@ var Spheirahedra = function () {
                     }
                 }
             } catch (err) {
-                _didIteratorError19 = true;
-                _iteratorError19 = err;
+                _didIteratorError20 = true;
+                _iteratorError20 = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion19 && _iterator19.return) {
-                        _iterator19.return();
+                    if (!_iteratorNormalCompletion20 && _iterator20.return) {
+                        _iterator20.return();
                     }
                 } finally {
-                    if (_didIteratorError19) {
-                        throw _iteratorError19;
+                    if (_didIteratorError20) {
+                        throw _iteratorError20;
                     }
                 }
             }
@@ -4452,13 +4505,13 @@ var Spheirahedra = function () {
         key: 'computeMinSeedSphere',
         value: function computeMinSeedSphere(x, vertexes, a, b, c) {
             var minSphere = new _sphere2.default(0, 0, 0, 99999999999);
-            var _iteratorNormalCompletion20 = true;
-            var _didIteratorError20 = false;
-            var _iteratorError20 = undefined;
+            var _iteratorNormalCompletion21 = true;
+            var _didIteratorError21 = false;
+            var _iteratorError21 = undefined;
 
             try {
-                for (var _iterator20 = vertexes[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
-                    var ov = _step20.value;
+                for (var _iterator21 = vertexes[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
+                    var ov = _step21.value;
 
                     if (_vector3d2.default.distance(x, ov) < 0.000001) {
                         // x === ov
@@ -4470,16 +4523,16 @@ var Spheirahedra = function () {
                     }
                 }
             } catch (err) {
-                _didIteratorError20 = true;
-                _iteratorError20 = err;
+                _didIteratorError21 = true;
+                _iteratorError21 = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion20 && _iterator20.return) {
-                        _iterator20.return();
+                    if (!_iteratorNormalCompletion21 && _iterator21.return) {
+                        _iterator21.return();
                     }
                 } finally {
-                    if (_didIteratorError20) {
-                        throw _iteratorError20;
+                    if (_didIteratorError21) {
+                        throw _iteratorError21;
                     }
                 }
             }
@@ -4522,6 +4575,7 @@ var Spheirahedra = function () {
                 'numDividePlanes': this.numDividePlanes,
                 'numExcavationSpheres': this.numExcavationSpheres,
                 'numBoundingPlanes': 12,
+                'numSlicePlanes': this.slicePlanes[this.currentSliceIndex].length,
                 'SHADER_TYPE_PRISM': Spheirahedra.SHADER_TYPE_PRISM,
                 'SHADER_TYPE_SPHAIRAHEDRA': Spheirahedra.SHADER_TYPE_SPHAIRAHEDRA,
                 'SHADER_TYPE_LIMITSET': Spheirahedra.SHADER_TYPE_LIMITSET,
@@ -4604,6 +4658,132 @@ var Spheirahedra = function () {
         key: 'PRISM_PLANES_2222_SQUARE',
         get: function get() {
             return [new _plane2.default(new _vector3d2.default(0, 5, 1), new _vector3d2.default(0.5, 1, 0.5), new _vector3d2.default(1, 2, 0), new _vector3d2.default(0.5, 0, 0.5).normalize()), new _plane2.default(new _vector3d2.default(0, 5, 1), new _vector3d2.default(-0.5, 1, 0.5), new _vector3d2.default(-1, 2, 0), new _vector3d2.default(-0.5, 0, 0.5).normalize()), new _plane2.default(new _vector3d2.default(0, 5, -1), new _vector3d2.default(-0.5, 1, -0.5), new _vector3d2.default(-1, 2, 0), new _vector3d2.default(-0.5, 0, -0.5).normalize()), new _plane2.default(new _vector3d2.default(0, 3, -1), new _vector3d2.default(0.5, 3, -0.5), new _vector3d2.default(1, 2, 0), new _vector3d2.default(0.5, 0, -0.5).normalize())];
+        }
+    }, {
+        key: 'SLICE_PLANES_FROM_333',
+        get: function get() {
+            var s = Spheirahedra.PRISM_PLANES_333;
+            var planes = [];
+            var slices = [s];
+            planes.push(s[0]);
+            planes.push(s[1].invertOnPlane(planes[0]));
+            planes.push(s[2].invertOnPlane(planes[0]));
+            planes.push(s[1].invertOnPlane(planes[2]));
+            planes.push(s[2].invertOnPlane(planes[1]));
+            planes.push(s[1].invertOnPlane(planes[4]));
+
+            slices.push(planes);
+            planes = [];
+
+            planes.push(s[1]);
+            planes.push(s[2].invertOnPlane(planes[0]));
+            planes.push(s[0].invertOnPlane(planes[0]));
+            planes.push(s[2].invertOnPlane(planes[2]));
+            planes.push(s[0].invertOnPlane(planes[1]));
+            planes.push(s[2].invertOnPlane(planes[4]));
+
+            slices.push(planes);
+            planes = [];
+
+            planes.push(s[2]);
+            planes.push(s[0].invertOnPlane(planes[0]));
+            planes.push(s[1].invertOnPlane(planes[0]));
+            planes.push(s[0].invertOnPlane(planes[2]));
+            planes.push(s[1].invertOnPlane(planes[1]));
+            planes.push(s[0].invertOnPlane(planes[4]));
+
+            slices.push(planes);
+            return slices;
+        }
+    }, {
+        key: 'SLICE_PLANES_FROM_236',
+        get: function get() {
+            var s = Spheirahedra.PRISM_PLANES_236;
+            var planes = [];
+            var slices = [s];
+            planes.push(s[0]);
+            planes.push(s[1].invertOnPlane(planes[0]));
+            planes.push(s[2].invertOnPlane(planes[0]));
+            planes.push(s[1].invertOnPlane(planes[2]));
+            planes.push(s[2].invertOnPlane(planes[1]));
+            planes.push(s[1].invertOnPlane(planes[4]));
+            planes.push(s[2].invertOnPlane(planes[3]));
+            planes.push(s[1].invertOnPlane(planes[6]));
+            planes.push(s[2].invertOnPlane(planes[5]));
+            planes.push(s[1].invertOnPlane(planes[8]));
+            planes.push(s[2].invertOnPlane(planes[7]));
+            slices.push(planes);
+            planes = [];
+
+            planes.push(s[1]);
+            planes.push(s[2].invertOnPlane(planes[0]));
+            planes.push(s[0].invertOnPlane(planes[0]));
+            planes.push(s[2].invertOnPlane(planes[2]));
+            planes.push(s[0].invertOnPlane(planes[1]));
+            planes.push(s[2].invertOnPlane(planes[4]));
+            planes.push(s[0].invertOnPlane(planes[3]));
+            planes.push(s[2].invertOnPlane(planes[6]));
+            planes.push(s[0].invertOnPlane(planes[5]));
+            slices.push(planes);
+            planes = [];
+
+            planes.push(s[2]);
+            planes.push(s[0].invertOnPlane(planes[0]));
+            planes.push(s[1].invertOnPlane(planes[0]));
+            planes.push(s[0].invertOnPlane(planes[2]));
+            planes.push(s[1].invertOnPlane(planes[1]));
+            planes.push(s[0].invertOnPlane(planes[4]));
+            planes.push(s[1].invertOnPlane(planes[3]));
+            planes.push(s[0].invertOnPlane(planes[6]));
+            planes.push(s[1].invertOnPlane(planes[5]));
+
+            slices.push(planes);
+            return slices;
+        }
+    }, {
+        key: 'SLICE_PLANES_FROM_244',
+        get: function get() {
+            var s = Spheirahedra.PRISM_PLANES_244;
+            var planes = [];
+            var slices = [s];
+            planes.push(s[0]);
+            planes.push(s[1].invertOnPlane(planes[0]));
+            planes.push(s[2].invertOnPlane(planes[0]));
+            planes.push(s[1].invertOnPlane(planes[2]));
+            planes.push(s[2].invertOnPlane(planes[1]));
+            planes.push(s[1].invertOnPlane(planes[4]));
+            planes.push(s[2].invertOnPlane(planes[3]));
+            slices.push(planes);
+            planes = [];
+
+            planes.push(s[1]);
+            planes.push(s[2].invertOnPlane(planes[0]));
+            planes.push(s[0].invertOnPlane(planes[0]));
+            planes.push(s[2].invertOnPlane(planes[2]));
+            planes.push(s[0].invertOnPlane(planes[1]));
+            planes.push(s[2].invertOnPlane(planes[4]));
+
+            slices.push(planes);
+            planes = [];
+
+            planes.push(s[2]);
+            planes.push(s[0].invertOnPlane(planes[0]));
+            planes.push(s[1].invertOnPlane(planes[0]));
+            planes.push(s[0].invertOnPlane(planes[2]));
+            planes.push(s[1].invertOnPlane(planes[1]));
+            planes.push(s[0].invertOnPlane(planes[4]));
+
+            slices.push(planes);
+            return slices;
+        }
+    }, {
+        key: 'SLICE_PLANES_FROM_2222_SQUARE',
+        get: function get() {
+            var s = Spheirahedra.PRISM_PLANES_2222_SQUARE;
+            var planes = [];
+            var slices = [Spheirahedra.PRISM_PLANES_2222_SQUARE, Spheirahedra.PRISM_PLANES_2222_SQUARE, Spheirahedra.PRISM_PLANES_2222_SQUARE, Spheirahedra.PRISM_PLANES_2222_SQUARE];
+
+            return slices;
         }
     }]);
 
@@ -5801,7 +5981,7 @@ Polygon.prototype = {
 
   // ALIAS ONLY!!
   solidFromSlices: function (options) {
-    const solidFromSlices = __webpack_require__(379)
+    const solidFromSlices = __webpack_require__(380)
     return solidFromSlices(this, options)
   }
 
@@ -6181,7 +6361,7 @@ Polygon.prototype = {
 
   // ALIAS ONLY!!
   solidFromSlices: function (options) {
-    const solidFromSlices = __webpack_require__(400)
+    const solidFromSlices = __webpack_require__(401)
     return solidFromSlices(this, options)
   }
 
@@ -6561,7 +6741,7 @@ Polygon.prototype = {
 
   // ALIAS ONLY!!
   solidFromSlices: function (options) {
-    const solidFromSlices = __webpack_require__(420)
+    const solidFromSlices = __webpack_require__(421)
     return solidFromSlices(this, options)
   }
 
@@ -6941,7 +7121,7 @@ Polygon.prototype = {
 
   // ALIAS ONLY!!
   solidFromSlices: function (options) {
-    const solidFromSlices = __webpack_require__(440)
+    const solidFromSlices = __webpack_require__(441)
     return solidFromSlices(this, options)
   }
 
@@ -7113,7 +7293,7 @@ const OrthoNormalBasis = __webpack_require__(97)
 
 const CAG = __webpack_require__(72) // FIXME: circular dependency !
 
-const Properties = __webpack_require__(155)
+const Properties = __webpack_require__(154)
 const {Connector} = __webpack_require__(111)
 const fixTJunctions = __webpack_require__(276)
 // let {fromPolygons} = require('./CSGMakers') // FIXME: circular dependency !
@@ -8490,7 +8670,7 @@ module.exports = Vertex
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(9)
-const Line3D = __webpack_require__(139)
+const Line3D = __webpack_require__(138)
 const {EPS, getTag} = __webpack_require__(2)
 
 // # class Plane
@@ -8698,7 +8878,7 @@ module.exports = Vertex
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(10)
-const Line3D = __webpack_require__(142)
+const Line3D = __webpack_require__(141)
 const {EPS, getTag} = __webpack_require__(3)
 
 // # class Plane
@@ -8906,7 +9086,7 @@ module.exports = Vertex
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(11)
-const Line3D = __webpack_require__(145)
+const Line3D = __webpack_require__(144)
 const {EPS, getTag} = __webpack_require__(4)
 
 // # class Plane
@@ -9114,7 +9294,7 @@ module.exports = Vertex
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(12)
-const Line3D = __webpack_require__(148)
+const Line3D = __webpack_require__(147)
 const {EPS, getTag} = __webpack_require__(5)
 
 // # class Plane
@@ -9546,7 +9726,7 @@ exports.default = Vec3;
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(20)
-const Line3D = __webpack_require__(127)
+const Line3D = __webpack_require__(128)
 const {EPS, getTag} = __webpack_require__(6)
 
 // # class Plane
@@ -9907,7 +10087,7 @@ Polygon.prototype = {
     // project the 3D polygon onto a plane
   projectToOrthoNormalBasis: function (orthobasis) {
     const CAG = __webpack_require__(72)
-    const {fromPointsNoCheck} = __webpack_require__(154) // circular dependencies
+    const {fromPointsNoCheck} = __webpack_require__(153) // circular dependencies
     let points2d = this.vertices.map(function (vertex) {
       return orthobasis.to2D(vertex.pos)
     })
@@ -11755,12 +11935,12 @@ const {fromSides, fromFakeCSG} = __webpack_require__(67)
 const canonicalize = __webpack_require__(214)
 const retesselate = __webpack_require__(217)
 const {isCAGValid, isSelfIntersecting, hasPointInside} = __webpack_require__(213)
-const {area, getBounds} = __webpack_require__(374)
+const {area, getBounds} = __webpack_require__(375)
 
 // all of these are good candidates for elimination in this scope, since they are part of a functional api
 const {overCutInsideCorners} = __webpack_require__(218)
-const {extrudeInOrthonormalBasis, extrudeInPlane, extrude, rotateExtrude} = __webpack_require__(375)
-const cagoutlinePaths = __webpack_require__(377)
+const {extrudeInOrthonormalBasis, extrudeInPlane, extrude, rotateExtrude} = __webpack_require__(376)
+const cagoutlinePaths = __webpack_require__(378)
 const center = __webpack_require__(219)
 const {expand, contract, expandedShellOfCAG} = __webpack_require__(220)
 /**
@@ -12373,12 +12553,12 @@ const {fromSides, fromFakeCSG} = __webpack_require__(68)
 const canonicalize = __webpack_require__(224)
 const retesselate = __webpack_require__(227)
 const {isCAGValid, isSelfIntersecting, hasPointInside} = __webpack_require__(223)
-const {area, getBounds} = __webpack_require__(395)
+const {area, getBounds} = __webpack_require__(396)
 
 // all of these are good candidates for elimination in this scope, since they are part of a functional api
 const {overCutInsideCorners} = __webpack_require__(228)
-const {extrudeInOrthonormalBasis, extrudeInPlane, extrude, rotateExtrude} = __webpack_require__(396)
-const cagoutlinePaths = __webpack_require__(398)
+const {extrudeInOrthonormalBasis, extrudeInPlane, extrude, rotateExtrude} = __webpack_require__(397)
+const cagoutlinePaths = __webpack_require__(399)
 const center = __webpack_require__(229)
 const {expand, contract, expandedShellOfCAG} = __webpack_require__(230)
 /**
@@ -12991,12 +13171,12 @@ const {fromSides, fromFakeCSG} = __webpack_require__(69)
 const canonicalize = __webpack_require__(234)
 const retesselate = __webpack_require__(237)
 const {isCAGValid, isSelfIntersecting, hasPointInside} = __webpack_require__(233)
-const {area, getBounds} = __webpack_require__(415)
+const {area, getBounds} = __webpack_require__(416)
 
 // all of these are good candidates for elimination in this scope, since they are part of a functional api
 const {overCutInsideCorners} = __webpack_require__(238)
-const {extrudeInOrthonormalBasis, extrudeInPlane, extrude, rotateExtrude} = __webpack_require__(416)
-const cagoutlinePaths = __webpack_require__(418)
+const {extrudeInOrthonormalBasis, extrudeInPlane, extrude, rotateExtrude} = __webpack_require__(417)
+const cagoutlinePaths = __webpack_require__(419)
 const center = __webpack_require__(239)
 const {expand, contract, expandedShellOfCAG} = __webpack_require__(240)
 /**
@@ -13609,12 +13789,12 @@ const {fromSides, fromFakeCSG} = __webpack_require__(70)
 const canonicalize = __webpack_require__(245)
 const retesselate = __webpack_require__(248)
 const {isCAGValid, isSelfIntersecting, hasPointInside} = __webpack_require__(244)
-const {area, getBounds} = __webpack_require__(435)
+const {area, getBounds} = __webpack_require__(436)
 
 // all of these are good candidates for elimination in this scope, since they are part of a functional api
 const {overCutInsideCorners} = __webpack_require__(249)
-const {extrudeInOrthonormalBasis, extrudeInPlane, extrude, rotateExtrude} = __webpack_require__(436)
-const cagoutlinePaths = __webpack_require__(438)
+const {extrudeInOrthonormalBasis, extrudeInPlane, extrude, rotateExtrude} = __webpack_require__(437)
+const cagoutlinePaths = __webpack_require__(439)
 const center = __webpack_require__(250)
 const {expand, contract, expandedShellOfCAG} = __webpack_require__(251)
 /**
@@ -14153,7 +14333,7 @@ module.exports = Vertex
 
 const Side = __webpack_require__(132)
 const Vector2D = __webpack_require__(13)
-const Vertex2 = __webpack_require__(114)
+const Vertex2 = __webpack_require__(115)
 const {areaEPS} = __webpack_require__(0)
 const {isSelfIntersecting, contains} = __webpack_require__(184)
 const {union, difference} = __webpack_require__(314)
@@ -14373,7 +14553,7 @@ module.exports = {
 
 const Side = __webpack_require__(135)
 const Vector2D = __webpack_require__(14)
-const Vertex2 = __webpack_require__(116)
+const Vertex2 = __webpack_require__(117)
 const {areaEPS} = __webpack_require__(1)
 const {isSelfIntersecting, contains} = __webpack_require__(197)
 const {union, difference} = __webpack_require__(338)
@@ -14591,12 +14771,12 @@ module.exports = {
 /* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Side = __webpack_require__(140)
+const Side = __webpack_require__(139)
 const Vector2D = __webpack_require__(15)
-const Vertex2 = __webpack_require__(119)
+const Vertex2 = __webpack_require__(120)
 const {areaEPS} = __webpack_require__(2)
 const {isSelfIntersecting, contains} = __webpack_require__(213)
-const {union, difference} = __webpack_require__(371)
+const {union, difference} = __webpack_require__(372)
 
 /** Construct a CAG from a list of `Side` instances.
  * @param {Side[]} sides - list of sides
@@ -14811,12 +14991,12 @@ module.exports = {
 /* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Side = __webpack_require__(143)
+const Side = __webpack_require__(142)
 const Vector2D = __webpack_require__(16)
-const Vertex2 = __webpack_require__(121)
+const Vertex2 = __webpack_require__(122)
 const {areaEPS} = __webpack_require__(3)
 const {isSelfIntersecting, contains} = __webpack_require__(223)
-const {union, difference} = __webpack_require__(392)
+const {union, difference} = __webpack_require__(393)
 
 /** Construct a CAG from a list of `Side` instances.
  * @param {Side[]} sides - list of sides
@@ -15031,12 +15211,12 @@ module.exports = {
 /* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Side = __webpack_require__(146)
+const Side = __webpack_require__(145)
 const Vector2D = __webpack_require__(17)
-const Vertex2 = __webpack_require__(123)
+const Vertex2 = __webpack_require__(124)
 const {areaEPS} = __webpack_require__(4)
 const {isSelfIntersecting, contains} = __webpack_require__(233)
-const {union, difference} = __webpack_require__(412)
+const {union, difference} = __webpack_require__(413)
 
 /** Construct a CAG from a list of `Side` instances.
  * @param {Side[]} sides - list of sides
@@ -15251,12 +15431,12 @@ module.exports = {
 /* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Side = __webpack_require__(149)
+const Side = __webpack_require__(148)
 const Vector2D = __webpack_require__(18)
-const Vertex2 = __webpack_require__(125)
+const Vertex2 = __webpack_require__(126)
 const {areaEPS} = __webpack_require__(5)
 const {isSelfIntersecting, contains} = __webpack_require__(244)
-const {union, difference} = __webpack_require__(432)
+const {union, difference} = __webpack_require__(433)
 
 /** Construct a CAG from a list of `Side` instances.
  * @param {Side[]} sides - list of sides
@@ -15556,10 +15736,10 @@ const Vertex3D = __webpack_require__(64)
 const Vector2D = __webpack_require__(22)
 const Vector3D = __webpack_require__(20)
 const Polygon = __webpack_require__(44)
-const Path2D = __webpack_require__(128)
+const Path2D = __webpack_require__(129)
 const Side = __webpack_require__(113)
 const {linesIntersect} = __webpack_require__(272)
-const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(129)
+const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(130)
 const FuzzyCAGFactory = __webpack_require__(273)
 /**
  * Class CAG
@@ -18608,7 +18788,7 @@ module.exports = Matrix4x4
 /* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(setImmediate, process) {/*! Browser bundle of nunjucks 3.2.2 (slim, only works with precompiled templates) */
+/* WEBPACK VAR INJECTION */(function(setImmediate, process) {/*! Browser bundle of nunjucks 3.2.3 (slim, only works with precompiled templates) */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(true)
 		module.exports = factory();
@@ -18912,6 +19092,8 @@ function getAttrGetter(attribute) {
   };
 }
 
+exports.getAttrGetter = getAttrGetter;
+
 function groupBy(obj, val, throwOnUndefined) {
   var result = {};
   var iterator = isFunction(val) ? val : getAttrGetter(val);
@@ -19126,7 +19308,7 @@ var supportsIterators = typeof Symbol === 'function' && Symbol.iterator && typeo
 
 var Frame = /*#__PURE__*/function () {
   function Frame(parent, isolateWrites) {
-    this.variables = {};
+    this.variables = Object.create(null);
     this.parent = parent;
     this.topLevel = false; // if this is true, writes (set) should never propagate upwards past
     // this frame to its parent (though reads may).
@@ -19207,9 +19389,7 @@ var Frame = /*#__PURE__*/function () {
 }();
 
 function makeMacro(argNames, kwargNames, func) {
-  var _this = this;
-
-  return function () {
+  return function macro() {
     for (var _len = arguments.length, macroArgs = new Array(_len), _key = 0; _key < _len; _key++) {
       macroArgs[_key] = arguments[_key];
     }
@@ -19245,7 +19425,7 @@ function makeMacro(argNames, kwargNames, func) {
       args = macroArgs;
     }
 
-    return func.apply(_this, args);
+    return func.apply(this, args);
   };
 }
 
@@ -19530,7 +19710,9 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 var Loader = __webpack_require__(4);
 
@@ -19575,7 +19757,9 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 var path = __webpack_require__(0);
 
@@ -19613,7 +19797,9 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 var EventEmitter = __webpack_require__(13);
 
@@ -19851,7 +20037,9 @@ module.exports = {
 "use strict";
 
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
+function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 var asap = __webpack_require__(8);
 
@@ -21413,14 +21601,21 @@ function sum(arr, attr, start) {
 }
 
 exports.sum = sum;
-exports.sort = r.makeMacro(['value', 'reverse', 'case_sensitive', 'attribute'], [], function (arr, reversed, caseSens, attr) {
+exports.sort = r.makeMacro(['value', 'reverse', 'case_sensitive', 'attribute'], [], function sortFilter(arr, reversed, caseSens, attr) {
+  var _this = this;
+
   // Copy it
   var array = lib.map(arr, function (v) {
     return v;
   });
+  var getAttribute = lib.getAttrGetter(attr);
   array.sort(function (a, b) {
-    var x = attr ? a[attr] : a;
-    var y = attr ? b[attr] : b;
+    var x = attr ? getAttribute(a) : a;
+    var y = attr ? getAttribute(b) : b;
+
+    if (_this.env.opts.throwOnUndefined && attr && (x === undefined || y === undefined)) {
+      throw new TypeError("sort: attribute \"" + attr + "\" resolved to undefined");
+    }
 
     if (!caseSens && lib.isString(x) && lib.isString(y)) {
       x = x.toLowerCase();
@@ -21594,13 +21789,15 @@ function float(val, def) {
 }
 
 exports.float = float;
+var intFilter = r.makeMacro(['value', 'default', 'base'], [], function doInt(value, defaultValue, base) {
+  if (base === void 0) {
+    base = 10;
+  }
 
-function int(val, def) {
-  var res = parseInt(val, 10);
-  return isNaN(res) ? def : res;
-}
-
-exports.int = int; // Aliases
+  var res = parseInt(value, base);
+  return isNaN(res) ? defaultValue : res;
+});
+exports.int = intFilter; // Aliases
 
 exports.d = exports.default;
 exports.e = exports.escape;
@@ -21666,6 +21863,7 @@ function EventEmitter() {
   EventEmitter.init.call(this);
 }
 module.exports = EventEmitter;
+module.exports.once = once;
 
 // Backwards-compat with node 0.10.x
 EventEmitter.EventEmitter = EventEmitter;
@@ -22055,6 +22253,35 @@ function unwrapListeners(arr) {
     ret[i] = arr[i].listener || arr[i];
   }
   return ret;
+}
+
+function once(emitter, name) {
+  return new Promise(function (resolve, reject) {
+    function eventListener() {
+      if (errorListener !== undefined) {
+        emitter.removeListener('error', errorListener);
+      }
+      resolve([].slice.call(arguments));
+    };
+    var errorListener;
+
+    // Adding an error listener is not optional because
+    // if an error is thrown on an event emitter we cannot
+    // guarantee that the actual event we are waiting will
+    // be fired. The result could be a silent way to create
+    // memory or file descriptor leaks, which is something
+    // we should avoid.
+    if (name !== 'error') {
+      errorListener = function errorListener(err) {
+        emitter.removeListener(name, eventListener);
+        reject(err);
+      };
+
+      emitter.once('error', errorListener);
+    }
+
+    emitter.once(name, eventListener);
+  });
 }
 
 
@@ -22824,7 +23051,7 @@ module.exports = installCompat;
 /******/ ]);
 });
 //# sourceMappingURL=nunjucks-slim.js.map
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(152).setImmediate, __webpack_require__(109)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(151).setImmediate, __webpack_require__(109)))
 
 /***/ }),
 /* 83 */
@@ -22883,7 +23110,7 @@ module.exports = function (nunjucks, env, obj, dependencies){
 
 const Vector2D = __webpack_require__(13)
 const Vector3D = __webpack_require__(7)
-const Line2D = __webpack_require__(160)
+const Line2D = __webpack_require__(159)
 const Line3D = __webpack_require__(131)
 const Plane = __webpack_require__(30)
 
@@ -23099,7 +23326,7 @@ const OrthoNormalBasis = __webpack_require__(84)
 
 const CAG = __webpack_require__(47) // FIXME: for some weird reason if CAG is imported AFTER frompolygons, a lot of things break???
 
-const Properties = __webpack_require__(161)
+const Properties = __webpack_require__(160)
 const {fromPolygons} = __webpack_require__(46) // FIXME: circular dependency !
 
 const fixTJunctions = __webpack_require__(323)
@@ -23686,7 +23913,7 @@ module.exports = CSG
 
 const Vector2D = __webpack_require__(14)
 const Vector3D = __webpack_require__(8)
-const Line2D = __webpack_require__(162)
+const Line2D = __webpack_require__(161)
 const Line3D = __webpack_require__(134)
 const Plane = __webpack_require__(32)
 
@@ -23902,7 +24129,7 @@ const OrthoNormalBasis = __webpack_require__(86)
 
 const CAG = __webpack_require__(50) // FIXME: for some weird reason if CAG is imported AFTER frompolygons, a lot of things break???
 
-const Properties = __webpack_require__(163)
+const Properties = __webpack_require__(162)
 const {fromPolygons} = __webpack_require__(49) // FIXME: circular dependency !
 
 const fixTJunctions = __webpack_require__(347)
@@ -24533,7 +24760,7 @@ var objectKeys = Object.keys || function (obj) {
 module.exports = Duplex;
 
 /*<replacement>*/
-var util = Object.create(__webpack_require__(118));
+var util = Object.create(__webpack_require__(119));
 util.inherits = __webpack_require__(101);
 /*</replacement>*/
 
@@ -24627,7 +24854,7 @@ Duplex.prototype._destroy = function (err, cb) {
 const Vector2D = __webpack_require__(15)
 const Vector3D = __webpack_require__(9)
 const Line2D = __webpack_require__(169)
-const Line3D = __webpack_require__(139)
+const Line3D = __webpack_require__(138)
 const Plane = __webpack_require__(34)
 
 /** class OrthoNormalBasis
@@ -24835,7 +25062,7 @@ module.exports = OrthoNormalBasis
 /* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Tree = __webpack_require__(369)
+const Tree = __webpack_require__(370)
 const Polygon = __webpack_require__(25)
 const Plane = __webpack_require__(34)
 const OrthoNormalBasis = __webpack_require__(89)
@@ -24845,14 +25072,14 @@ const CAG = __webpack_require__(53) // FIXME: for some weird reason if CAG is im
 const Properties = __webpack_require__(170)
 const {fromPolygons} = __webpack_require__(52) // FIXME: circular dependency !
 
-const fixTJunctions = __webpack_require__(380)
+const fixTJunctions = __webpack_require__(381)
 const canonicalize = __webpack_require__(214)
 const retesselate = __webpack_require__(217)
-const {bounds} = __webpack_require__(381)
-const {projectToOrthoNormalBasis} = __webpack_require__(382)
+const {bounds} = __webpack_require__(382)
+const {projectToOrthoNormalBasis} = __webpack_require__(383)
 
 const {lieFlat, getTransformationToFlatLying, getTransformationAndInverseTransformationToFlatLying} = __webpack_require__(218)
-const {sectionCut, cutByPlane} = __webpack_require__(383)
+const {sectionCut, cutByPlane} = __webpack_require__(384)
 const center = __webpack_require__(219)
 const {expand, contract, expandedShellOfCCSG} = __webpack_require__(220)
 
@@ -25430,7 +25657,7 @@ module.exports = CSG
 const Vector2D = __webpack_require__(16)
 const Vector3D = __webpack_require__(10)
 const Line2D = __webpack_require__(171)
-const Line3D = __webpack_require__(142)
+const Line3D = __webpack_require__(141)
 const Plane = __webpack_require__(36)
 
 /** class OrthoNormalBasis
@@ -25638,7 +25865,7 @@ module.exports = OrthoNormalBasis
 /* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Tree = __webpack_require__(390)
+const Tree = __webpack_require__(391)
 const Polygon = __webpack_require__(26)
 const Plane = __webpack_require__(36)
 const OrthoNormalBasis = __webpack_require__(91)
@@ -25648,14 +25875,14 @@ const CAG = __webpack_require__(56) // FIXME: for some weird reason if CAG is im
 const Properties = __webpack_require__(172)
 const {fromPolygons} = __webpack_require__(55) // FIXME: circular dependency !
 
-const fixTJunctions = __webpack_require__(401)
+const fixTJunctions = __webpack_require__(402)
 const canonicalize = __webpack_require__(224)
 const retesselate = __webpack_require__(227)
-const {bounds} = __webpack_require__(402)
-const {projectToOrthoNormalBasis} = __webpack_require__(403)
+const {bounds} = __webpack_require__(403)
+const {projectToOrthoNormalBasis} = __webpack_require__(404)
 
 const {lieFlat, getTransformationToFlatLying, getTransformationAndInverseTransformationToFlatLying} = __webpack_require__(228)
-const {sectionCut, cutByPlane} = __webpack_require__(404)
+const {sectionCut, cutByPlane} = __webpack_require__(405)
 const center = __webpack_require__(229)
 const {expand, contract, expandedShellOfCCSG} = __webpack_require__(230)
 
@@ -26233,7 +26460,7 @@ module.exports = CSG
 const Vector2D = __webpack_require__(17)
 const Vector3D = __webpack_require__(11)
 const Line2D = __webpack_require__(173)
-const Line3D = __webpack_require__(145)
+const Line3D = __webpack_require__(144)
 const Plane = __webpack_require__(38)
 
 /** class OrthoNormalBasis
@@ -26441,7 +26668,7 @@ module.exports = OrthoNormalBasis
 /* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Tree = __webpack_require__(410)
+const Tree = __webpack_require__(411)
 const Polygon = __webpack_require__(27)
 const Plane = __webpack_require__(38)
 const OrthoNormalBasis = __webpack_require__(93)
@@ -26451,14 +26678,14 @@ const CAG = __webpack_require__(59) // FIXME: for some weird reason if CAG is im
 const Properties = __webpack_require__(174)
 const {fromPolygons} = __webpack_require__(58) // FIXME: circular dependency !
 
-const fixTJunctions = __webpack_require__(421)
+const fixTJunctions = __webpack_require__(422)
 const canonicalize = __webpack_require__(234)
 const retesselate = __webpack_require__(237)
-const {bounds} = __webpack_require__(422)
-const {projectToOrthoNormalBasis} = __webpack_require__(423)
+const {bounds} = __webpack_require__(423)
+const {projectToOrthoNormalBasis} = __webpack_require__(424)
 
 const {lieFlat, getTransformationToFlatLying, getTransformationAndInverseTransformationToFlatLying} = __webpack_require__(238)
-const {sectionCut, cutByPlane} = __webpack_require__(424)
+const {sectionCut, cutByPlane} = __webpack_require__(425)
 const center = __webpack_require__(239)
 const {expand, contract, expandedShellOfCCSG} = __webpack_require__(240)
 
@@ -27036,7 +27263,7 @@ module.exports = CSG
 const Vector2D = __webpack_require__(18)
 const Vector3D = __webpack_require__(12)
 const Line2D = __webpack_require__(175)
-const Line3D = __webpack_require__(148)
+const Line3D = __webpack_require__(147)
 const Plane = __webpack_require__(40)
 
 /** class OrthoNormalBasis
@@ -27244,7 +27471,7 @@ module.exports = OrthoNormalBasis
 /* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Tree = __webpack_require__(430)
+const Tree = __webpack_require__(431)
 const Polygon = __webpack_require__(28)
 const Plane = __webpack_require__(40)
 const OrthoNormalBasis = __webpack_require__(95)
@@ -27254,14 +27481,14 @@ const CAG = __webpack_require__(62) // FIXME: for some weird reason if CAG is im
 const Properties = __webpack_require__(176)
 const {fromPolygons} = __webpack_require__(61) // FIXME: circular dependency !
 
-const fixTJunctions = __webpack_require__(441)
+const fixTJunctions = __webpack_require__(442)
 const canonicalize = __webpack_require__(245)
 const retesselate = __webpack_require__(248)
-const {bounds} = __webpack_require__(442)
-const {projectToOrthoNormalBasis} = __webpack_require__(443)
+const {bounds} = __webpack_require__(443)
+const {projectToOrthoNormalBasis} = __webpack_require__(444)
 
 const {lieFlat, getTransformationToFlatLying, getTransformationAndInverseTransformationToFlatLying} = __webpack_require__(249)
-const {sectionCut, cutByPlane} = __webpack_require__(444)
+const {sectionCut, cutByPlane} = __webpack_require__(445)
 const center = __webpack_require__(250)
 const {expand, contract, expandedShellOfCCSG} = __webpack_require__(251)
 
@@ -27838,8 +28065,8 @@ module.exports = CSG
 
 const Vector2D = __webpack_require__(22)
 const Vector3D = __webpack_require__(20)
-const Line2D = __webpack_require__(153)
-const Line3D = __webpack_require__(127)
+const Line2D = __webpack_require__(152)
+const Line3D = __webpack_require__(128)
 const Plane = __webpack_require__(43)
 
 // # class OrthoNormalBasis
@@ -28540,7 +28767,7 @@ if (typeof Object.create === 'function') {
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(9)
-const Line3D = __webpack_require__(139)
+const Line3D = __webpack_require__(138)
 const Matrix4x4 = __webpack_require__(75)
 const OrthoNormalBasis = __webpack_require__(89)
 const Plane = __webpack_require__(34)
@@ -28766,7 +28993,7 @@ module.exports = {Connector, ConnectorList}
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(10)
-const Line3D = __webpack_require__(142)
+const Line3D = __webpack_require__(141)
 const Matrix4x4 = __webpack_require__(76)
 const OrthoNormalBasis = __webpack_require__(91)
 const Plane = __webpack_require__(36)
@@ -28992,7 +29219,7 @@ module.exports = {Connector, ConnectorList}
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(11)
-const Line3D = __webpack_require__(145)
+const Line3D = __webpack_require__(144)
 const Matrix4x4 = __webpack_require__(77)
 const OrthoNormalBasis = __webpack_require__(93)
 const Plane = __webpack_require__(38)
@@ -29218,7 +29445,7 @@ module.exports = {Connector, ConnectorList}
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(12)
-const Line3D = __webpack_require__(148)
+const Line3D = __webpack_require__(147)
 const Matrix4x4 = __webpack_require__(78)
 const OrthoNormalBasis = __webpack_require__(95)
 const Plane = __webpack_require__(40)
@@ -29713,7 +29940,7 @@ if (typeof DEBUG !== 'undefined' && DEBUG) {
   ) }
 }
 
-var listToStyles = __webpack_require__(460)
+var listToStyles = __webpack_require__(461)
 
 /*
 type StyleObject = {
@@ -30317,7 +30544,7 @@ exports.default = Vec2;
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(20)
-const Line3D = __webpack_require__(127)
+const Line3D = __webpack_require__(128)
 const Matrix4x4 = __webpack_require__(81)
 const OrthoNormalBasis = __webpack_require__(97)
 const Plane = __webpack_require__(43)
@@ -30680,1470 +30907,6 @@ module.exports = Side
 
 /***/ }),
 /* 114 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector2D = __webpack_require__(13)
-const {getTag} = __webpack_require__(0)
-
-const Vertex = function (pos) {
-  this.pos = pos
-}
-
-Vertex.fromObject = function (obj) {
-  return new Vertex(new Vector2D(obj.pos._x, obj.pos._y))
-}
-
-Vertex.prototype = {
-  toString: function () {
-    return '(' + this.pos.x.toFixed(5) + ',' + this.pos.y.toFixed(5) + ')'
-  },
-  getTag: function () {
-    var result = this.tag
-    if (!result) {
-      result = getTag()
-      this.tag = result
-    }
-    return result
-  }
-}
-
-module.exports = Vertex
-
-
-/***/ }),
-/* 115 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector3D = __webpack_require__(7)
-const Vector2D = __webpack_require__(13)
-
-// Parse an option from the options object
-// If the option is not present, return the default value
-const parseOption = function (options, optionname, defaultvalue) {
-  var result = defaultvalue
-  if (options && optionname in options) {
-    result = options[optionname]
-  }
-  return result
-}
-
-  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
-  // into a vector with equal x,y,z
-const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector3D(result)
-  return result
-}
-
-const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  return result.map(function (res) {
-    return new Vector3D(res)
-  })
-}
-
-  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
-  // into a vector with equal x,y
-const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector2D(result)
-  return result
-}
-
-const parseOptionAsFloat = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    result = Number(result)
-  }
-  if (isNaN(result) || typeof (result) !== 'number') {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsInt = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = Number(Math.floor(result))
-  if (isNaN(result)) {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsBool = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    if (result === 'true') result = true
-    else if (result === 'false') result = false
-    else if (result === 0) result = false
-  }
-  result = !!result
-  return result
-}
-
-module.exports = {
-  parseOption,
-  parseOptionAsInt,
-  parseOptionAsFloat,
-  parseOptionAsBool,
-  parseOptionAs3DVector,
-  parseOptionAs2DVector,
-  parseOptionAs3DVectorList
-}
-
-
-/***/ }),
-/* 116 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector2D = __webpack_require__(14)
-const {getTag} = __webpack_require__(1)
-
-const Vertex = function (pos) {
-  this.pos = pos
-}
-
-Vertex.fromObject = function (obj) {
-  return new Vertex(new Vector2D(obj.pos._x, obj.pos._y))
-}
-
-Vertex.prototype = {
-  toString: function () {
-    return '(' + this.pos.x.toFixed(5) + ',' + this.pos.y.toFixed(5) + ')'
-  },
-  getTag: function () {
-    var result = this.tag
-    if (!result) {
-      result = getTag()
-      this.tag = result
-    }
-    return result
-  }
-}
-
-module.exports = Vertex
-
-
-/***/ }),
-/* 117 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector3D = __webpack_require__(8)
-const Vector2D = __webpack_require__(14)
-
-// Parse an option from the options object
-// If the option is not present, return the default value
-const parseOption = function (options, optionname, defaultvalue) {
-  var result = defaultvalue
-  if (options && optionname in options) {
-    result = options[optionname]
-  }
-  return result
-}
-
-  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
-  // into a vector with equal x,y,z
-const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector3D(result)
-  return result
-}
-
-const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  return result.map(function (res) {
-    return new Vector3D(res)
-  })
-}
-
-  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
-  // into a vector with equal x,y
-const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector2D(result)
-  return result
-}
-
-const parseOptionAsFloat = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    result = Number(result)
-  }
-  if (isNaN(result) || typeof (result) !== 'number') {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsInt = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = Number(Math.floor(result))
-  if (isNaN(result)) {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsBool = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    if (result === 'true') result = true
-    else if (result === 'false') result = false
-    else if (result === 0) result = false
-  }
-  result = !!result
-  return result
-}
-
-module.exports = {
-  parseOption,
-  parseOptionAsInt,
-  parseOptionAsFloat,
-  parseOptionAsBool,
-  parseOptionAs3DVector,
-  parseOptionAs2DVector,
-  parseOptionAs3DVectorList
-}
-
-
-/***/ }),
-/* 118 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-// NOTE: These type checking functions intentionally don't use `instanceof`
-// because it is fragile and can be easily faked with `Object.create()`.
-
-function isArray(arg) {
-  if (Array.isArray) {
-    return Array.isArray(arg);
-  }
-  return objectToString(arg) === '[object Array]';
-}
-exports.isArray = isArray;
-
-function isBoolean(arg) {
-  return typeof arg === 'boolean';
-}
-exports.isBoolean = isBoolean;
-
-function isNull(arg) {
-  return arg === null;
-}
-exports.isNull = isNull;
-
-function isNullOrUndefined(arg) {
-  return arg == null;
-}
-exports.isNullOrUndefined = isNullOrUndefined;
-
-function isNumber(arg) {
-  return typeof arg === 'number';
-}
-exports.isNumber = isNumber;
-
-function isString(arg) {
-  return typeof arg === 'string';
-}
-exports.isString = isString;
-
-function isSymbol(arg) {
-  return typeof arg === 'symbol';
-}
-exports.isSymbol = isSymbol;
-
-function isUndefined(arg) {
-  return arg === void 0;
-}
-exports.isUndefined = isUndefined;
-
-function isRegExp(re) {
-  return objectToString(re) === '[object RegExp]';
-}
-exports.isRegExp = isRegExp;
-
-function isObject(arg) {
-  return typeof arg === 'object' && arg !== null;
-}
-exports.isObject = isObject;
-
-function isDate(d) {
-  return objectToString(d) === '[object Date]';
-}
-exports.isDate = isDate;
-
-function isError(e) {
-  return (objectToString(e) === '[object Error]' || e instanceof Error);
-}
-exports.isError = isError;
-
-function isFunction(arg) {
-  return typeof arg === 'function';
-}
-exports.isFunction = isFunction;
-
-function isPrimitive(arg) {
-  return arg === null ||
-         typeof arg === 'boolean' ||
-         typeof arg === 'number' ||
-         typeof arg === 'string' ||
-         typeof arg === 'symbol' ||  // ES6 symbol
-         typeof arg === 'undefined';
-}
-exports.isPrimitive = isPrimitive;
-
-exports.isBuffer = Buffer.isBuffer;
-
-function objectToString(o) {
-  return Object.prototype.toString.call(o);
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(130).Buffer))
-
-/***/ }),
-/* 119 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector2D = __webpack_require__(15)
-const {getTag} = __webpack_require__(2)
-
-const Vertex = function (pos) {
-  this.pos = pos
-}
-
-Vertex.fromObject = function (obj) {
-  return new Vertex(new Vector2D(obj.pos._x, obj.pos._y))
-}
-
-Vertex.prototype = {
-  toString: function () {
-    return '(' + this.pos.x.toFixed(5) + ',' + this.pos.y.toFixed(5) + ')'
-  },
-  getTag: function () {
-    var result = this.tag
-    if (!result) {
-      result = getTag()
-      this.tag = result
-    }
-    return result
-  }
-}
-
-module.exports = Vertex
-
-
-/***/ }),
-/* 120 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector3D = __webpack_require__(9)
-const Vector2D = __webpack_require__(15)
-
-// Parse an option from the options object
-// If the option is not present, return the default value
-const parseOption = function (options, optionname, defaultvalue) {
-  var result = defaultvalue
-  if (options && optionname in options) {
-    result = options[optionname]
-  }
-  return result
-}
-
-  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
-  // into a vector with equal x,y,z
-const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector3D(result)
-  return result
-}
-
-const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  return result.map(function (res) {
-    return new Vector3D(res)
-  })
-}
-
-  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
-  // into a vector with equal x,y
-const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector2D(result)
-  return result
-}
-
-const parseOptionAsFloat = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    result = Number(result)
-  }
-  if (isNaN(result) || typeof (result) !== 'number') {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsInt = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = Number(Math.floor(result))
-  if (isNaN(result)) {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsBool = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    if (result === 'true') result = true
-    else if (result === 'false') result = false
-    else if (result === 0) result = false
-  }
-  result = !!result
-  return result
-}
-
-module.exports = {
-  parseOption,
-  parseOptionAsInt,
-  parseOptionAsFloat,
-  parseOptionAsBool,
-  parseOptionAs3DVector,
-  parseOptionAs2DVector,
-  parseOptionAs3DVectorList
-}
-
-
-/***/ }),
-/* 121 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector2D = __webpack_require__(16)
-const {getTag} = __webpack_require__(3)
-
-const Vertex = function (pos) {
-  this.pos = pos
-}
-
-Vertex.fromObject = function (obj) {
-  return new Vertex(new Vector2D(obj.pos._x, obj.pos._y))
-}
-
-Vertex.prototype = {
-  toString: function () {
-    return '(' + this.pos.x.toFixed(5) + ',' + this.pos.y.toFixed(5) + ')'
-  },
-  getTag: function () {
-    var result = this.tag
-    if (!result) {
-      result = getTag()
-      this.tag = result
-    }
-    return result
-  }
-}
-
-module.exports = Vertex
-
-
-/***/ }),
-/* 122 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector3D = __webpack_require__(10)
-const Vector2D = __webpack_require__(16)
-
-// Parse an option from the options object
-// If the option is not present, return the default value
-const parseOption = function (options, optionname, defaultvalue) {
-  var result = defaultvalue
-  if (options && optionname in options) {
-    result = options[optionname]
-  }
-  return result
-}
-
-  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
-  // into a vector with equal x,y,z
-const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector3D(result)
-  return result
-}
-
-const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  return result.map(function (res) {
-    return new Vector3D(res)
-  })
-}
-
-  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
-  // into a vector with equal x,y
-const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector2D(result)
-  return result
-}
-
-const parseOptionAsFloat = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    result = Number(result)
-  }
-  if (isNaN(result) || typeof (result) !== 'number') {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsInt = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = Number(Math.floor(result))
-  if (isNaN(result)) {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsBool = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    if (result === 'true') result = true
-    else if (result === 'false') result = false
-    else if (result === 0) result = false
-  }
-  result = !!result
-  return result
-}
-
-module.exports = {
-  parseOption,
-  parseOptionAsInt,
-  parseOptionAsFloat,
-  parseOptionAsBool,
-  parseOptionAs3DVector,
-  parseOptionAs2DVector,
-  parseOptionAs3DVectorList
-}
-
-
-/***/ }),
-/* 123 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector2D = __webpack_require__(17)
-const {getTag} = __webpack_require__(4)
-
-const Vertex = function (pos) {
-  this.pos = pos
-}
-
-Vertex.fromObject = function (obj) {
-  return new Vertex(new Vector2D(obj.pos._x, obj.pos._y))
-}
-
-Vertex.prototype = {
-  toString: function () {
-    return '(' + this.pos.x.toFixed(5) + ',' + this.pos.y.toFixed(5) + ')'
-  },
-  getTag: function () {
-    var result = this.tag
-    if (!result) {
-      result = getTag()
-      this.tag = result
-    }
-    return result
-  }
-}
-
-module.exports = Vertex
-
-
-/***/ }),
-/* 124 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector3D = __webpack_require__(11)
-const Vector2D = __webpack_require__(17)
-
-// Parse an option from the options object
-// If the option is not present, return the default value
-const parseOption = function (options, optionname, defaultvalue) {
-  var result = defaultvalue
-  if (options && optionname in options) {
-    result = options[optionname]
-  }
-  return result
-}
-
-  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
-  // into a vector with equal x,y,z
-const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector3D(result)
-  return result
-}
-
-const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  return result.map(function (res) {
-    return new Vector3D(res)
-  })
-}
-
-  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
-  // into a vector with equal x,y
-const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector2D(result)
-  return result
-}
-
-const parseOptionAsFloat = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    result = Number(result)
-  }
-  if (isNaN(result) || typeof (result) !== 'number') {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsInt = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = Number(Math.floor(result))
-  if (isNaN(result)) {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsBool = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    if (result === 'true') result = true
-    else if (result === 'false') result = false
-    else if (result === 0) result = false
-  }
-  result = !!result
-  return result
-}
-
-module.exports = {
-  parseOption,
-  parseOptionAsInt,
-  parseOptionAsFloat,
-  parseOptionAsBool,
-  parseOptionAs3DVector,
-  parseOptionAs2DVector,
-  parseOptionAs3DVectorList
-}
-
-
-/***/ }),
-/* 125 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector2D = __webpack_require__(18)
-const {getTag} = __webpack_require__(5)
-
-const Vertex = function (pos) {
-  this.pos = pos
-}
-
-Vertex.fromObject = function (obj) {
-  return new Vertex(new Vector2D(obj.pos._x, obj.pos._y))
-}
-
-Vertex.prototype = {
-  toString: function () {
-    return '(' + this.pos.x.toFixed(5) + ',' + this.pos.y.toFixed(5) + ')'
-  },
-  getTag: function () {
-    var result = this.tag
-    if (!result) {
-      result = getTag()
-      this.tag = result
-    }
-    return result
-  }
-}
-
-module.exports = Vertex
-
-
-/***/ }),
-/* 126 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector3D = __webpack_require__(12)
-const Vector2D = __webpack_require__(18)
-
-// Parse an option from the options object
-// If the option is not present, return the default value
-const parseOption = function (options, optionname, defaultvalue) {
-  var result = defaultvalue
-  if (options && optionname in options) {
-    result = options[optionname]
-  }
-  return result
-}
-
-  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
-  // into a vector with equal x,y,z
-const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector3D(result)
-  return result
-}
-
-const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  return result.map(function (res) {
-    return new Vector3D(res)
-  })
-}
-
-  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
-  // into a vector with equal x,y
-const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector2D(result)
-  return result
-}
-
-const parseOptionAsFloat = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    result = Number(result)
-  }
-  if (isNaN(result) || typeof (result) !== 'number') {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsInt = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = Number(Math.floor(result))
-  if (isNaN(result)) {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsBool = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    if (result === 'true') result = true
-    else if (result === 'false') result = false
-    else if (result === 0) result = false
-  }
-  result = !!result
-  return result
-}
-
-module.exports = {
-  parseOption,
-  parseOptionAsInt,
-  parseOptionAsFloat,
-  parseOptionAsBool,
-  parseOptionAs3DVector,
-  parseOptionAs2DVector,
-  parseOptionAs3DVectorList
-}
-
-
-/***/ }),
-/* 127 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector3D = __webpack_require__(20)
-const {EPS} = __webpack_require__(6)
-const {solve2Linear} = __webpack_require__(71)
-
-// # class Line3D
-// Represents a line in 3D space
-// direction must be a unit vector
-// point is a random point on the line
-const Line3D = function (point, direction) {
-  point = new Vector3D(point)
-  direction = new Vector3D(direction)
-  this.point = point
-  this.direction = direction.unit()
-}
-
-Line3D.fromPoints = function (p1, p2) {
-  p1 = new Vector3D(p1)
-  p2 = new Vector3D(p2)
-  let direction = p2.minus(p1)
-  return new Line3D(p1, direction)
-}
-
-Line3D.fromPlanes = function (p1, p2) {
-  let direction = p1.normal.cross(p2.normal)
-  let l = direction.length()
-  if (l < EPS) {
-    throw new Error('Parallel planes')
-  }
-  direction = direction.times(1.0 / l)
-
-  let mabsx = Math.abs(direction.x)
-  let mabsy = Math.abs(direction.y)
-  let mabsz = Math.abs(direction.z)
-  let origin
-  if ((mabsx >= mabsy) && (mabsx >= mabsz)) {
-        // direction vector is mostly pointing towards x
-        // find a point p for which x is zero:
-    let r = solve2Linear(p1.normal.y, p1.normal.z, p2.normal.y, p2.normal.z, p1.w, p2.w)
-    origin = new Vector3D(0, r[0], r[1])
-  } else if ((mabsy >= mabsx) && (mabsy >= mabsz)) {
-        // find a point p for which y is zero:
-    let r = solve2Linear(p1.normal.x, p1.normal.z, p2.normal.x, p2.normal.z, p1.w, p2.w)
-    origin = new Vector3D(r[0], 0, r[1])
-  } else {
-        // find a point p for which z is zero:
-    let r = solve2Linear(p1.normal.x, p1.normal.y, p2.normal.x, p2.normal.y, p1.w, p2.w)
-    origin = new Vector3D(r[0], r[1], 0)
-  }
-  return new Line3D(origin, direction)
-}
-
-Line3D.prototype = {
-  intersectWithPlane: function (plane) {
-        // plane: plane.normal * p = plane.w
-        // line: p=line.point + labda * line.direction
-    let labda = (plane.w - plane.normal.dot(this.point)) / plane.normal.dot(this.direction)
-    let point = this.point.plus(this.direction.times(labda))
-    return point
-  },
-
-  clone: function (line) {
-    return new Line3D(this.point.clone(), this.direction.clone())
-  },
-
-  reverse: function () {
-    return new Line3D(this.point.clone(), this.direction.negated())
-  },
-
-  transform: function (matrix4x4) {
-    let newpoint = this.point.multiply4x4(matrix4x4)
-    let pointPlusDirection = this.point.plus(this.direction)
-    let newPointPlusDirection = pointPlusDirection.multiply4x4(matrix4x4)
-    let newdirection = newPointPlusDirection.minus(newpoint)
-    return new Line3D(newpoint, newdirection)
-  },
-
-  closestPointOnLine: function (point) {
-    point = new Vector3D(point)
-    let t = point.minus(this.point).dot(this.direction) / this.direction.dot(this.direction)
-    let closestpoint = this.point.plus(this.direction.times(t))
-    return closestpoint
-  },
-
-  distanceToPoint: function (point) {
-    point = new Vector3D(point)
-    let closestpoint = this.closestPointOnLine(point)
-    let distancevector = point.minus(closestpoint)
-    let distance = distancevector.length()
-    return distance
-  },
-
-  equals: function (line3d) {
-    if (!this.direction.equals(line3d.direction)) return false
-    let distance = this.distanceToPoint(line3d.point)
-    if (distance > EPS) return false
-    return true
-  }
-}
-
-module.exports = Line3D
-
-
-/***/ }),
-/* 128 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector2D = __webpack_require__(22)
-const {EPS, angleEPS} = __webpack_require__(6)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(129)
-const {defaultResolution2D} = __webpack_require__(6)
-const Vertex = __webpack_require__(112)
-const Side = __webpack_require__(113)
-
-/** Class Path2D
- * Represents a series of points, connected by infinitely thin lines.
- * A path can be open or closed, i.e. additional line between first and last points. 
- * The difference between Path2D and CAG is that a path is a 'thin' line, whereas a CAG is an enclosed area. 
- * @constructor
- * @param {Vector2D[]} [points=[]] - list of points
- * @param {boolean} [closed=false] - closer of path
- *
- * @example
- * new CSG.Path2D()
- * new CSG.Path2D([[10,10], [-10,10], [-10,-10], [10,-10]], true) // closed
- */
-const Path2D = function (points, closed) {
-  closed = !!closed
-  points = points || []
-    // re-parse the points into Vector2D
-    // and remove any duplicate points
-  let prevpoint = null
-  if (closed && (points.length > 0)) {
-    prevpoint = new Vector2D(points[points.length - 1])
-  }
-  let newpoints = []
-  points.map(function (point) {
-    point = new Vector2D(point)
-    let skip = false
-    if (prevpoint !== null) {
-      let distance = point.distanceTo(prevpoint)
-      skip = distance < EPS
-    }
-    if (!skip) newpoints.push(point)
-    prevpoint = point
-  })
-  this.points = newpoints
-  this.closed = closed
-}
-
-/** Construct an arc.
- * @param {Object} [options] - options for construction
- * @param {Vector2D} [options.center=[0,0]] - center of circle
- * @param {Number} [options.radius=1] - radius of circle
- * @param {Number} [options.startangle=0] - starting angle of the arc, in degrees
- * @param {Number} [options.endangle=360] - ending angle of the arc, in degrees
- * @param {Number} [options.resolution=defaultResolution2D] - number of sides per 360 rotation
- * @param {Boolean} [options.maketangent=false] - adds line segments at both ends of the arc to ensure that the gradients at the edges are tangent
- * @returns {Path2D} new Path2D object (not closed)
- *
- * @example
- * let path = CSG.Path2D.arc({
- *   center: [5, 5],
- *   radius: 10,
- *   startangle: 90,
- *   endangle: 180,
- *   resolution: 36,
- *   maketangent: true
- * });
- */
-Path2D.arc = function (options) {
-  let center = parseOptionAs2DVector(options, 'center', 0)
-  let radius = parseOptionAsFloat(options, 'radius', 1)
-  let startangle = parseOptionAsFloat(options, 'startangle', 0)
-  let endangle = parseOptionAsFloat(options, 'endangle', 360)
-  let resolution = parseOptionAsInt(options, 'resolution', defaultResolution2D)
-  let maketangent = parseOptionAsBool(options, 'maketangent', false)
-    // no need to make multiple turns:
-  while (endangle - startangle >= 720) {
-    endangle -= 360
-  }
-  while (endangle - startangle <= -720) {
-    endangle += 360
-  }
-  let points = []
-  let point
-  let absangledif = Math.abs(endangle - startangle)
-  if (absangledif < angleEPS) {
-    point = Vector2D.fromAngle(startangle / 180.0 * Math.PI).times(radius)
-    points.push(point.plus(center))
-  } else {
-    let numsteps = Math.floor(resolution * absangledif / 360) + 1
-    let edgestepsize = numsteps * 0.5 / absangledif // step size for half a degree
-    if (edgestepsize > 0.25) edgestepsize = 0.25
-    let numstepsMod = maketangent ? (numsteps + 2) : numsteps
-    for (let i = 0; i <= numstepsMod; i++) {
-      let step = i
-      if (maketangent) {
-        step = (i - 1) * (numsteps - 2 * edgestepsize) / numsteps + edgestepsize
-        if (step < 0) step = 0
-        if (step > numsteps) step = numsteps
-      }
-      let angle = startangle + step * (endangle - startangle) / numsteps
-      point = Vector2D.fromAngle(angle / 180.0 * Math.PI).times(radius)
-      points.push(point.plus(center))
-    }
-  }
-  return new Path2D(points, false)
-}
-
-Path2D.prototype = {
-  concat: function (otherpath) {
-    if (this.closed || otherpath.closed) {
-      throw new Error('Paths must not be closed')
-    }
-    let newpoints = this.points.concat(otherpath.points)
-    return new Path2D(newpoints)
-  },
-
-  /**
-   * Get the points that make up the path.
-   * note that this is current internal list of points, not an immutable copy.
-   * @returns {Vector2[]} array of points the make up the path
-   */
-  getPoints: function() {
-    return this.points;
-  },
-
-  /**
-   * Append an point to the end of the path.
-   * @param {Vector2D} point - point to append
-   * @returns {Path2D} new Path2D object (not closed)
-   */
-  appendPoint: function (point) {
-    if (this.closed) {
-      throw new Error('Path must not be closed')
-    }
-    point = new Vector2D(point) // cast to Vector2D
-    let newpoints = this.points.concat([point])
-    return new Path2D(newpoints)
-  },
-
-  /**
-   * Append a list of points to the end of the path.
-   * @param {Vector2D[]} points - points to append
-   * @returns {Path2D} new Path2D object (not closed)
-   */
-  appendPoints: function (points) {
-    if (this.closed) {
-      throw new Error('Path must not be closed')
-    }
-    let newpoints = this.points
-    points.forEach(function (point) {
-      newpoints.push(new Vector2D(point)) // cast to Vector2D
-    })
-    return new Path2D(newpoints)
-  },
-
-  close: function () {
-    return new Path2D(this.points, true)
-  },
-
-  /**
-   * Determine if the path is a closed or not.
-   * @returns {Boolean} true when the path is closed, otherwise false
-   */
-  isClosed: function() {
-    return this.closed
-  },
-
-    // Extrude the path by following it with a rectangle (upright, perpendicular to the path direction)
-    // Returns a CSG solid
-    //   width: width of the extrusion, in the z=0 plane
-    //   height: height of the extrusion in the z direction
-    //   resolution: number of segments per 360 degrees for the curve in a corner
-  rectangularExtrude: function (width, height, resolution) {
-    let cag = this.expandToCAG(width / 2, resolution)
-    let result = cag.extrude({
-      offset: [0, 0, height]
-    })
-    return result
-  },
-
-    // Expand the path to a CAG
-    // This traces the path with a circle with radius pathradius
-  expandToCAG: function (pathradius, resolution) {
-    const CAG = __webpack_require__(72) // FIXME: cyclic dependencies CAG => PATH2 => CAG
-    let sides = []
-    let numpoints = this.points.length
-    let startindex = 0
-    if (this.closed && (numpoints > 2)) startindex = -1
-    let prevvertex
-    for (let i = startindex; i < numpoints; i++) {
-      let pointindex = i
-      if (pointindex < 0) pointindex = numpoints - 1
-      let point = this.points[pointindex]
-      let vertex = new Vertex(point)
-      if (i > startindex) {
-        let side = new Side(prevvertex, vertex)
-        sides.push(side)
-      }
-      prevvertex = vertex
-    }
-    let shellcag = CAG.fromSides(sides)
-    let expanded = shellcag.expandedShell(pathradius, resolution)
-    return expanded
-  },
-
-  innerToCAG: function() {
-    const CAG = __webpack_require__(72) // FIXME: cyclic dependencies CAG => PATH2 => CAG
-    if (!this.closed) throw new Error("The path should be closed!");
-    return CAG.fromPoints(this.points);
-  },
-
-  transform: function (matrix4x4) {
-    let newpoints = this.points.map(function (point) {
-      return point.multiply4x4(matrix4x4)
-    })
-    return new Path2D(newpoints, this.closed)
-  },
-
-  /**
-   * Append a Bezier curve to the end of the path, using the control points to transition the curve through start and end points.
-   * <br>
-   * The Bézier curve starts at the last point in the path,
-   * and ends at the last given control point. Other control points are intermediate control points.
-   * <br>
-   * The first control point may be null to ensure a smooth transition occurs. In this case,  
-   * the second to last control point of the path is mirrored into the control points of the Bezier curve.
-   * In other words, the trailing gradient of the path matches the new gradient of the curve. 
-   * @param {Vector2D[]} controlpoints - list of control points
-   * @param {Object} [options] - options for construction
-   * @param {Number} [options.resolution=defaultResolution2D] - number of sides per 360 rotation
-   * @returns {Path2D} new Path2D object (not closed)
-   *
-   * @example
-   * let p5 = new CSG.Path2D([[10,-20]],false);
-   * p5 = p5.appendBezier([[10,-10],[25,-10],[25,-20]]);
-   * p5 = p5.appendBezier([[25,-30],[40,-30],[40,-20]]);
-   */
-  appendBezier: function (controlpoints, options) {
-    if (arguments.length < 2) {
-      options = {}
-    }
-    if (this.closed) {
-      throw new Error('Path must not be closed')
-    }
-    if (!(controlpoints instanceof Array)) {
-      throw new Error('appendBezier: should pass an array of control points')
-    }
-    if (controlpoints.length < 1) {
-      throw new Error('appendBezier: need at least 1 control point')
-    }
-    if (this.points.length < 1) {
-      throw new Error('appendBezier: path must already contain a point (the endpoint of the path is used as the starting point for the bezier curve)')
-    }
-    let resolution = parseOptionAsInt(options, 'resolution', defaultResolution2D)
-    if (resolution < 4) resolution = 4
-    let factorials = []
-    let controlpointsParsed = []
-    controlpointsParsed.push(this.points[this.points.length - 1]) // start at the previous end point
-    for (let i = 0; i < controlpoints.length; ++i) {
-      let p = controlpoints[i]
-      if (p === null) {
-                // we can pass null as the first control point. In that case a smooth gradient is ensured:
-        if (i !== 0) {
-          throw new Error('appendBezier: null can only be passed as the first control point')
-        }
-        if (controlpoints.length < 2) {
-          throw new Error('appendBezier: null can only be passed if there is at least one more control point')
-        }
-        let lastBezierControlPoint
-        if ('lastBezierControlPoint' in this) {
-          lastBezierControlPoint = this.lastBezierControlPoint
-        } else {
-          if (this.points.length < 2) {
-            throw new Error('appendBezier: null is passed as a control point but this requires a previous bezier curve or at least two points in the existing path')
-          }
-          lastBezierControlPoint = this.points[this.points.length - 2]
-        }
-                // mirror the last bezier control point:
-        p = this.points[this.points.length - 1].times(2).minus(lastBezierControlPoint)
-      } else {
-        p = new Vector2D(p) // cast to Vector2D
-      }
-      controlpointsParsed.push(p)
-    }
-    let bezierOrder = controlpointsParsed.length - 1
-    let fact = 1
-    for (let i = 0; i <= bezierOrder; ++i) {
-      if (i > 0) fact *= i
-      factorials.push(fact)
-    }
-    let binomials = []
-    for (let i = 0; i <= bezierOrder; ++i) {
-      let binomial = factorials[bezierOrder] / (factorials[i] * factorials[bezierOrder - i])
-      binomials.push(binomial)
-    }
-    let getPointForT = function (t) {
-      let t_k = 1 // = pow(t,k)
-      let one_minus_t_n_minus_k = Math.pow(1 - t, bezierOrder) // = pow( 1-t, bezierOrder - k)
-      let inv_1_minus_t = (t !== 1) ? (1 / (1 - t)) : 1
-      let point = new Vector2D(0, 0)
-      for (let k = 0; k <= bezierOrder; ++k) {
-        if (k === bezierOrder) one_minus_t_n_minus_k = 1
-        let bernstein_coefficient = binomials[k] * t_k * one_minus_t_n_minus_k
-        point = point.plus(controlpointsParsed[k].times(bernstein_coefficient))
-        t_k *= t
-        one_minus_t_n_minus_k *= inv_1_minus_t
-      }
-      return point
-    }
-    let newpoints = []
-    let newpoints_t = []
-    let numsteps = bezierOrder + 1
-    for (let i = 0; i < numsteps; ++i) {
-      let t = i / (numsteps - 1)
-      let point = getPointForT(t)
-      newpoints.push(point)
-      newpoints_t.push(t)
-    }
-    // subdivide each segment until the angle at each vertex becomes small enough:
-    let subdivideBase = 1
-    let maxangle = Math.PI * 2 / resolution // segments may have differ no more in angle than this
-    let maxsinangle = Math.sin(maxangle)
-    while (subdivideBase < newpoints.length - 1) {
-      let dir1 = newpoints[subdivideBase].minus(newpoints[subdivideBase - 1]).unit()
-      let dir2 = newpoints[subdivideBase + 1].minus(newpoints[subdivideBase]).unit()
-      let sinangle = dir1.cross(dir2) // this is the sine of the angle
-      if (Math.abs(sinangle) > maxsinangle) {
-                // angle is too big, we need to subdivide
-        let t0 = newpoints_t[subdivideBase - 1]
-        let t1 = newpoints_t[subdivideBase + 1]
-        let t0_new = t0 + (t1 - t0) * 1 / 3
-        let t1_new = t0 + (t1 - t0) * 2 / 3
-        let point0_new = getPointForT(t0_new)
-        let point1_new = getPointForT(t1_new)
-                // remove the point at subdivideBase and replace with 2 new points:
-        newpoints.splice(subdivideBase, 1, point0_new, point1_new)
-        newpoints_t.splice(subdivideBase, 1, t0_new, t1_new)
-                // re - evaluate the angles, starting at the previous junction since it has changed:
-        subdivideBase--
-        if (subdivideBase < 1) subdivideBase = 1
-      } else {
-        ++subdivideBase
-      }
-    }
-        // append to the previous points, but skip the first new point because it is identical to the last point:
-    newpoints = this.points.concat(newpoints.slice(1))
-    let result = new Path2D(newpoints)
-    result.lastBezierControlPoint = controlpointsParsed[controlpointsParsed.length - 2]
-    return result
-  },
-
-
-  /**
-   * Append an arc to the end of the path.
-   * This implementation follows the SVG arc specs. For the details see
-   * http://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
-   * @param {Vector2D} endpoint - end point of arc
-   * @param {Object} [options] - options for construction
-   * @param {Number} [options.radius=0] - radius of arc (X and Y), see also xradius and yradius
-   * @param {Number} [options.xradius=0] - X radius of arc, see also radius
-   * @param {Number} [options.yradius=0] - Y radius of arc, see also radius
-   * @param {Number} [options.xaxisrotation=0] -  rotation (in degrees) of the X axis of the arc with respect to the X axis of the coordinate system
-   * @param {Number} [options.resolution=defaultResolution2D] - number of sides per 360 rotation
-   * @param {Boolean} [options.clockwise=false] - draw an arc clockwise with respect to the center point
-   * @param {Boolean} [options.large=false] - draw an arc longer than 180 degrees
-   * @returns {Path2D} new Path2D object (not closed)
-   *
-   * @example
-   * let p1 = new CSG.Path2D([[27.5,-22.96875]],false);
-   * p1 = p1.appendPoint([27.5,-3.28125]);
-   * p1 = p1.appendArc([12.5,-22.96875],{xradius: 15,yradius: -19.6875,xaxisrotation: 0,clockwise: false,large: false});
-   * p1 = p1.close();
-   */
-  appendArc: function (endpoint, options) {
-    let decimals = 100000
-    if (arguments.length < 2) {
-      options = {}
-    }
-    if (this.closed) {
-      throw new Error('Path must not be closed')
-    }
-    if (this.points.length < 1) {
-      throw new Error('appendArc: path must already contain a point (the endpoint of the path is used as the starting point for the arc)')
-    }
-    let resolution = parseOptionAsInt(options, 'resolution', defaultResolution2D)
-    if (resolution < 4) resolution = 4
-    let xradius, yradius
-    if (('xradius' in options) || ('yradius' in options)) {
-      if ('radius' in options) {
-        throw new Error('Should either give an xradius and yradius parameter, or a radius parameter')
-      }
-      xradius = parseOptionAsFloat(options, 'xradius', 0)
-      yradius = parseOptionAsFloat(options, 'yradius', 0)
-    } else {
-      xradius = parseOptionAsFloat(options, 'radius', 0)
-      yradius = xradius
-    }
-    let xaxisrotation = parseOptionAsFloat(options, 'xaxisrotation', 0)
-    let clockwise = parseOptionAsBool(options, 'clockwise', false)
-    let largearc = parseOptionAsBool(options, 'large', false)
-    let startpoint = this.points[this.points.length - 1]
-    endpoint = new Vector2D(endpoint)
-        // round to precision in order to have determinate calculations
-    xradius = Math.round(xradius * decimals) / decimals
-    yradius = Math.round(yradius * decimals) / decimals
-    endpoint = new Vector2D(Math.round(endpoint.x * decimals) / decimals, Math.round(endpoint.y * decimals) / decimals)
-
-    let sweepFlag = !clockwise
-    let newpoints = []
-    if ((xradius === 0) || (yradius === 0)) {
-            // http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes:
-            // If rx = 0 or ry = 0, then treat this as a straight line from (x1, y1) to (x2, y2) and stop
-      newpoints.push(endpoint)
-    } else {
-      xradius = Math.abs(xradius)
-      yradius = Math.abs(yradius)
-
-            // see http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes :
-      let phi = xaxisrotation * Math.PI / 180.0
-      let cosphi = Math.cos(phi)
-      let sinphi = Math.sin(phi)
-      let minushalfdistance = startpoint.minus(endpoint).times(0.5)
-            // F.6.5.1:
-            // round to precision in order to have determinate calculations
-      let x = Math.round((cosphi * minushalfdistance.x + sinphi * minushalfdistance.y) * decimals) / decimals
-      let y = Math.round((-sinphi * minushalfdistance.x + cosphi * minushalfdistance.y) * decimals) / decimals
-      let startTranslated = new Vector2D(x, y)
-            // F.6.6.2:
-      let biglambda = (startTranslated.x * startTranslated.x) / (xradius * xradius) + (startTranslated.y * startTranslated.y) / (yradius * yradius)
-      if (biglambda > 1.0) {
-                // F.6.6.3:
-        let sqrtbiglambda = Math.sqrt(biglambda)
-        xradius *= sqrtbiglambda
-        yradius *= sqrtbiglambda
-                // round to precision in order to have determinate calculations
-        xradius = Math.round(xradius * decimals) / decimals
-        yradius = Math.round(yradius * decimals) / decimals
-      }
-            // F.6.5.2:
-      let multiplier1 = Math.sqrt((xradius * xradius * yradius * yradius - xradius * xradius * startTranslated.y * startTranslated.y - yradius * yradius * startTranslated.x * startTranslated.x) / (xradius * xradius * startTranslated.y * startTranslated.y + yradius * yradius * startTranslated.x * startTranslated.x))
-      if (sweepFlag === largearc) multiplier1 = -multiplier1
-      let centerTranslated = new Vector2D(xradius * startTranslated.y / yradius, -yradius * startTranslated.x / xradius).times(multiplier1)
-            // F.6.5.3:
-      let center = new Vector2D(cosphi * centerTranslated.x - sinphi * centerTranslated.y, sinphi * centerTranslated.x + cosphi * centerTranslated.y).plus((startpoint.plus(endpoint)).times(0.5))
-            // F.6.5.5:
-      let vec1 = new Vector2D((startTranslated.x - centerTranslated.x) / xradius, (startTranslated.y - centerTranslated.y) / yradius)
-      let vec2 = new Vector2D((-startTranslated.x - centerTranslated.x) / xradius, (-startTranslated.y - centerTranslated.y) / yradius)
-      let theta1 = vec1.angleRadians()
-      let theta2 = vec2.angleRadians()
-      let deltatheta = theta2 - theta1
-      deltatheta = deltatheta % (2 * Math.PI)
-      if ((!sweepFlag) && (deltatheta > 0)) {
-        deltatheta -= 2 * Math.PI
-      } else if ((sweepFlag) && (deltatheta < 0)) {
-        deltatheta += 2 * Math.PI
-      }
-
-            // Ok, we have the center point and angle range (from theta1, deltatheta radians) so we can create the ellipse
-      let numsteps = Math.ceil(Math.abs(deltatheta) / (2 * Math.PI) * resolution) + 1
-      if (numsteps < 1) numsteps = 1
-      for (let step = 1; step <= numsteps; step++) {
-        let theta = theta1 + step / numsteps * deltatheta
-        let costheta = Math.cos(theta)
-        let sintheta = Math.sin(theta)
-                // F.6.3.1:
-        let point = new Vector2D(cosphi * xradius * costheta - sinphi * yradius * sintheta, sinphi * xradius * costheta + cosphi * yradius * sintheta).plus(center)
-        newpoints.push(point)
-      }
-    }
-    newpoints = this.points.concat(newpoints)
-    let result = new Path2D(newpoints)
-    return result
-  }
-}
-
-module.exports = Path2D
-
-
-/***/ }),
-/* 129 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Vector3D = __webpack_require__(20)
-const Vector2D = __webpack_require__(22)
-
-// Parse an option from the options object
-// If the option is not present, return the default value
-const parseOption = function (options, optionname, defaultvalue) {
-  var result = defaultvalue
-  if (options && optionname in options) {
-    result = options[optionname]
-  }
-  return result
-}
-
-  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
-  // into a vector with equal x,y,z
-const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector3D(result)
-  return result
-}
-
-const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  return result.map(function (res) {
-    return new Vector3D(res)
-  })
-}
-
-  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
-  // into a vector with equal x,y
-const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = new Vector2D(result)
-  return result
-}
-
-const parseOptionAsFloat = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    result = Number(result)
-  }
-  if (isNaN(result) || typeof (result) !== 'number') {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsInt = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  result = Number(Math.floor(result))
-  if (isNaN(result)) {
-    throw new Error('Parameter ' + optionname + ' should be a number')
-  }
-  return result
-}
-
-const parseOptionAsBool = function (options, optionname, defaultvalue) {
-  var result = parseOption(options, optionname, defaultvalue)
-  if (typeof (result) === 'string') {
-    if (result === 'true') result = true
-    else if (result === 'false') result = false
-    else if (result === 0) result = false
-  }
-  result = !!result
-  return result
-}
-
-module.exports = {
-  parseOption,
-  parseOptionAsInt,
-  parseOptionAsFloat,
-  parseOptionAsBool,
-  parseOptionAs3DVector,
-  parseOptionAs2DVector,
-  parseOptionAs3DVectorList
-}
-
-
-/***/ }),
-/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -33940,6 +32703,1469 @@ function isnan (val) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(79)))
 
 /***/ }),
+/* 115 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector2D = __webpack_require__(13)
+const {getTag} = __webpack_require__(0)
+
+const Vertex = function (pos) {
+  this.pos = pos
+}
+
+Vertex.fromObject = function (obj) {
+  return new Vertex(new Vector2D(obj.pos._x, obj.pos._y))
+}
+
+Vertex.prototype = {
+  toString: function () {
+    return '(' + this.pos.x.toFixed(5) + ',' + this.pos.y.toFixed(5) + ')'
+  },
+  getTag: function () {
+    var result = this.tag
+    if (!result) {
+      result = getTag()
+      this.tag = result
+    }
+    return result
+  }
+}
+
+module.exports = Vertex
+
+
+/***/ }),
+/* 116 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector3D = __webpack_require__(7)
+const Vector2D = __webpack_require__(13)
+
+// Parse an option from the options object
+// If the option is not present, return the default value
+const parseOption = function (options, optionname, defaultvalue) {
+  var result = defaultvalue
+  if (options && optionname in options) {
+    result = options[optionname]
+  }
+  return result
+}
+
+  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
+  // into a vector with equal x,y,z
+const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector3D(result)
+  return result
+}
+
+const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  return result.map(function (res) {
+    return new Vector3D(res)
+  })
+}
+
+  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
+  // into a vector with equal x,y
+const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector2D(result)
+  return result
+}
+
+const parseOptionAsFloat = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    result = Number(result)
+  }
+  if (isNaN(result) || typeof (result) !== 'number') {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsInt = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = Number(Math.floor(result))
+  if (isNaN(result)) {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsBool = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    if (result === 'true') result = true
+    else if (result === 'false') result = false
+    else if (result === 0) result = false
+  }
+  result = !!result
+  return result
+}
+
+module.exports = {
+  parseOption,
+  parseOptionAsInt,
+  parseOptionAsFloat,
+  parseOptionAsBool,
+  parseOptionAs3DVector,
+  parseOptionAs2DVector,
+  parseOptionAs3DVectorList
+}
+
+
+/***/ }),
+/* 117 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector2D = __webpack_require__(14)
+const {getTag} = __webpack_require__(1)
+
+const Vertex = function (pos) {
+  this.pos = pos
+}
+
+Vertex.fromObject = function (obj) {
+  return new Vertex(new Vector2D(obj.pos._x, obj.pos._y))
+}
+
+Vertex.prototype = {
+  toString: function () {
+    return '(' + this.pos.x.toFixed(5) + ',' + this.pos.y.toFixed(5) + ')'
+  },
+  getTag: function () {
+    var result = this.tag
+    if (!result) {
+      result = getTag()
+      this.tag = result
+    }
+    return result
+  }
+}
+
+module.exports = Vertex
+
+
+/***/ }),
+/* 118 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector3D = __webpack_require__(8)
+const Vector2D = __webpack_require__(14)
+
+// Parse an option from the options object
+// If the option is not present, return the default value
+const parseOption = function (options, optionname, defaultvalue) {
+  var result = defaultvalue
+  if (options && optionname in options) {
+    result = options[optionname]
+  }
+  return result
+}
+
+  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
+  // into a vector with equal x,y,z
+const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector3D(result)
+  return result
+}
+
+const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  return result.map(function (res) {
+    return new Vector3D(res)
+  })
+}
+
+  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
+  // into a vector with equal x,y
+const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector2D(result)
+  return result
+}
+
+const parseOptionAsFloat = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    result = Number(result)
+  }
+  if (isNaN(result) || typeof (result) !== 'number') {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsInt = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = Number(Math.floor(result))
+  if (isNaN(result)) {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsBool = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    if (result === 'true') result = true
+    else if (result === 'false') result = false
+    else if (result === 0) result = false
+  }
+  result = !!result
+  return result
+}
+
+module.exports = {
+  parseOption,
+  parseOptionAsInt,
+  parseOptionAsFloat,
+  parseOptionAsBool,
+  parseOptionAs3DVector,
+  parseOptionAs2DVector,
+  parseOptionAs3DVectorList
+}
+
+
+/***/ }),
+/* 119 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// NOTE: These type checking functions intentionally don't use `instanceof`
+// because it is fragile and can be easily faked with `Object.create()`.
+
+function isArray(arg) {
+  if (Array.isArray) {
+    return Array.isArray(arg);
+  }
+  return objectToString(arg) === '[object Array]';
+}
+exports.isArray = isArray;
+
+function isBoolean(arg) {
+  return typeof arg === 'boolean';
+}
+exports.isBoolean = isBoolean;
+
+function isNull(arg) {
+  return arg === null;
+}
+exports.isNull = isNull;
+
+function isNullOrUndefined(arg) {
+  return arg == null;
+}
+exports.isNullOrUndefined = isNullOrUndefined;
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+exports.isNumber = isNumber;
+
+function isString(arg) {
+  return typeof arg === 'string';
+}
+exports.isString = isString;
+
+function isSymbol(arg) {
+  return typeof arg === 'symbol';
+}
+exports.isSymbol = isSymbol;
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+exports.isUndefined = isUndefined;
+
+function isRegExp(re) {
+  return objectToString(re) === '[object RegExp]';
+}
+exports.isRegExp = isRegExp;
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+exports.isObject = isObject;
+
+function isDate(d) {
+  return objectToString(d) === '[object Date]';
+}
+exports.isDate = isDate;
+
+function isError(e) {
+  return (objectToString(e) === '[object Error]' || e instanceof Error);
+}
+exports.isError = isError;
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+exports.isFunction = isFunction;
+
+function isPrimitive(arg) {
+  return arg === null ||
+         typeof arg === 'boolean' ||
+         typeof arg === 'number' ||
+         typeof arg === 'string' ||
+         typeof arg === 'symbol' ||  // ES6 symbol
+         typeof arg === 'undefined';
+}
+exports.isPrimitive = isPrimitive;
+
+exports.isBuffer = __webpack_require__(114).Buffer.isBuffer;
+
+function objectToString(o) {
+  return Object.prototype.toString.call(o);
+}
+
+
+/***/ }),
+/* 120 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector2D = __webpack_require__(15)
+const {getTag} = __webpack_require__(2)
+
+const Vertex = function (pos) {
+  this.pos = pos
+}
+
+Vertex.fromObject = function (obj) {
+  return new Vertex(new Vector2D(obj.pos._x, obj.pos._y))
+}
+
+Vertex.prototype = {
+  toString: function () {
+    return '(' + this.pos.x.toFixed(5) + ',' + this.pos.y.toFixed(5) + ')'
+  },
+  getTag: function () {
+    var result = this.tag
+    if (!result) {
+      result = getTag()
+      this.tag = result
+    }
+    return result
+  }
+}
+
+module.exports = Vertex
+
+
+/***/ }),
+/* 121 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector3D = __webpack_require__(9)
+const Vector2D = __webpack_require__(15)
+
+// Parse an option from the options object
+// If the option is not present, return the default value
+const parseOption = function (options, optionname, defaultvalue) {
+  var result = defaultvalue
+  if (options && optionname in options) {
+    result = options[optionname]
+  }
+  return result
+}
+
+  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
+  // into a vector with equal x,y,z
+const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector3D(result)
+  return result
+}
+
+const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  return result.map(function (res) {
+    return new Vector3D(res)
+  })
+}
+
+  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
+  // into a vector with equal x,y
+const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector2D(result)
+  return result
+}
+
+const parseOptionAsFloat = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    result = Number(result)
+  }
+  if (isNaN(result) || typeof (result) !== 'number') {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsInt = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = Number(Math.floor(result))
+  if (isNaN(result)) {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsBool = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    if (result === 'true') result = true
+    else if (result === 'false') result = false
+    else if (result === 0) result = false
+  }
+  result = !!result
+  return result
+}
+
+module.exports = {
+  parseOption,
+  parseOptionAsInt,
+  parseOptionAsFloat,
+  parseOptionAsBool,
+  parseOptionAs3DVector,
+  parseOptionAs2DVector,
+  parseOptionAs3DVectorList
+}
+
+
+/***/ }),
+/* 122 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector2D = __webpack_require__(16)
+const {getTag} = __webpack_require__(3)
+
+const Vertex = function (pos) {
+  this.pos = pos
+}
+
+Vertex.fromObject = function (obj) {
+  return new Vertex(new Vector2D(obj.pos._x, obj.pos._y))
+}
+
+Vertex.prototype = {
+  toString: function () {
+    return '(' + this.pos.x.toFixed(5) + ',' + this.pos.y.toFixed(5) + ')'
+  },
+  getTag: function () {
+    var result = this.tag
+    if (!result) {
+      result = getTag()
+      this.tag = result
+    }
+    return result
+  }
+}
+
+module.exports = Vertex
+
+
+/***/ }),
+/* 123 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector3D = __webpack_require__(10)
+const Vector2D = __webpack_require__(16)
+
+// Parse an option from the options object
+// If the option is not present, return the default value
+const parseOption = function (options, optionname, defaultvalue) {
+  var result = defaultvalue
+  if (options && optionname in options) {
+    result = options[optionname]
+  }
+  return result
+}
+
+  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
+  // into a vector with equal x,y,z
+const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector3D(result)
+  return result
+}
+
+const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  return result.map(function (res) {
+    return new Vector3D(res)
+  })
+}
+
+  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
+  // into a vector with equal x,y
+const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector2D(result)
+  return result
+}
+
+const parseOptionAsFloat = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    result = Number(result)
+  }
+  if (isNaN(result) || typeof (result) !== 'number') {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsInt = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = Number(Math.floor(result))
+  if (isNaN(result)) {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsBool = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    if (result === 'true') result = true
+    else if (result === 'false') result = false
+    else if (result === 0) result = false
+  }
+  result = !!result
+  return result
+}
+
+module.exports = {
+  parseOption,
+  parseOptionAsInt,
+  parseOptionAsFloat,
+  parseOptionAsBool,
+  parseOptionAs3DVector,
+  parseOptionAs2DVector,
+  parseOptionAs3DVectorList
+}
+
+
+/***/ }),
+/* 124 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector2D = __webpack_require__(17)
+const {getTag} = __webpack_require__(4)
+
+const Vertex = function (pos) {
+  this.pos = pos
+}
+
+Vertex.fromObject = function (obj) {
+  return new Vertex(new Vector2D(obj.pos._x, obj.pos._y))
+}
+
+Vertex.prototype = {
+  toString: function () {
+    return '(' + this.pos.x.toFixed(5) + ',' + this.pos.y.toFixed(5) + ')'
+  },
+  getTag: function () {
+    var result = this.tag
+    if (!result) {
+      result = getTag()
+      this.tag = result
+    }
+    return result
+  }
+}
+
+module.exports = Vertex
+
+
+/***/ }),
+/* 125 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector3D = __webpack_require__(11)
+const Vector2D = __webpack_require__(17)
+
+// Parse an option from the options object
+// If the option is not present, return the default value
+const parseOption = function (options, optionname, defaultvalue) {
+  var result = defaultvalue
+  if (options && optionname in options) {
+    result = options[optionname]
+  }
+  return result
+}
+
+  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
+  // into a vector with equal x,y,z
+const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector3D(result)
+  return result
+}
+
+const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  return result.map(function (res) {
+    return new Vector3D(res)
+  })
+}
+
+  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
+  // into a vector with equal x,y
+const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector2D(result)
+  return result
+}
+
+const parseOptionAsFloat = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    result = Number(result)
+  }
+  if (isNaN(result) || typeof (result) !== 'number') {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsInt = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = Number(Math.floor(result))
+  if (isNaN(result)) {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsBool = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    if (result === 'true') result = true
+    else if (result === 'false') result = false
+    else if (result === 0) result = false
+  }
+  result = !!result
+  return result
+}
+
+module.exports = {
+  parseOption,
+  parseOptionAsInt,
+  parseOptionAsFloat,
+  parseOptionAsBool,
+  parseOptionAs3DVector,
+  parseOptionAs2DVector,
+  parseOptionAs3DVectorList
+}
+
+
+/***/ }),
+/* 126 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector2D = __webpack_require__(18)
+const {getTag} = __webpack_require__(5)
+
+const Vertex = function (pos) {
+  this.pos = pos
+}
+
+Vertex.fromObject = function (obj) {
+  return new Vertex(new Vector2D(obj.pos._x, obj.pos._y))
+}
+
+Vertex.prototype = {
+  toString: function () {
+    return '(' + this.pos.x.toFixed(5) + ',' + this.pos.y.toFixed(5) + ')'
+  },
+  getTag: function () {
+    var result = this.tag
+    if (!result) {
+      result = getTag()
+      this.tag = result
+    }
+    return result
+  }
+}
+
+module.exports = Vertex
+
+
+/***/ }),
+/* 127 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector3D = __webpack_require__(12)
+const Vector2D = __webpack_require__(18)
+
+// Parse an option from the options object
+// If the option is not present, return the default value
+const parseOption = function (options, optionname, defaultvalue) {
+  var result = defaultvalue
+  if (options && optionname in options) {
+    result = options[optionname]
+  }
+  return result
+}
+
+  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
+  // into a vector with equal x,y,z
+const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector3D(result)
+  return result
+}
+
+const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  return result.map(function (res) {
+    return new Vector3D(res)
+  })
+}
+
+  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
+  // into a vector with equal x,y
+const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector2D(result)
+  return result
+}
+
+const parseOptionAsFloat = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    result = Number(result)
+  }
+  if (isNaN(result) || typeof (result) !== 'number') {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsInt = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = Number(Math.floor(result))
+  if (isNaN(result)) {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsBool = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    if (result === 'true') result = true
+    else if (result === 'false') result = false
+    else if (result === 0) result = false
+  }
+  result = !!result
+  return result
+}
+
+module.exports = {
+  parseOption,
+  parseOptionAsInt,
+  parseOptionAsFloat,
+  parseOptionAsBool,
+  parseOptionAs3DVector,
+  parseOptionAs2DVector,
+  parseOptionAs3DVectorList
+}
+
+
+/***/ }),
+/* 128 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector3D = __webpack_require__(20)
+const {EPS} = __webpack_require__(6)
+const {solve2Linear} = __webpack_require__(71)
+
+// # class Line3D
+// Represents a line in 3D space
+// direction must be a unit vector
+// point is a random point on the line
+const Line3D = function (point, direction) {
+  point = new Vector3D(point)
+  direction = new Vector3D(direction)
+  this.point = point
+  this.direction = direction.unit()
+}
+
+Line3D.fromPoints = function (p1, p2) {
+  p1 = new Vector3D(p1)
+  p2 = new Vector3D(p2)
+  let direction = p2.minus(p1)
+  return new Line3D(p1, direction)
+}
+
+Line3D.fromPlanes = function (p1, p2) {
+  let direction = p1.normal.cross(p2.normal)
+  let l = direction.length()
+  if (l < EPS) {
+    throw new Error('Parallel planes')
+  }
+  direction = direction.times(1.0 / l)
+
+  let mabsx = Math.abs(direction.x)
+  let mabsy = Math.abs(direction.y)
+  let mabsz = Math.abs(direction.z)
+  let origin
+  if ((mabsx >= mabsy) && (mabsx >= mabsz)) {
+        // direction vector is mostly pointing towards x
+        // find a point p for which x is zero:
+    let r = solve2Linear(p1.normal.y, p1.normal.z, p2.normal.y, p2.normal.z, p1.w, p2.w)
+    origin = new Vector3D(0, r[0], r[1])
+  } else if ((mabsy >= mabsx) && (mabsy >= mabsz)) {
+        // find a point p for which y is zero:
+    let r = solve2Linear(p1.normal.x, p1.normal.z, p2.normal.x, p2.normal.z, p1.w, p2.w)
+    origin = new Vector3D(r[0], 0, r[1])
+  } else {
+        // find a point p for which z is zero:
+    let r = solve2Linear(p1.normal.x, p1.normal.y, p2.normal.x, p2.normal.y, p1.w, p2.w)
+    origin = new Vector3D(r[0], r[1], 0)
+  }
+  return new Line3D(origin, direction)
+}
+
+Line3D.prototype = {
+  intersectWithPlane: function (plane) {
+        // plane: plane.normal * p = plane.w
+        // line: p=line.point + labda * line.direction
+    let labda = (plane.w - plane.normal.dot(this.point)) / plane.normal.dot(this.direction)
+    let point = this.point.plus(this.direction.times(labda))
+    return point
+  },
+
+  clone: function (line) {
+    return new Line3D(this.point.clone(), this.direction.clone())
+  },
+
+  reverse: function () {
+    return new Line3D(this.point.clone(), this.direction.negated())
+  },
+
+  transform: function (matrix4x4) {
+    let newpoint = this.point.multiply4x4(matrix4x4)
+    let pointPlusDirection = this.point.plus(this.direction)
+    let newPointPlusDirection = pointPlusDirection.multiply4x4(matrix4x4)
+    let newdirection = newPointPlusDirection.minus(newpoint)
+    return new Line3D(newpoint, newdirection)
+  },
+
+  closestPointOnLine: function (point) {
+    point = new Vector3D(point)
+    let t = point.minus(this.point).dot(this.direction) / this.direction.dot(this.direction)
+    let closestpoint = this.point.plus(this.direction.times(t))
+    return closestpoint
+  },
+
+  distanceToPoint: function (point) {
+    point = new Vector3D(point)
+    let closestpoint = this.closestPointOnLine(point)
+    let distancevector = point.minus(closestpoint)
+    let distance = distancevector.length()
+    return distance
+  },
+
+  equals: function (line3d) {
+    if (!this.direction.equals(line3d.direction)) return false
+    let distance = this.distanceToPoint(line3d.point)
+    if (distance > EPS) return false
+    return true
+  }
+}
+
+module.exports = Line3D
+
+
+/***/ }),
+/* 129 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector2D = __webpack_require__(22)
+const {EPS, angleEPS} = __webpack_require__(6)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(130)
+const {defaultResolution2D} = __webpack_require__(6)
+const Vertex = __webpack_require__(112)
+const Side = __webpack_require__(113)
+
+/** Class Path2D
+ * Represents a series of points, connected by infinitely thin lines.
+ * A path can be open or closed, i.e. additional line between first and last points. 
+ * The difference between Path2D and CAG is that a path is a 'thin' line, whereas a CAG is an enclosed area. 
+ * @constructor
+ * @param {Vector2D[]} [points=[]] - list of points
+ * @param {boolean} [closed=false] - closer of path
+ *
+ * @example
+ * new CSG.Path2D()
+ * new CSG.Path2D([[10,10], [-10,10], [-10,-10], [10,-10]], true) // closed
+ */
+const Path2D = function (points, closed) {
+  closed = !!closed
+  points = points || []
+    // re-parse the points into Vector2D
+    // and remove any duplicate points
+  let prevpoint = null
+  if (closed && (points.length > 0)) {
+    prevpoint = new Vector2D(points[points.length - 1])
+  }
+  let newpoints = []
+  points.map(function (point) {
+    point = new Vector2D(point)
+    let skip = false
+    if (prevpoint !== null) {
+      let distance = point.distanceTo(prevpoint)
+      skip = distance < EPS
+    }
+    if (!skip) newpoints.push(point)
+    prevpoint = point
+  })
+  this.points = newpoints
+  this.closed = closed
+}
+
+/** Construct an arc.
+ * @param {Object} [options] - options for construction
+ * @param {Vector2D} [options.center=[0,0]] - center of circle
+ * @param {Number} [options.radius=1] - radius of circle
+ * @param {Number} [options.startangle=0] - starting angle of the arc, in degrees
+ * @param {Number} [options.endangle=360] - ending angle of the arc, in degrees
+ * @param {Number} [options.resolution=defaultResolution2D] - number of sides per 360 rotation
+ * @param {Boolean} [options.maketangent=false] - adds line segments at both ends of the arc to ensure that the gradients at the edges are tangent
+ * @returns {Path2D} new Path2D object (not closed)
+ *
+ * @example
+ * let path = CSG.Path2D.arc({
+ *   center: [5, 5],
+ *   radius: 10,
+ *   startangle: 90,
+ *   endangle: 180,
+ *   resolution: 36,
+ *   maketangent: true
+ * });
+ */
+Path2D.arc = function (options) {
+  let center = parseOptionAs2DVector(options, 'center', 0)
+  let radius = parseOptionAsFloat(options, 'radius', 1)
+  let startangle = parseOptionAsFloat(options, 'startangle', 0)
+  let endangle = parseOptionAsFloat(options, 'endangle', 360)
+  let resolution = parseOptionAsInt(options, 'resolution', defaultResolution2D)
+  let maketangent = parseOptionAsBool(options, 'maketangent', false)
+    // no need to make multiple turns:
+  while (endangle - startangle >= 720) {
+    endangle -= 360
+  }
+  while (endangle - startangle <= -720) {
+    endangle += 360
+  }
+  let points = []
+  let point
+  let absangledif = Math.abs(endangle - startangle)
+  if (absangledif < angleEPS) {
+    point = Vector2D.fromAngle(startangle / 180.0 * Math.PI).times(radius)
+    points.push(point.plus(center))
+  } else {
+    let numsteps = Math.floor(resolution * absangledif / 360) + 1
+    let edgestepsize = numsteps * 0.5 / absangledif // step size for half a degree
+    if (edgestepsize > 0.25) edgestepsize = 0.25
+    let numstepsMod = maketangent ? (numsteps + 2) : numsteps
+    for (let i = 0; i <= numstepsMod; i++) {
+      let step = i
+      if (maketangent) {
+        step = (i - 1) * (numsteps - 2 * edgestepsize) / numsteps + edgestepsize
+        if (step < 0) step = 0
+        if (step > numsteps) step = numsteps
+      }
+      let angle = startangle + step * (endangle - startangle) / numsteps
+      point = Vector2D.fromAngle(angle / 180.0 * Math.PI).times(radius)
+      points.push(point.plus(center))
+    }
+  }
+  return new Path2D(points, false)
+}
+
+Path2D.prototype = {
+  concat: function (otherpath) {
+    if (this.closed || otherpath.closed) {
+      throw new Error('Paths must not be closed')
+    }
+    let newpoints = this.points.concat(otherpath.points)
+    return new Path2D(newpoints)
+  },
+
+  /**
+   * Get the points that make up the path.
+   * note that this is current internal list of points, not an immutable copy.
+   * @returns {Vector2[]} array of points the make up the path
+   */
+  getPoints: function() {
+    return this.points;
+  },
+
+  /**
+   * Append an point to the end of the path.
+   * @param {Vector2D} point - point to append
+   * @returns {Path2D} new Path2D object (not closed)
+   */
+  appendPoint: function (point) {
+    if (this.closed) {
+      throw new Error('Path must not be closed')
+    }
+    point = new Vector2D(point) // cast to Vector2D
+    let newpoints = this.points.concat([point])
+    return new Path2D(newpoints)
+  },
+
+  /**
+   * Append a list of points to the end of the path.
+   * @param {Vector2D[]} points - points to append
+   * @returns {Path2D} new Path2D object (not closed)
+   */
+  appendPoints: function (points) {
+    if (this.closed) {
+      throw new Error('Path must not be closed')
+    }
+    let newpoints = this.points
+    points.forEach(function (point) {
+      newpoints.push(new Vector2D(point)) // cast to Vector2D
+    })
+    return new Path2D(newpoints)
+  },
+
+  close: function () {
+    return new Path2D(this.points, true)
+  },
+
+  /**
+   * Determine if the path is a closed or not.
+   * @returns {Boolean} true when the path is closed, otherwise false
+   */
+  isClosed: function() {
+    return this.closed
+  },
+
+    // Extrude the path by following it with a rectangle (upright, perpendicular to the path direction)
+    // Returns a CSG solid
+    //   width: width of the extrusion, in the z=0 plane
+    //   height: height of the extrusion in the z direction
+    //   resolution: number of segments per 360 degrees for the curve in a corner
+  rectangularExtrude: function (width, height, resolution) {
+    let cag = this.expandToCAG(width / 2, resolution)
+    let result = cag.extrude({
+      offset: [0, 0, height]
+    })
+    return result
+  },
+
+    // Expand the path to a CAG
+    // This traces the path with a circle with radius pathradius
+  expandToCAG: function (pathradius, resolution) {
+    const CAG = __webpack_require__(72) // FIXME: cyclic dependencies CAG => PATH2 => CAG
+    let sides = []
+    let numpoints = this.points.length
+    let startindex = 0
+    if (this.closed && (numpoints > 2)) startindex = -1
+    let prevvertex
+    for (let i = startindex; i < numpoints; i++) {
+      let pointindex = i
+      if (pointindex < 0) pointindex = numpoints - 1
+      let point = this.points[pointindex]
+      let vertex = new Vertex(point)
+      if (i > startindex) {
+        let side = new Side(prevvertex, vertex)
+        sides.push(side)
+      }
+      prevvertex = vertex
+    }
+    let shellcag = CAG.fromSides(sides)
+    let expanded = shellcag.expandedShell(pathradius, resolution)
+    return expanded
+  },
+
+  innerToCAG: function() {
+    const CAG = __webpack_require__(72) // FIXME: cyclic dependencies CAG => PATH2 => CAG
+    if (!this.closed) throw new Error("The path should be closed!");
+    return CAG.fromPoints(this.points);
+  },
+
+  transform: function (matrix4x4) {
+    let newpoints = this.points.map(function (point) {
+      return point.multiply4x4(matrix4x4)
+    })
+    return new Path2D(newpoints, this.closed)
+  },
+
+  /**
+   * Append a Bezier curve to the end of the path, using the control points to transition the curve through start and end points.
+   * <br>
+   * The Bézier curve starts at the last point in the path,
+   * and ends at the last given control point. Other control points are intermediate control points.
+   * <br>
+   * The first control point may be null to ensure a smooth transition occurs. In this case,  
+   * the second to last control point of the path is mirrored into the control points of the Bezier curve.
+   * In other words, the trailing gradient of the path matches the new gradient of the curve. 
+   * @param {Vector2D[]} controlpoints - list of control points
+   * @param {Object} [options] - options for construction
+   * @param {Number} [options.resolution=defaultResolution2D] - number of sides per 360 rotation
+   * @returns {Path2D} new Path2D object (not closed)
+   *
+   * @example
+   * let p5 = new CSG.Path2D([[10,-20]],false);
+   * p5 = p5.appendBezier([[10,-10],[25,-10],[25,-20]]);
+   * p5 = p5.appendBezier([[25,-30],[40,-30],[40,-20]]);
+   */
+  appendBezier: function (controlpoints, options) {
+    if (arguments.length < 2) {
+      options = {}
+    }
+    if (this.closed) {
+      throw new Error('Path must not be closed')
+    }
+    if (!(controlpoints instanceof Array)) {
+      throw new Error('appendBezier: should pass an array of control points')
+    }
+    if (controlpoints.length < 1) {
+      throw new Error('appendBezier: need at least 1 control point')
+    }
+    if (this.points.length < 1) {
+      throw new Error('appendBezier: path must already contain a point (the endpoint of the path is used as the starting point for the bezier curve)')
+    }
+    let resolution = parseOptionAsInt(options, 'resolution', defaultResolution2D)
+    if (resolution < 4) resolution = 4
+    let factorials = []
+    let controlpointsParsed = []
+    controlpointsParsed.push(this.points[this.points.length - 1]) // start at the previous end point
+    for (let i = 0; i < controlpoints.length; ++i) {
+      let p = controlpoints[i]
+      if (p === null) {
+                // we can pass null as the first control point. In that case a smooth gradient is ensured:
+        if (i !== 0) {
+          throw new Error('appendBezier: null can only be passed as the first control point')
+        }
+        if (controlpoints.length < 2) {
+          throw new Error('appendBezier: null can only be passed if there is at least one more control point')
+        }
+        let lastBezierControlPoint
+        if ('lastBezierControlPoint' in this) {
+          lastBezierControlPoint = this.lastBezierControlPoint
+        } else {
+          if (this.points.length < 2) {
+            throw new Error('appendBezier: null is passed as a control point but this requires a previous bezier curve or at least two points in the existing path')
+          }
+          lastBezierControlPoint = this.points[this.points.length - 2]
+        }
+                // mirror the last bezier control point:
+        p = this.points[this.points.length - 1].times(2).minus(lastBezierControlPoint)
+      } else {
+        p = new Vector2D(p) // cast to Vector2D
+      }
+      controlpointsParsed.push(p)
+    }
+    let bezierOrder = controlpointsParsed.length - 1
+    let fact = 1
+    for (let i = 0; i <= bezierOrder; ++i) {
+      if (i > 0) fact *= i
+      factorials.push(fact)
+    }
+    let binomials = []
+    for (let i = 0; i <= bezierOrder; ++i) {
+      let binomial = factorials[bezierOrder] / (factorials[i] * factorials[bezierOrder - i])
+      binomials.push(binomial)
+    }
+    let getPointForT = function (t) {
+      let t_k = 1 // = pow(t,k)
+      let one_minus_t_n_minus_k = Math.pow(1 - t, bezierOrder) // = pow( 1-t, bezierOrder - k)
+      let inv_1_minus_t = (t !== 1) ? (1 / (1 - t)) : 1
+      let point = new Vector2D(0, 0)
+      for (let k = 0; k <= bezierOrder; ++k) {
+        if (k === bezierOrder) one_minus_t_n_minus_k = 1
+        let bernstein_coefficient = binomials[k] * t_k * one_minus_t_n_minus_k
+        point = point.plus(controlpointsParsed[k].times(bernstein_coefficient))
+        t_k *= t
+        one_minus_t_n_minus_k *= inv_1_minus_t
+      }
+      return point
+    }
+    let newpoints = []
+    let newpoints_t = []
+    let numsteps = bezierOrder + 1
+    for (let i = 0; i < numsteps; ++i) {
+      let t = i / (numsteps - 1)
+      let point = getPointForT(t)
+      newpoints.push(point)
+      newpoints_t.push(t)
+    }
+    // subdivide each segment until the angle at each vertex becomes small enough:
+    let subdivideBase = 1
+    let maxangle = Math.PI * 2 / resolution // segments may have differ no more in angle than this
+    let maxsinangle = Math.sin(maxangle)
+    while (subdivideBase < newpoints.length - 1) {
+      let dir1 = newpoints[subdivideBase].minus(newpoints[subdivideBase - 1]).unit()
+      let dir2 = newpoints[subdivideBase + 1].minus(newpoints[subdivideBase]).unit()
+      let sinangle = dir1.cross(dir2) // this is the sine of the angle
+      if (Math.abs(sinangle) > maxsinangle) {
+                // angle is too big, we need to subdivide
+        let t0 = newpoints_t[subdivideBase - 1]
+        let t1 = newpoints_t[subdivideBase + 1]
+        let t0_new = t0 + (t1 - t0) * 1 / 3
+        let t1_new = t0 + (t1 - t0) * 2 / 3
+        let point0_new = getPointForT(t0_new)
+        let point1_new = getPointForT(t1_new)
+                // remove the point at subdivideBase and replace with 2 new points:
+        newpoints.splice(subdivideBase, 1, point0_new, point1_new)
+        newpoints_t.splice(subdivideBase, 1, t0_new, t1_new)
+                // re - evaluate the angles, starting at the previous junction since it has changed:
+        subdivideBase--
+        if (subdivideBase < 1) subdivideBase = 1
+      } else {
+        ++subdivideBase
+      }
+    }
+        // append to the previous points, but skip the first new point because it is identical to the last point:
+    newpoints = this.points.concat(newpoints.slice(1))
+    let result = new Path2D(newpoints)
+    result.lastBezierControlPoint = controlpointsParsed[controlpointsParsed.length - 2]
+    return result
+  },
+
+
+  /**
+   * Append an arc to the end of the path.
+   * This implementation follows the SVG arc specs. For the details see
+   * http://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
+   * @param {Vector2D} endpoint - end point of arc
+   * @param {Object} [options] - options for construction
+   * @param {Number} [options.radius=0] - radius of arc (X and Y), see also xradius and yradius
+   * @param {Number} [options.xradius=0] - X radius of arc, see also radius
+   * @param {Number} [options.yradius=0] - Y radius of arc, see also radius
+   * @param {Number} [options.xaxisrotation=0] -  rotation (in degrees) of the X axis of the arc with respect to the X axis of the coordinate system
+   * @param {Number} [options.resolution=defaultResolution2D] - number of sides per 360 rotation
+   * @param {Boolean} [options.clockwise=false] - draw an arc clockwise with respect to the center point
+   * @param {Boolean} [options.large=false] - draw an arc longer than 180 degrees
+   * @returns {Path2D} new Path2D object (not closed)
+   *
+   * @example
+   * let p1 = new CSG.Path2D([[27.5,-22.96875]],false);
+   * p1 = p1.appendPoint([27.5,-3.28125]);
+   * p1 = p1.appendArc([12.5,-22.96875],{xradius: 15,yradius: -19.6875,xaxisrotation: 0,clockwise: false,large: false});
+   * p1 = p1.close();
+   */
+  appendArc: function (endpoint, options) {
+    let decimals = 100000
+    if (arguments.length < 2) {
+      options = {}
+    }
+    if (this.closed) {
+      throw new Error('Path must not be closed')
+    }
+    if (this.points.length < 1) {
+      throw new Error('appendArc: path must already contain a point (the endpoint of the path is used as the starting point for the arc)')
+    }
+    let resolution = parseOptionAsInt(options, 'resolution', defaultResolution2D)
+    if (resolution < 4) resolution = 4
+    let xradius, yradius
+    if (('xradius' in options) || ('yradius' in options)) {
+      if ('radius' in options) {
+        throw new Error('Should either give an xradius and yradius parameter, or a radius parameter')
+      }
+      xradius = parseOptionAsFloat(options, 'xradius', 0)
+      yradius = parseOptionAsFloat(options, 'yradius', 0)
+    } else {
+      xradius = parseOptionAsFloat(options, 'radius', 0)
+      yradius = xradius
+    }
+    let xaxisrotation = parseOptionAsFloat(options, 'xaxisrotation', 0)
+    let clockwise = parseOptionAsBool(options, 'clockwise', false)
+    let largearc = parseOptionAsBool(options, 'large', false)
+    let startpoint = this.points[this.points.length - 1]
+    endpoint = new Vector2D(endpoint)
+        // round to precision in order to have determinate calculations
+    xradius = Math.round(xradius * decimals) / decimals
+    yradius = Math.round(yradius * decimals) / decimals
+    endpoint = new Vector2D(Math.round(endpoint.x * decimals) / decimals, Math.round(endpoint.y * decimals) / decimals)
+
+    let sweepFlag = !clockwise
+    let newpoints = []
+    if ((xradius === 0) || (yradius === 0)) {
+            // http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes:
+            // If rx = 0 or ry = 0, then treat this as a straight line from (x1, y1) to (x2, y2) and stop
+      newpoints.push(endpoint)
+    } else {
+      xradius = Math.abs(xradius)
+      yradius = Math.abs(yradius)
+
+            // see http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes :
+      let phi = xaxisrotation * Math.PI / 180.0
+      let cosphi = Math.cos(phi)
+      let sinphi = Math.sin(phi)
+      let minushalfdistance = startpoint.minus(endpoint).times(0.5)
+            // F.6.5.1:
+            // round to precision in order to have determinate calculations
+      let x = Math.round((cosphi * minushalfdistance.x + sinphi * minushalfdistance.y) * decimals) / decimals
+      let y = Math.round((-sinphi * minushalfdistance.x + cosphi * minushalfdistance.y) * decimals) / decimals
+      let startTranslated = new Vector2D(x, y)
+            // F.6.6.2:
+      let biglambda = (startTranslated.x * startTranslated.x) / (xradius * xradius) + (startTranslated.y * startTranslated.y) / (yradius * yradius)
+      if (biglambda > 1.0) {
+                // F.6.6.3:
+        let sqrtbiglambda = Math.sqrt(biglambda)
+        xradius *= sqrtbiglambda
+        yradius *= sqrtbiglambda
+                // round to precision in order to have determinate calculations
+        xradius = Math.round(xradius * decimals) / decimals
+        yradius = Math.round(yradius * decimals) / decimals
+      }
+            // F.6.5.2:
+      let multiplier1 = Math.sqrt((xradius * xradius * yradius * yradius - xradius * xradius * startTranslated.y * startTranslated.y - yradius * yradius * startTranslated.x * startTranslated.x) / (xradius * xradius * startTranslated.y * startTranslated.y + yradius * yradius * startTranslated.x * startTranslated.x))
+      if (sweepFlag === largearc) multiplier1 = -multiplier1
+      let centerTranslated = new Vector2D(xradius * startTranslated.y / yradius, -yradius * startTranslated.x / xradius).times(multiplier1)
+            // F.6.5.3:
+      let center = new Vector2D(cosphi * centerTranslated.x - sinphi * centerTranslated.y, sinphi * centerTranslated.x + cosphi * centerTranslated.y).plus((startpoint.plus(endpoint)).times(0.5))
+            // F.6.5.5:
+      let vec1 = new Vector2D((startTranslated.x - centerTranslated.x) / xradius, (startTranslated.y - centerTranslated.y) / yradius)
+      let vec2 = new Vector2D((-startTranslated.x - centerTranslated.x) / xradius, (-startTranslated.y - centerTranslated.y) / yradius)
+      let theta1 = vec1.angleRadians()
+      let theta2 = vec2.angleRadians()
+      let deltatheta = theta2 - theta1
+      deltatheta = deltatheta % (2 * Math.PI)
+      if ((!sweepFlag) && (deltatheta > 0)) {
+        deltatheta -= 2 * Math.PI
+      } else if ((sweepFlag) && (deltatheta < 0)) {
+        deltatheta += 2 * Math.PI
+      }
+
+            // Ok, we have the center point and angle range (from theta1, deltatheta radians) so we can create the ellipse
+      let numsteps = Math.ceil(Math.abs(deltatheta) / (2 * Math.PI) * resolution) + 1
+      if (numsteps < 1) numsteps = 1
+      for (let step = 1; step <= numsteps; step++) {
+        let theta = theta1 + step / numsteps * deltatheta
+        let costheta = Math.cos(theta)
+        let sintheta = Math.sin(theta)
+                // F.6.3.1:
+        let point = new Vector2D(cosphi * xradius * costheta - sinphi * yradius * sintheta, sinphi * xradius * costheta + cosphi * yradius * sintheta).plus(center)
+        newpoints.push(point)
+      }
+    }
+    newpoints = this.points.concat(newpoints)
+    let result = new Path2D(newpoints)
+    return result
+  }
+}
+
+module.exports = Path2D
+
+
+/***/ }),
+/* 130 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Vector3D = __webpack_require__(20)
+const Vector2D = __webpack_require__(22)
+
+// Parse an option from the options object
+// If the option is not present, return the default value
+const parseOption = function (options, optionname, defaultvalue) {
+  var result = defaultvalue
+  if (options && optionname in options) {
+    result = options[optionname]
+  }
+  return result
+}
+
+  // Parse an option and force into a Vector3D. If a scalar is passed it is converted
+  // into a vector with equal x,y,z
+const parseOptionAs3DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector3D(result)
+  return result
+}
+
+const parseOptionAs3DVectorList = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  return result.map(function (res) {
+    return new Vector3D(res)
+  })
+}
+
+  // Parse an option and force into a Vector2D. If a scalar is passed it is converted
+  // into a vector with equal x,y
+const parseOptionAs2DVector = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = new Vector2D(result)
+  return result
+}
+
+const parseOptionAsFloat = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    result = Number(result)
+  }
+  if (isNaN(result) || typeof (result) !== 'number') {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsInt = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  result = Number(Math.floor(result))
+  if (isNaN(result)) {
+    throw new Error('Parameter ' + optionname + ' should be a number')
+  }
+  return result
+}
+
+const parseOptionAsBool = function (options, optionname, defaultvalue) {
+  var result = parseOption(options, optionname, defaultvalue)
+  if (typeof (result) === 'string') {
+    if (result === 'true') result = true
+    else if (result === 'false') result = false
+    else if (result === 0) result = false
+  }
+  result = !!result
+  return result
+}
+
+module.exports = {
+  parseOption,
+  parseOptionAsInt,
+  parseOptionAsFloat,
+  parseOptionAsBool,
+  parseOptionAs3DVector,
+  parseOptionAs2DVector,
+  parseOptionAs3DVectorList
+}
+
+
+/***/ }),
 /* 131 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -34050,7 +34276,7 @@ module.exports = Line3D
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(13)
-const Vertex = __webpack_require__(114)
+const Vertex = __webpack_require__(115)
 const Vertex3 = __webpack_require__(31)
 const Polygon = __webpack_require__(23)
 const {getTag} = __webpack_require__(0)
@@ -34159,9 +34385,9 @@ module.exports = Side
 
 const Vector2D = __webpack_require__(13)
 const {EPS, angleEPS} = __webpack_require__(0)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(115)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(116)
 const {defaultResolution2D} = __webpack_require__(0)
-const Vertex = __webpack_require__(114)
+const Vertex = __webpack_require__(115)
 const Side = __webpack_require__(132)
 
 /** Class Path2D
@@ -34762,7 +34988,7 @@ module.exports = Line3D
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(14)
-const Vertex = __webpack_require__(116)
+const Vertex = __webpack_require__(117)
 const Vertex3 = __webpack_require__(33)
 const Polygon = __webpack_require__(24)
 const {getTag} = __webpack_require__(1)
@@ -34871,9 +35097,9 @@ module.exports = Side
 
 const Vector2D = __webpack_require__(14)
 const {EPS, angleEPS} = __webpack_require__(1)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(117)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(118)
 const {defaultResolution2D} = __webpack_require__(1)
-const Vertex = __webpack_require__(116)
+const Vertex = __webpack_require__(117)
 const Side = __webpack_require__(135)
 
 /** Class Path2D
@@ -35420,74 +35646,6 @@ function nextTick(fn, arg1, arg2, arg3) {
 /* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* eslint-disable node/no-deprecated-api */
-var buffer = __webpack_require__(130)
-var Buffer = buffer.Buffer
-
-// alternative to using Object.keys for old browsers
-function copyProps (src, dst) {
-  for (var key in src) {
-    dst[key] = src[key]
-  }
-}
-if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
-  module.exports = buffer
-} else {
-  // Copy properties from require('buffer')
-  copyProps(buffer, exports)
-  exports.Buffer = SafeBuffer
-}
-
-function SafeBuffer (arg, encodingOrOffset, length) {
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-// Copy static methods from Buffer
-copyProps(Buffer, SafeBuffer)
-
-SafeBuffer.from = function (arg, encodingOrOffset, length) {
-  if (typeof arg === 'number') {
-    throw new TypeError('Argument must not be a number')
-  }
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-SafeBuffer.alloc = function (size, fill, encoding) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  var buf = Buffer(size)
-  if (fill !== undefined) {
-    if (typeof encoding === 'string') {
-      buf.fill(fill, encoding)
-    } else {
-      buf.fill(fill)
-    }
-  } else {
-    buf.fill(0)
-  }
-  return buf
-}
-
-SafeBuffer.allocUnsafe = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return Buffer(size)
-}
-
-SafeBuffer.allocUnsafeSlow = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return buffer.SlowBuffer(size)
-}
-
-
-/***/ }),
-/* 139 */
-/***/ (function(module, exports, __webpack_require__) {
-
 const Vector3D = __webpack_require__(9)
 const {EPS} = __webpack_require__(2)
 const {solve2Linear} = __webpack_require__(51)
@@ -35591,11 +35749,11 @@ module.exports = Line3D
 
 
 /***/ }),
-/* 140 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(15)
-const Vertex = __webpack_require__(119)
+const Vertex = __webpack_require__(120)
 const Vertex3 = __webpack_require__(35)
 const Polygon = __webpack_require__(25)
 const {getTag} = __webpack_require__(2)
@@ -35699,15 +35857,15 @@ module.exports = Side
 
 
 /***/ }),
-/* 141 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(15)
 const {EPS, angleEPS} = __webpack_require__(2)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(120)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(121)
 const {defaultResolution2D} = __webpack_require__(2)
-const Vertex = __webpack_require__(119)
-const Side = __webpack_require__(140)
+const Vertex = __webpack_require__(120)
+const Side = __webpack_require__(139)
 
 /** Class Path2D
  * Represents a series of points, connected by infinitely thin lines.
@@ -36197,7 +36355,7 @@ module.exports = Path2D
 
 
 /***/ }),
-/* 142 */
+/* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(10)
@@ -36303,11 +36461,11 @@ module.exports = Line3D
 
 
 /***/ }),
-/* 143 */
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(16)
-const Vertex = __webpack_require__(121)
+const Vertex = __webpack_require__(122)
 const Vertex3 = __webpack_require__(37)
 const Polygon = __webpack_require__(26)
 const {getTag} = __webpack_require__(3)
@@ -36411,15 +36569,15 @@ module.exports = Side
 
 
 /***/ }),
-/* 144 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(16)
 const {EPS, angleEPS} = __webpack_require__(3)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(122)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(123)
 const {defaultResolution2D} = __webpack_require__(3)
-const Vertex = __webpack_require__(121)
-const Side = __webpack_require__(143)
+const Vertex = __webpack_require__(122)
+const Side = __webpack_require__(142)
 
 /** Class Path2D
  * Represents a series of points, connected by infinitely thin lines.
@@ -36909,7 +37067,7 @@ module.exports = Path2D
 
 
 /***/ }),
-/* 145 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(11)
@@ -37015,11 +37173,11 @@ module.exports = Line3D
 
 
 /***/ }),
-/* 146 */
+/* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(17)
-const Vertex = __webpack_require__(123)
+const Vertex = __webpack_require__(124)
 const Vertex3 = __webpack_require__(39)
 const Polygon = __webpack_require__(27)
 const {getTag} = __webpack_require__(4)
@@ -37123,15 +37281,15 @@ module.exports = Side
 
 
 /***/ }),
-/* 147 */
+/* 146 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(17)
 const {EPS, angleEPS} = __webpack_require__(4)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(124)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(125)
 const {defaultResolution2D} = __webpack_require__(4)
-const Vertex = __webpack_require__(123)
-const Side = __webpack_require__(146)
+const Vertex = __webpack_require__(124)
+const Side = __webpack_require__(145)
 
 /** Class Path2D
  * Represents a series of points, connected by infinitely thin lines.
@@ -37621,7 +37779,7 @@ module.exports = Path2D
 
 
 /***/ }),
-/* 148 */
+/* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(12)
@@ -37727,11 +37885,11 @@ module.exports = Line3D
 
 
 /***/ }),
-/* 149 */
+/* 148 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(18)
-const Vertex = __webpack_require__(125)
+const Vertex = __webpack_require__(126)
 const Vertex3 = __webpack_require__(41)
 const Polygon = __webpack_require__(28)
 const {getTag} = __webpack_require__(5)
@@ -37835,15 +37993,15 @@ module.exports = Side
 
 
 /***/ }),
-/* 150 */
+/* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(18)
 const {EPS, angleEPS} = __webpack_require__(5)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(126)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt, parseOptionAsBool} = __webpack_require__(127)
 const {defaultResolution2D} = __webpack_require__(5)
-const Vertex = __webpack_require__(125)
-const Side = __webpack_require__(149)
+const Vertex = __webpack_require__(126)
+const Side = __webpack_require__(148)
 
 /** Class Path2D
  * Represents a series of points, connected by infinitely thin lines.
@@ -38333,7 +38491,7 @@ module.exports = Path2D
 
 
 /***/ }),
-/* 151 */
+/* 150 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {inchMM, ptMM, pcMM, svgColors} = __webpack_require__(106)
@@ -38521,7 +38679,7 @@ module.exports = {
 
 
 /***/ }),
-/* 152 */
+/* 151 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var scope = (typeof global !== "undefined" && global) ||
@@ -38591,7 +38749,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(79)))
 
 /***/ }),
-/* 153 */
+/* 152 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(22)
@@ -38687,14 +38845,14 @@ module.exports = Line2D
 
 
 /***/ }),
-/* 154 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CAG = __webpack_require__(72)
 const Side = __webpack_require__(113)
 const Vector2D = __webpack_require__(22)
 const Vertex = __webpack_require__(112)
-const Path2 = __webpack_require__(128)
+const Path2 = __webpack_require__(129)
 
 /** Reconstruct a CAG from an object with identical property names.
  * @param {Object} obj - anonymous object, typically from JSON
@@ -38751,7 +38909,7 @@ module.exports = {
 
 
 /***/ }),
-/* 155 */
+/* 154 */
 /***/ (function(module, exports) {
 
 // ////////////////////////////////////
@@ -38839,7 +38997,7 @@ module.exports = Properties
 
 
 /***/ }),
-/* 156 */
+/* 155 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var nunjucks = __webpack_require__(82);
@@ -38892,7 +39050,7 @@ if(runtime.contextOrFrameLookup(context, frame, "shaderType") == runtime.context
 output += "\nuniform float u_marchingThreshold;\nuniform float u_colorWeight;\nuniform bool u_displayPrism;\n";
 ;
 }
-output += "\nuniform vec3 u_lightDirection;\nuniform vec2 u_metallicRoughness;\nuniform bool u_displaySpheirahedraSphere;\nuniform bool u_displayConvexSphere;\nuniform bool u_displayInversionSphere;\nuniform bool u_displayBoundingSphere;\nuniform bool u_castShadow;\nuniform bool u_displeyRawSpheirahedralPrism;\nuniform float u_boundingPlaneY;\nuniform vec2 u_ao;\nuniform Sphere u_boundingSphere;\nuniform bool u_twoDividePlanes;\n\nconst int RENDER_LIMIT_TERRAIN = 0;\nconst int RENDER_LIMIT_SEED_SPHERE = 1;\nconst int RENDER_LIMIT_SPHEIRAHEDRON = 2;\n\nconst float PI = 3.14159265359;\n";
+output += "\nuniform vec3 u_lightDirection;\nuniform vec2 u_metallicRoughness;\nuniform bool u_displaySpheirahedraSphere;\nuniform bool u_displayConvexSphere;\nuniform bool u_displayInversionSphere;\nuniform bool u_displayBoundingSphere;\nuniform bool u_castShadow;\nuniform bool u_displeyRawSpheirahedralPrism;\nuniform float u_boundingPlaneY;\nuniform vec2 u_ao;\nuniform Sphere u_boundingSphere;\nuniform bool u_twoDividePlanes;\nuniform bool u_enableSlice;\nuniform int u_numSlicePlanes;\nuniform Plane u_slicePlanes[12];\nuniform Plane u_quasiSphereSlicePlane;\n\nconst int RENDER_LIMIT_TERRAIN = 0;\nconst int RENDER_LIMIT_SEED_SPHERE = 1;\nconst int RENDER_LIMIT_SPHEIRAHEDRON = 2;\n\nconst float PI = 3.14159265359;\n\nfloat g_sliceInvNum = 0.;\n\n";
 if(parentTemplate) {
 parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);
 } else {
@@ -38915,7 +39073,7 @@ root: root
 module.exports = shim(nunjucks, env, nunjucks.nunjucksPrecompiled["shaders/uniforms.njk.frag"] , dependencies)
 
 /***/ }),
-/* 157 */
+/* 156 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var nunjucks = __webpack_require__(82);
@@ -38963,7 +39121,7 @@ root: root
 module.exports = shim(nunjucks, env, nunjucks.nunjucksPrecompiled["shaders/color.njk.frag"] , dependencies)
 
 /***/ }),
-/* 158 */
+/* 157 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var nunjucks = __webpack_require__(82);
@@ -38988,9 +39146,9 @@ var colno = 0;
 var output = "";
 try {
 var parentTemplate = null;
-output += "vec3 CalcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,\n              const vec2 resolution, const vec2 coord){\n    float imagePlane = (resolution.y * .5) / tan(fov * .5);\n    vec3 v = normalize(target - eye);\n    vec3 xaxis = normalize(cross(v, up));\n    vec3 yaxis =  normalize(cross(v, xaxis));\n    vec3 center = v * imagePlane;\n    vec3 origin = center - (xaxis * (resolution.x  *.5)) - (yaxis * (resolution.y * .5));\n    return normalize(origin + (xaxis * coord.x) + (yaxis * (resolution.y - coord.y)));\n}\n\nvec3 CalcRayOrtho (const vec3 eye, const vec3 target, const vec3 up, const float orthoWidth,\n                   const vec2 resolution, const vec2 coord,\n                   out vec3 rayOrigin){\n    vec3 v = normalize(target - eye);\n    vec3 xaxis = normalize(cross(v, up));\n    vec3 yaxis =  normalize(cross(v, xaxis));\n    vec2 orthoPlane = vec2(orthoWidth, orthoWidth * resolution.y / resolution.x);\n    vec3 planeOrigin = eye - (xaxis * (orthoPlane.x * .5)) - (yaxis * (orthoPlane.y * .5));\n    rayOrigin = planeOrigin + (xaxis * orthoPlane.x * coord.x / resolution.x) + (yaxis * orthoPlane.y * coord.y / resolution.y);\n    return v;\n}\n\nstruct IsectInfo {\n    int objId;\n    int objIndex;\n    int objComponentId;\n    vec3 normal;\n    vec3 intersection;\n    float mint;\n    float maxt;\n    vec3 matColor;\n    bool hit;\n};\n\nfloat MAX_FLOAT = 1e20;\nconst float THRESHOLD = 0.001;\n\nIsectInfo NewIsectInfo() {\n    IsectInfo isectInfo;\n    isectInfo.objId = -1;\n    isectInfo.objIndex = -1;\n    isectInfo.objComponentId = -1;\n    isectInfo.mint = MAX_FLOAT;\n    isectInfo.maxt = 9999999.;\n    isectInfo.hit = false;\n    return isectInfo;\n}\n\nbool IntersectBoundingSphere(vec3 sphereCenter, float radius,\n                             vec3 rayOrigin, vec3 rayDir,\n                             out float t0, out float t1){\n\tvec3 v = rayOrigin - sphereCenter;\n\tfloat b = dot(rayDir, v);\n\tfloat c = dot(v, v) - radius * radius;\n\tfloat d = b * b - c;\n\tconst float EPSILON = 0.0001;\n\tif(d >= 0.){\n\t\tfloat s = sqrt(d);\n\t\tfloat tm = -b - s;\n\t\tt0 = tm;\n\t\tif(tm <= EPSILON){\n\t\t\ttm = -b + s;\n            t1 = tm;\n\t\t\tt0 = 0.;\n\t\t}else{\n\t\t\tt1 = -b + s;\n\t\t}\n\t\tif(EPSILON < tm){\n\t\t\treturn true;\n\t\t}\n\t}\n    t0 = 0.;\n    t1 = MAX_FLOAT;\n\treturn false;\n}\n\nbool IntersectBoundingPlane(const vec3 n, const vec3 p,\n\t\t\t\t\t\t\tconst vec3 rayOrigin, const vec3 rayDir,\n\t\t\t\t\t\t\tinout float t0, inout float t1) {\n\tfloat d = -dot(p, n);\n    float v = dot(n, rayDir);\n    float t = -(dot(n, rayOrigin) + d) / v;\n    if(THRESHOLD < t){\n\t\tif(v < 0.) {\n\t\t\tt0 = max(t, t0);\n\t\t\tt1 = MAX_FLOAT;\n\t\t} else {\n\t\t\tt0 = t0;\n\t\t\tt1 = t;\n\t\t}\n\t\treturn true;\n    }\n    t0 = t0;\n    t1 = MAX_FLOAT;\n\treturn (v < 0.);\n}\n\nvec2 Rand2n(const vec2 co, const float sampleIndex) {\n    vec2 seed = co * (sampleIndex + 1.0);\n    seed+=vec2(-1,1);\n    // implementation based on: lumina.sourceforge.net/Tutorials/Noise.html\n    return vec2(fract(sin(dot(seed.xy ,vec2(12.9898,78.233))) * 43758.5453),\n                fract(cos(dot(seed.xy ,vec2(4.898,7.23))) * 23421.631));\n}\n\nvec4 DistUnion(vec4 t1, vec4 t2) {\n    return (t1.x < t2.x) ? t1 : t2;\n}\n\nfloat DistPlane(const vec3 pos, const vec3 p, const vec3 normal) {\n    return dot(pos - p, normal);\n}\n\nvoid IntersectSphere(const int objId, const int objIndex, const int objComponentId,\n                     const vec3 matColor,\n                     const vec3 sphereCenter, const float radius,\n                     const vec3 rayOrigin, const vec3 rayDir, inout IsectInfo isectInfo){\n    vec3 v = rayOrigin - sphereCenter;\n    float b = dot(rayDir, v);\n    float c = dot(v, v) - radius * radius;\n    float d = b * b - c;\n    if(d >= 0.){\n        float s = sqrt(d);\n        float t = -b - s;\n        if(t <= THRESHOLD) t = -b + s;\n        if(THRESHOLD < t && t < isectInfo.mint){\n            isectInfo.objId = objId;\n            isectInfo.objIndex = objIndex;\n            isectInfo.objComponentId = objComponentId;\n            isectInfo.matColor = matColor;\n            isectInfo.mint = t;\n            isectInfo.intersection = (rayOrigin + t * rayDir);\n            isectInfo.normal = normalize(isectInfo.intersection - sphereCenter);\n            isectInfo.hit = true;\n        }\n    }\n}\n\nfloat DistSphere(const vec3 pos, const Sphere sphere) {\n    return distance(pos, sphere.center) - sphere.r.x;\n}\n\nfloat DistPrism(const vec3 pos) {\n    float d = -1.;\n\t";
+output += "vec3 CalcRay (const vec3 eye, const vec3 target, const vec3 up, const float fov,\n              const vec2 resolution, const vec2 coord){\n    float imagePlane = (resolution.y * .5) / tan(fov * .5);\n    vec3 v = normalize(target - eye);\n    vec3 xaxis = normalize(cross(v, up));\n    vec3 yaxis =  normalize(cross(v, xaxis));\n    vec3 center = v * imagePlane;\n    vec3 origin = center - (xaxis * (resolution.x  *.5)) - (yaxis * (resolution.y * .5));\n    return normalize(origin + (xaxis * coord.x) + (yaxis * (resolution.y - coord.y)));\n}\n\nvec3 CalcRayOrtho (const vec3 eye, const vec3 target, const vec3 up, const float orthoWidth,\n                   const vec2 resolution, const vec2 coord,\n                   out vec3 rayOrigin){\n    vec3 v = normalize(target - eye);\n    vec3 xaxis = normalize(cross(v, up));\n    vec3 yaxis =  normalize(cross(v, xaxis));\n    vec2 orthoPlane = vec2(orthoWidth, orthoWidth * resolution.y / resolution.x);\n    vec3 planeOrigin = eye - (xaxis * (orthoPlane.x * .5)) - (yaxis * (orthoPlane.y * .5));\n    rayOrigin = planeOrigin + (xaxis * orthoPlane.x * coord.x / resolution.x) + (yaxis * orthoPlane.y * coord.y / resolution.y);\n    return v;\n}\n\nstruct IsectInfo {\n    int objId;\n    int objIndex;\n    int objComponentId;\n    vec3 normal;\n    vec3 intersection;\n    float mint;\n    float maxt;\n    vec3 matColor;\n    bool hit;\n};\n\nfloat MAX_FLOAT = 1e20;\nconst float THRESHOLD = 0.001;\n\nIsectInfo NewIsectInfo() {\n    IsectInfo isectInfo;\n    isectInfo.objId = -1;\n    isectInfo.objIndex = -1;\n    isectInfo.objComponentId = -1;\n    isectInfo.mint = MAX_FLOAT;\n    isectInfo.maxt = 9999999.;\n    isectInfo.hit = false;\n    return isectInfo;\n}\n\nbool IntersectBoundingSphere(vec3 sphereCenter, float radius,\n                             vec3 rayOrigin, vec3 rayDir,\n                             out float t0, out float t1){\n\tvec3 v = rayOrigin - sphereCenter;\n\tfloat b = dot(rayDir, v);\n\tfloat c = dot(v, v) - radius * radius;\n\tfloat d = b * b - c;\n\tconst float EPSILON = 0.0001;\n\tif(d >= 0.){\n\t\tfloat s = sqrt(d);\n\t\tfloat tm = -b - s;\n\t\tt0 = tm;\n\t\tif(tm <= EPSILON){\n\t\t\ttm = -b + s;\n            t1 = tm;\n\t\t\tt0 = 0.;\n\t\t}else{\n\t\t\tt1 = -b + s;\n\t\t}\n\t\tif(EPSILON < tm){\n\t\t\treturn true;\n\t\t}\n\t}\n    t0 = 0.;\n    t1 = MAX_FLOAT;\n\treturn false;\n}\n\nbool IntersectBoundingPlane(const vec3 n, const vec3 p,\n\t\t\t\t\t\t\tconst vec3 rayOrigin, const vec3 rayDir,\n\t\t\t\t\t\t\tinout float t0, inout float t1) {\n\tfloat d = -dot(p, n);\n    float v = dot(n, rayDir);\n    float t = -(dot(n, rayOrigin) + d) / v;\n    if(THRESHOLD < t){\n\t\tif(v < 0.) {\n\t\t\tt0 = max(t, t0);\n\t\t\tt1 = MAX_FLOAT;\n\t\t} else {\n\t\t\tt0 = t0;\n\t\t\tt1 = t;\n\t\t}\n\t\treturn true;\n    }\n    t0 = t0;\n    t1 = MAX_FLOAT;\n\treturn (v < 0.);\n}\n\nvec2 Rand2n(const vec2 co, const float sampleIndex) {\n    vec2 seed = co * (sampleIndex + 1.0);\n    seed+=vec2(-1,1);\n    // implementation based on: lumina.sourceforge.net/Tutorials/Noise.html\n    return vec2(fract(sin(dot(seed.xy ,vec2(12.9898,78.233))) * 43758.5453),\n                fract(cos(dot(seed.xy ,vec2(4.898,7.23))) * 23421.631));\n}\n\nvec4 DistUnion(vec4 t1, vec4 t2) {\n    return (t1.x < t2.x) ? t1 : t2;\n}\n\nvec4 DistSubtract(vec4 t1, vec4 t2) {\n    return (t1.x > t2.x) ? t1 : t2;\n}\n\n\n\nfloat DistPlane(const vec3 pos, const vec3 p, const vec3 normal) {\n    return dot(pos - p, normal);\n}\n\nvoid IntersectSphere(const int objId, const int objIndex, const int objComponentId,\n                     const vec3 matColor,\n                     const vec3 sphereCenter, const float radius,\n                     const vec3 rayOrigin, const vec3 rayDir, inout IsectInfo isectInfo){\n    vec3 v = rayOrigin - sphereCenter;\n    float b = dot(rayDir, v);\n    float c = dot(v, v) - radius * radius;\n    float d = b * b - c;\n    if(d >= 0.){\n        float s = sqrt(d);\n        float t = -b - s;\n        if(t <= THRESHOLD) t = -b + s;\n        if(THRESHOLD < t && t < isectInfo.mint){\n            isectInfo.objId = objId;\n            isectInfo.objIndex = objIndex;\n            isectInfo.objComponentId = objComponentId;\n            isectInfo.matColor = matColor;\n            isectInfo.mint = t;\n            isectInfo.intersection = (rayOrigin + t * rayDir);\n            isectInfo.normal = normalize(isectInfo.intersection - sphereCenter);\n            isectInfo.hit = true;\n        }\n    }\n}\n\nfloat DistSphere(const vec3 pos, const Sphere sphere) {\n    return distance(pos, sphere.center) - sphere.r.x;\n}\n\nfloat DistPrism(const vec3 pos) {\n    float d = -1.;\n\t";
 frame = frame.push();
-var t_3 = (lineno = 145, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismPlanes")]));
+var t_3 = (lineno = 151, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismPlanes")]));
 if(t_3) {t_3 = runtime.fromIterator(t_3);
 var t_2 = t_3.length;
 for(var t_1=0; t_1 < t_3.length; t_1++) {
@@ -39016,7 +39174,7 @@ output += "\n    return d;\n}\n\n";
 if(runtime.contextOrFrameLookup(context, frame, "shaderType") == runtime.contextOrFrameLookup(context, frame, "SHADER_TYPE_PRISM") || runtime.contextOrFrameLookup(context, frame, "renderMode") == 0) {
 output += "\nfloat DistInfSpheirahedraAll(const vec3 pos) {\n    float d = DistPrism(pos);\n    ";
 frame = frame.push();
-var t_7 = (lineno = 156, colno = 21, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numExcavationSpheres")]));
+var t_7 = (lineno = 162, colno = 21, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numExcavationSpheres")]));
 if(t_7) {t_7 = runtime.fromIterator(t_7);
 var t_6 = t_7.length;
 for(var t_5=0; t_5 < t_7.length; t_5++) {
@@ -39038,7 +39196,7 @@ output += "]),\n\t\t\td);\n\t";
 frame = frame.pop();
 output += "\n\t";
 frame = frame.push();
-var t_11 = (lineno = 160, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
+var t_11 = (lineno = 166, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
 if(t_11) {t_11 = runtime.fromIterator(t_11);
 var t_10 = t_11.length;
 for(var t_9=0; t_9 < t_11.length; t_9++) {
@@ -39063,7 +39221,7 @@ output += "\n    return d;\n}\n";
 }
 output += "\n\nfloat DistInfSpheirahedra(const vec3 pos) {\n    float d = DistPrism(pos);\n    ";
 frame = frame.push();
-var t_15 = (lineno = 170, colno = 21, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numDividePlanes")]));
+var t_15 = (lineno = 176, colno = 21, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numDividePlanes")]));
 if(t_15) {t_15 = runtime.fromIterator(t_15);
 var t_14 = t_15.length;
 for(var t_13=0; t_13 < t_15.length; t_13++) {
@@ -39087,7 +39245,7 @@ output += "].normal),\n\t\t\td);\n    ";
 frame = frame.pop();
 output += "\n    ";
 frame = frame.push();
-var t_19 = (lineno = 175, colno = 21, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numExcavationSpheres")]));
+var t_19 = (lineno = 181, colno = 21, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numExcavationSpheres")]));
 if(t_19) {t_19 = runtime.fromIterator(t_19);
 var t_18 = t_19.length;
 for(var t_17=0; t_17 < t_19.length; t_17++) {
@@ -39109,7 +39267,7 @@ output += "]),\n\t\t\td);\n\t";
 frame = frame.pop();
 output += "\n\t";
 frame = frame.push();
-var t_23 = (lineno = 179, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
+var t_23 = (lineno = 185, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
 if(t_23) {t_23 = runtime.fromIterator(t_23);
 var t_22 = t_23.length;
 for(var t_21=0; t_21 < t_23.length; t_21++) {
@@ -39131,7 +39289,7 @@ output += "]),\n\t\t\td);\n\t";
 frame = frame.pop();
 output += "\n    if(u_twoDividePlanes && u_prismSpheres[1].center.y > 0.) {\n        float d2 = DistPrism(pos);\n        d2 = max(-DistPlane(pos, u_prismSpheres[0].center,\n                          vec3(0, -1, 0)),\n                 d2);\n        ";
 frame = frame.push();
-var t_27 = (lineno = 188, colno = 25, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
+var t_27 = (lineno = 194, colno = 25, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
 if(t_27) {t_27 = runtime.fromIterator(t_27);
 var t_26 = t_27.length;
 for(var t_25=0; t_25 < t_27.length; t_25++) {
@@ -39153,7 +39311,7 @@ output += "]),\n                 d2);\n        ";
 frame = frame.pop();
 output += "\n    \n        d = min(d, d2);\n    }\n    return d;\n}\n\nfloat DistSpheirahedra(vec3 pos) {\n    float d = MAX_FLOAT;\n    ";
 frame = frame.push();
-var t_31 = (lineno = 200, colno = 21, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numDividePlanes")]));
+var t_31 = (lineno = 206, colno = 21, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numDividePlanes")]));
 if(t_31) {t_31 = runtime.fromIterator(t_31);
 var t_30 = t_31.length;
 for(var t_29=0; t_29 < t_31.length; t_29++) {
@@ -39175,7 +39333,7 @@ output += "]));\n    ";
 frame = frame.pop();
 output += "\n    ";
 frame = frame.push();
-var t_35 = (lineno = 203, colno = 21, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numExcavationSpheres")]));
+var t_35 = (lineno = 209, colno = 21, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numExcavationSpheres")]));
 if(t_35) {t_35 = runtime.fromIterator(t_35);
 var t_34 = t_35.length;
 for(var t_33=0; t_33 < t_35.length; t_33++) {
@@ -39197,7 +39355,7 @@ output += "]),\n\t\t\td);\n\t";
 frame = frame.pop();
 output += "\n\t";
 frame = frame.push();
-var t_39 = (lineno = 207, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
+var t_39 = (lineno = 213, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
 if(t_39) {t_39 = runtime.fromIterator(t_39);
 var t_38 = t_39.length;
 for(var t_37=0; t_37 < t_39.length; t_37++) {
@@ -39221,9 +39379,9 @@ output += "\n    return d;\n}\n\nconst float DIV_PI = 1.0 / PI;\nconst vec3 diel
 if(runtime.contextOrFrameLookup(context, frame, "shaderType") == runtime.contextOrFrameLookup(context, frame, "SHADER_TYPE_LIMITSET")) {
 output += "\nvoid SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {\n    vec3 diff = pos - center;\n    float lenSq = dot(diff, diff);\n    float k = r.y / lenSq;\n    dr *= k; // (r * r) / lenSq\n    pos = (diff * k) + center;\n}\n\n";
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 0) {
-output += "\nfloat DistLimitsetTerrain(vec3 pos, out float invNum) {\n    float dr = 1.;\n    invNum = 0.;\n\n    float d;\n    for(int i = 0; i < 2000; i++) {\n        if(u_maxIterations <= i) break;\n        bool inFund = true;\n\t\t";
+output += "\nfloat DistLimitsetTerrain(vec3 pos, out float invNum) {\n    float dr = 1.;\n    invNum = 0.;\n    g_sliceInvNum = 0.;\n    float d;\n    for(int i = 0; i < 2000; i++) {\n        if(u_maxIterations <= i) break;\n        bool inFund = true;\n\t\t";
 frame = frame.push();
-var t_43 = (lineno = 311, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
+var t_43 = (lineno = 317, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
 if(t_43) {t_43 = runtime.fromIterator(t_43);
 var t_42 = t_43.length;
 for(var t_41=0; t_41 < t_43.length; t_41++) {
@@ -39242,7 +39400,7 @@ output += "].center) < u_prismSpheres[";
 output += runtime.suppressValue(t_44, env.opts.autoescape);
 output += "].r.x) {\n            invNum += (float(";
 output += runtime.suppressValue((t_44 + 1) * 10, env.opts.autoescape);
-output += ") + invNum) * u_colorWeight + 1.;\n\t\t\tSphereInvert(pos, dr,\n\t\t\t\t\t\t u_prismSpheres[";
+output += ") + invNum) * u_colorWeight + 1.;\n            g_sliceInvNum++;\n\t\t\tSphereInvert(pos, dr,\n\t\t\t\t\t\t u_prismSpheres[";
 output += runtime.suppressValue(t_44, env.opts.autoescape);
 output += "].center,\n\t\t\t\t\t\t u_prismSpheres[";
 output += runtime.suppressValue(t_44, env.opts.autoescape);
@@ -39253,7 +39411,7 @@ output += "].r);\n\t\t\tcontinue;\n\t\t}\n\t\t";
 frame = frame.pop();
 output += "\n\n\t\t";
 frame = frame.push();
-var t_47 = (lineno = 321, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismPlanes")]));
+var t_47 = (lineno = 328, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismPlanes")]));
 if(t_47) {t_47 = runtime.fromIterator(t_47);
 var t_46 = t_47.length;
 for(var t_45=0; t_45 < t_47.length; t_45++) {
@@ -39290,7 +39448,7 @@ else {
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 1) {
 output += "\nfloat DistLimitsetFromSeedSpheres(vec3 pos, out float invNum) {\n    float dr = 1.;\n    invNum = 0.;\n    for(int i = 0; i < 1000; i++) {\n        if(u_maxIterations <= i) break;\n        bool inFund = true;\n\t\t";
 frame = frame.push();
-var t_51 = (lineno = 344, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
+var t_51 = (lineno = 351, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
 if(t_51) {t_51 = runtime.fromIterator(t_51);
 var t_50 = t_51.length;
 for(var t_49=0; t_49 < t_51.length; t_49++) {
@@ -39320,7 +39478,7 @@ output += "].r);\n\t\t\tcontinue;\n\t\t}\n\t\t";
 frame = frame.pop();
 output += "\n        if(inFund) break;\n    }\n\n    float minDist = 9999999.;\n\n\t";
 frame = frame.push();
-var t_55 = (lineno = 358, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSeedSpheres")]));
+var t_55 = (lineno = 365, colno = 18, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSeedSpheres")]));
 if(t_55) {t_55 = runtime.fromIterator(t_55);
 var t_54 = t_55.length;
 for(var t_53=0; t_53 < t_55.length; t_53++) {
@@ -39344,9 +39502,9 @@ output += "\n\n    return minDist;\n}\n";
 ;
 }
 else {
-output += "\nfloat DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {\n    float dr = 1.;\n    invNum = 0.;\n    for(int i = 0; i < 1000; i++) {\n        if(u_maxIterations <= i) break;\n        bool inFund = true;\n\t\t";
+output += "\nfloat DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {\n    float dr = 1.;\n    invNum = 0.;\n    g_sliceInvNum = 0.;\n    for(int i = 0; i < 1000; i++) {\n        if(u_maxIterations <= i) break;\n        bool inFund = true;\n\t\t";
 frame = frame.push();
-var t_59 = (lineno = 372, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
+var t_59 = (lineno = 380, colno = 19, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
 if(t_59) {t_59 = runtime.fromIterator(t_59);
 var t_58 = t_59.length;
 for(var t_57=0; t_57 < t_59.length; t_57++) {
@@ -39363,7 +39521,7 @@ output += "\n\t\tif(distance(pos, u_spheirahedraSpheres[";
 output += runtime.suppressValue(t_60, env.opts.autoescape);
 output += "].center) < u_spheirahedraSpheres[";
 output += runtime.suppressValue(t_60, env.opts.autoescape);
-output += "].r.x) {\n            invNum += (float(";
+output += "].r.x) {\n                  g_sliceInvNum++;\n            invNum += (float(";
 output += runtime.suppressValue((t_60 + 1) * 10, env.opts.autoescape);
 output += ") + invNum) * u_colorWeight + 1.;\n\t\t\tSphereInvert(pos, dr,\n\t\t\t\t\t\t u_spheirahedraSpheres[";
 output += runtime.suppressValue(t_60, env.opts.autoescape);
@@ -39382,7 +39540,7 @@ output += "\n        if(inFund) break;\n    }\n\n    return DistSpheirahedra(pos
 output += "\n";
 ;
 }
-output += "\n";
+output += "\n\n";
 if(parentTemplate) {
 parentTemplate.rootRenderFunc(env, context, frame, runtime, cb);
 } else {
@@ -39405,7 +39563,7 @@ root: root
 module.exports = shim(nunjucks, env, nunjucks.nunjucksPrecompiled["shaders/raytrace.njk.frag"] , dependencies)
 
 /***/ }),
-/* 159 */
+/* 158 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39542,7 +39700,7 @@ function CreateFloatTextures(gl, width, height, num) {
 }
 
 /***/ }),
-/* 160 */
+/* 159 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(13)
@@ -39638,7 +39796,7 @@ module.exports = Line2D
 
 
 /***/ }),
-/* 161 */
+/* 160 */
 /***/ (function(module, exports) {
 
 // ////////////////////////////////////
@@ -39726,7 +39884,7 @@ module.exports = Properties
 
 
 /***/ }),
-/* 162 */
+/* 161 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(14)
@@ -39822,7 +39980,7 @@ module.exports = Line2D
 
 
 /***/ }),
-/* 163 */
+/* 162 */
 /***/ (function(module, exports) {
 
 // ////////////////////////////////////
@@ -39910,7 +40068,7 @@ module.exports = Properties
 
 
 /***/ }),
-/* 164 */
+/* 163 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40364,36 +40522,57 @@ function unwrapListeners(arr) {
 
 function once(emitter, name) {
   return new Promise(function (resolve, reject) {
-    function eventListener() {
-      if (errorListener !== undefined) {
+    function errorListener(err) {
+      emitter.removeListener(name, resolver);
+      reject(err);
+    }
+
+    function resolver() {
+      if (typeof emitter.removeListener === 'function') {
         emitter.removeListener('error', errorListener);
       }
       resolve([].slice.call(arguments));
     };
-    var errorListener;
 
-    // Adding an error listener is not optional because
-    // if an error is thrown on an event emitter we cannot
-    // guarantee that the actual event we are waiting will
-    // be fired. The result could be a silent way to create
-    // memory or file descriptor leaks, which is something
-    // we should avoid.
+    eventTargetAgnosticAddListener(emitter, name, resolver, { once: true });
     if (name !== 'error') {
-      errorListener = function errorListener(err) {
-        emitter.removeListener(name, eventListener);
-        reject(err);
-      };
-
-      emitter.once('error', errorListener);
+      addErrorHandlerIfEventEmitter(emitter, errorListener, { once: true });
     }
-
-    emitter.once(name, eventListener);
   });
+}
+
+function addErrorHandlerIfEventEmitter(emitter, handler, flags) {
+  if (typeof emitter.on === 'function') {
+    eventTargetAgnosticAddListener(emitter, 'error', handler, flags);
+  }
+}
+
+function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
+  if (typeof emitter.on === 'function') {
+    if (flags.once) {
+      emitter.once(name, listener);
+    } else {
+      emitter.on(name, listener);
+    }
+  } else if (typeof emitter.addEventListener === 'function') {
+    // EventTarget does not have `error` event semantics like Node
+    // EventEmitters, we do not listen for `error` events here.
+    emitter.addEventListener(name, function wrapListener(arg) {
+      // IE does not have builtin `{ once: true }` support so we
+      // have to do it manually.
+      if (flags.once) {
+        emitter.removeEventListener(name, wrapListener);
+      }
+      listener(arg);
+    });
+  } else {
+    throw new TypeError('The "emitter" argument must be of type EventEmitter. Received type ' + typeof emitter);
+  }
 }
 
 
 /***/ }),
-/* 165 */
+/* 164 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(208);
@@ -40402,7 +40581,75 @@ exports.Readable = exports;
 exports.Writable = __webpack_require__(166);
 exports.Duplex = __webpack_require__(88);
 exports.Transform = __webpack_require__(211);
-exports.PassThrough = __webpack_require__(358);
+exports.PassThrough = __webpack_require__(359);
+
+
+/***/ }),
+/* 165 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* eslint-disable node/no-deprecated-api */
+var buffer = __webpack_require__(114)
+var Buffer = buffer.Buffer
+
+// alternative to using Object.keys for old browsers
+function copyProps (src, dst) {
+  for (var key in src) {
+    dst[key] = src[key]
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer, exports)
+  exports.Buffer = SafeBuffer
+}
+
+function SafeBuffer (arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer)
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number')
+  }
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  var buf = Buffer(size)
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding)
+    } else {
+      buf.fill(fill)
+    }
+  } else {
+    buf.fill(0)
+  }
+  return buf
+}
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return Buffer(size)
+}
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return buffer.SlowBuffer(size)
+}
 
 
 /***/ }),
@@ -40476,7 +40723,7 @@ var Duplex;
 Writable.WritableState = WritableState;
 
 /*<replacement>*/
-var util = Object.create(__webpack_require__(118));
+var util = Object.create(__webpack_require__(119));
 util.inherits = __webpack_require__(101);
 /*</replacement>*/
 
@@ -40492,7 +40739,7 @@ var Stream = __webpack_require__(209);
 
 /*<replacement>*/
 
-var Buffer = __webpack_require__(138).Buffer;
+var Buffer = __webpack_require__(165).Buffer;
 var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
   return Buffer.from(chunk);
@@ -41097,7 +41344,7 @@ Writable.prototype._destroy = function (err, cb) {
   this.end();
   cb(err);
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(109), __webpack_require__(152).setImmediate, __webpack_require__(79)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(109), __webpack_require__(151).setImmediate, __webpack_require__(79)))
 
 /***/ }),
 /* 167 */
@@ -41129,7 +41376,7 @@ Writable.prototype._destroy = function (err, cb) {
 
 /*<replacement>*/
 
-var Buffer = __webpack_require__(138).Buffer;
+var Buffer = __webpack_require__(358).Buffer;
 /*</replacement>*/
 
 var isEncoding = Buffer.isEncoding || function (encoding) {
@@ -42238,13 +42485,13 @@ module.exports = Polygon2D
 /***/ (function(module, exports, __webpack_require__) {
 
 const CSG = __webpack_require__(29)
-const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(129)
+const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(130)
 const {defaultResolution3D, defaultResolution2D, EPS} = __webpack_require__(6)
 const Vector3D = __webpack_require__(20)
 const Vertex = __webpack_require__(64)
 const Polygon = __webpack_require__(44)
 const {Connector} = __webpack_require__(111)
-const Properties = __webpack_require__(155)
+const Properties = __webpack_require__(154)
 
 /** Construct an axis-aligned solid cuboid.
  * @param {Object} [options] - options for construction
@@ -43801,13 +44048,13 @@ module.exports = {
 /* 192 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(115)
+const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(116)
 const {defaultResolution3D, defaultResolution2D, EPS} = __webpack_require__(0)
 const Vector3 = __webpack_require__(7)
 const Vertex3 = __webpack_require__(31)
 const Polygon3 = __webpack_require__(23)
 const {Connector} = __webpack_require__(99)
-const Properties = __webpack_require__(161)
+const Properties = __webpack_require__(160)
 const {fromPolygons} = __webpack_require__(46)
 
 /** Construct an axis-aligned solid cuboid.
@@ -45916,11 +46163,11 @@ CSG.getTag = getTag
 CSG.Vector2D = __webpack_require__(14)
 CSG.Vector3D = __webpack_require__(8)
 CSG.Vertex = __webpack_require__(33)
-CAG.Vertex = __webpack_require__(116)
+CAG.Vertex = __webpack_require__(117)
 CSG.Plane = __webpack_require__(32)
 CSG.Polygon = __webpack_require__(24)
 CSG.Polygon2D = __webpack_require__(196)
-CSG.Line2D = __webpack_require__(162)
+CSG.Line2D = __webpack_require__(161)
 CSG.Line3D = __webpack_require__(134)
 CSG.Path2D = __webpack_require__(136)
 CSG.OrthoNormalBasis = __webpack_require__(86)
@@ -45930,7 +46177,7 @@ CAG.Side = __webpack_require__(135)
 
 CSG.Connector = __webpack_require__(100).Connector
 CSG.ConnectorList = __webpack_require__(100).ConnectorList
-CSG.Properties = __webpack_require__(163)
+CSG.Properties = __webpack_require__(162)
 
 const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(351)
 const {sphere, cube, roundedCube, cylinder, roundedCylinder, cylinderElliptic, polyhedron} = __webpack_require__(205)
@@ -45968,7 +46215,7 @@ CAG.fromCompactBinary = CAGFactories.fromCompactBinary
 
 /// ////////////////////////////////////
 // option parsers
-const optionsParsers = __webpack_require__(117)
+const optionsParsers = __webpack_require__(118)
 
 // ////////////////////////////////////
 addTransformationMethodsToPrototype(CSG.prototype)
@@ -46977,13 +47224,13 @@ module.exports = {
 /* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(117)
+const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(118)
 const {defaultResolution3D, defaultResolution2D, EPS} = __webpack_require__(1)
 const Vector3 = __webpack_require__(8)
 const Vertex3 = __webpack_require__(33)
 const Polygon3 = __webpack_require__(24)
 const {Connector} = __webpack_require__(100)
-const Properties = __webpack_require__(163)
+const Properties = __webpack_require__(162)
 const {fromPolygons} = __webpack_require__(49)
 
 /** Construct an axis-aligned solid cuboid.
@@ -47556,7 +47803,7 @@ amfA,
 amfMap,
 amfU1,
 amfU2,
-amfU3} = __webpack_require__(363)
+amfU3} = __webpack_require__(364)
 const {inchMM} = __webpack_require__(168)
 
 let amfLast = null // last object found
@@ -49407,7 +49654,7 @@ module.exports = parse
   }
 })( false ? this.sax = {} : exports)
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(130).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(114).Buffer))
 
 /***/ }),
 /* 208 */
@@ -49455,7 +49702,7 @@ var Duplex;
 Readable.ReadableState = ReadableState;
 
 /*<replacement>*/
-var EE = __webpack_require__(164).EventEmitter;
+var EE = __webpack_require__(163).EventEmitter;
 
 var EElistenerCount = function (emitter, type) {
   return emitter.listeners(type).length;
@@ -49468,7 +49715,7 @@ var Stream = __webpack_require__(209);
 
 /*<replacement>*/
 
-var Buffer = __webpack_require__(138).Buffer;
+var Buffer = __webpack_require__(165).Buffer;
 var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
   return Buffer.from(chunk);
@@ -49480,7 +49727,7 @@ function _isUint8Array(obj) {
 /*</replacement>*/
 
 /*<replacement>*/
-var util = Object.create(__webpack_require__(118));
+var util = Object.create(__webpack_require__(119));
 util.inherits = __webpack_require__(101);
 /*</replacement>*/
 
@@ -50439,7 +50686,7 @@ function indexOf(xs, x) {
 /* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(164).EventEmitter;
+module.exports = __webpack_require__(163).EventEmitter;
 
 
 /***/ }),
@@ -50597,7 +50844,7 @@ module.exports = Transform;
 var Duplex = __webpack_require__(88);
 
 /*<replacement>*/
-var util = Object.create(__webpack_require__(118));
+var util = Object.create(__webpack_require__(119));
 util.inherits = __webpack_require__(101);
 /*</replacement>*/
 
@@ -50773,7 +51020,7 @@ module.exports = Polygon2D
 /***/ (function(module, exports, __webpack_require__) {
 
 const {areaEPS} = __webpack_require__(2)
-const {linesIntersect} = __webpack_require__(370)
+const {linesIntersect} = __webpack_require__(371)
 
 // check if we are a valid CAG (for debugging)
 // NOTE(bebbi) uneven side count doesn't work because rounding with EPS isn't taken into account
@@ -50880,7 +51127,7 @@ module.exports = {
 
 const {EPS} = __webpack_require__(2)
 const FuzzyCSGFactory = __webpack_require__(215)
-const FuzzyCAGFactory = __webpack_require__(372)
+const FuzzyCAGFactory = __webpack_require__(373)
 const {fromPolygons} = __webpack_require__(52)
 const {fromSides} = __webpack_require__(67)
 
@@ -51105,7 +51352,7 @@ module.exports = FuzzyFactory
 /***/ (function(module, exports, __webpack_require__) {
 
 const FuzzyCSGFactory = __webpack_require__(215)
-const reTesselateCoplanarPolygons = __webpack_require__(373)
+const reTesselateCoplanarPolygons = __webpack_require__(374)
 const {fromPolygons} = __webpack_require__(52)
 
 const reTesselate = function (csg) {
@@ -51330,7 +51577,7 @@ module.exports = {lieFlat, getTransformationToFlatLying, getTransformationAndInv
 /* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const toArray = __webpack_require__(378)
+const toArray = __webpack_require__(379)
 
 /**
  * Centers the given object(s) using the given options (if any)
@@ -51715,7 +51962,7 @@ module.exports = {
 /* 221 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(120)
+const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(121)
 const {defaultResolution3D, defaultResolution2D, EPS} = __webpack_require__(2)
 const Vector3 = __webpack_require__(9)
 const Vertex3 = __webpack_require__(35)
@@ -52296,7 +52543,7 @@ module.exports = Polygon2D
 /***/ (function(module, exports, __webpack_require__) {
 
 const {areaEPS} = __webpack_require__(3)
-const {linesIntersect} = __webpack_require__(391)
+const {linesIntersect} = __webpack_require__(392)
 
 // check if we are a valid CAG (for debugging)
 // NOTE(bebbi) uneven side count doesn't work because rounding with EPS isn't taken into account
@@ -52403,7 +52650,7 @@ module.exports = {
 
 const {EPS} = __webpack_require__(3)
 const FuzzyCSGFactory = __webpack_require__(225)
-const FuzzyCAGFactory = __webpack_require__(393)
+const FuzzyCAGFactory = __webpack_require__(394)
 const {fromPolygons} = __webpack_require__(55)
 const {fromSides} = __webpack_require__(68)
 
@@ -52628,7 +52875,7 @@ module.exports = FuzzyFactory
 /***/ (function(module, exports, __webpack_require__) {
 
 const FuzzyCSGFactory = __webpack_require__(225)
-const reTesselateCoplanarPolygons = __webpack_require__(394)
+const reTesselateCoplanarPolygons = __webpack_require__(395)
 const {fromPolygons} = __webpack_require__(55)
 
 const reTesselate = function (csg) {
@@ -52853,7 +53100,7 @@ module.exports = {lieFlat, getTransformationToFlatLying, getTransformationAndInv
 /* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const toArray = __webpack_require__(399)
+const toArray = __webpack_require__(400)
 
 /**
  * Centers the given object(s) using the given options (if any)
@@ -53238,7 +53485,7 @@ module.exports = {
 /* 231 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(122)
+const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(123)
 const {defaultResolution3D, defaultResolution2D, EPS} = __webpack_require__(3)
 const Vector3 = __webpack_require__(10)
 const Vertex3 = __webpack_require__(37)
@@ -53819,7 +54066,7 @@ module.exports = Polygon2D
 /***/ (function(module, exports, __webpack_require__) {
 
 const {areaEPS} = __webpack_require__(4)
-const {linesIntersect} = __webpack_require__(411)
+const {linesIntersect} = __webpack_require__(412)
 
 // check if we are a valid CAG (for debugging)
 // NOTE(bebbi) uneven side count doesn't work because rounding with EPS isn't taken into account
@@ -53926,7 +54173,7 @@ module.exports = {
 
 const {EPS} = __webpack_require__(4)
 const FuzzyCSGFactory = __webpack_require__(235)
-const FuzzyCAGFactory = __webpack_require__(413)
+const FuzzyCAGFactory = __webpack_require__(414)
 const {fromPolygons} = __webpack_require__(58)
 const {fromSides} = __webpack_require__(69)
 
@@ -54151,7 +54398,7 @@ module.exports = FuzzyFactory
 /***/ (function(module, exports, __webpack_require__) {
 
 const FuzzyCSGFactory = __webpack_require__(235)
-const reTesselateCoplanarPolygons = __webpack_require__(414)
+const reTesselateCoplanarPolygons = __webpack_require__(415)
 const {fromPolygons} = __webpack_require__(58)
 
 const reTesselate = function (csg) {
@@ -54376,7 +54623,7 @@ module.exports = {lieFlat, getTransformationToFlatLying, getTransformationAndInv
 /* 239 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const toArray = __webpack_require__(419)
+const toArray = __webpack_require__(420)
 
 /**
  * Centers the given object(s) using the given options (if any)
@@ -54761,7 +55008,7 @@ module.exports = {
 /* 241 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(124)
+const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(125)
 const {defaultResolution3D, defaultResolution2D, EPS} = __webpack_require__(4)
 const Vector3 = __webpack_require__(11)
 const Vertex3 = __webpack_require__(39)
@@ -55397,7 +55644,7 @@ for solid CAD anyway.
 
 */
 
-const {addTransformationMethodsToPrototype, addCenteringToPrototype} = __webpack_require__(429)
+const {addTransformationMethodsToPrototype, addCenteringToPrototype} = __webpack_require__(430)
 let CSG = __webpack_require__(96)
 let CAG = __webpack_require__(62)
 
@@ -55438,23 +55685,23 @@ CSG.getTag = getTag
 CSG.Vector2D = __webpack_require__(18)
 CSG.Vector3D = __webpack_require__(12)
 CSG.Vertex = __webpack_require__(41)
-CAG.Vertex = __webpack_require__(125)
+CAG.Vertex = __webpack_require__(126)
 CSG.Plane = __webpack_require__(40)
 CSG.Polygon = __webpack_require__(28)
 CSG.Polygon2D = __webpack_require__(243)
 CSG.Line2D = __webpack_require__(175)
-CSG.Line3D = __webpack_require__(148)
-CSG.Path2D = __webpack_require__(150)
+CSG.Line3D = __webpack_require__(147)
+CSG.Path2D = __webpack_require__(149)
 CSG.OrthoNormalBasis = __webpack_require__(95)
 CSG.Matrix4x4 = __webpack_require__(78)
 
-CAG.Side = __webpack_require__(149)
+CAG.Side = __webpack_require__(148)
 
 CSG.Connector = __webpack_require__(105).Connector
 CSG.ConnectorList = __webpack_require__(105).ConnectorList
 CSG.Properties = __webpack_require__(176)
 
-const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(445)
+const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(446)
 const {sphere, cube, roundedCube, cylinder, roundedCylinder, cylinderElliptic, polyhedron} = __webpack_require__(252)
 
 CSG.sphere = sphere
@@ -55477,7 +55724,7 @@ CSG.fromObject = fromObject
 CSG.fromSlices = fromSlices
 CSG.fromPolygons = fromPolygons
 
-CSG.toPointCloud = __webpack_require__(446).toPointCloud
+CSG.toPointCloud = __webpack_require__(447).toPointCloud
 
 const CAGFactories = __webpack_require__(70)
 CAG.fromSides = CAGFactories.fromSides
@@ -55490,7 +55737,7 @@ CAG.fromCompactBinary = CAGFactories.fromCompactBinary
 
 /// ////////////////////////////////////
 // option parsers
-const optionsParsers = __webpack_require__(126)
+const optionsParsers = __webpack_require__(127)
 
 // ////////////////////////////////////
 addTransformationMethodsToPrototype(CSG.prototype)
@@ -55557,7 +55804,7 @@ module.exports = Polygon2D
 /***/ (function(module, exports, __webpack_require__) {
 
 const {areaEPS} = __webpack_require__(5)
-const {linesIntersect} = __webpack_require__(431)
+const {linesIntersect} = __webpack_require__(432)
 
 // check if we are a valid CAG (for debugging)
 // NOTE(bebbi) uneven side count doesn't work because rounding with EPS isn't taken into account
@@ -55664,7 +55911,7 @@ module.exports = {
 
 const {EPS} = __webpack_require__(5)
 const FuzzyCSGFactory = __webpack_require__(246)
-const FuzzyCAGFactory = __webpack_require__(433)
+const FuzzyCAGFactory = __webpack_require__(434)
 const {fromPolygons} = __webpack_require__(61)
 const {fromSides} = __webpack_require__(70)
 
@@ -55889,7 +56136,7 @@ module.exports = FuzzyFactory
 /***/ (function(module, exports, __webpack_require__) {
 
 const FuzzyCSGFactory = __webpack_require__(246)
-const reTesselateCoplanarPolygons = __webpack_require__(434)
+const reTesselateCoplanarPolygons = __webpack_require__(435)
 const {fromPolygons} = __webpack_require__(61)
 
 const reTesselate = function (csg) {
@@ -56114,7 +56361,7 @@ module.exports = {lieFlat, getTransformationToFlatLying, getTransformationAndInv
 /* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const toArray = __webpack_require__(439)
+const toArray = __webpack_require__(440)
 
 /**
  * Centers the given object(s) using the given options (if any)
@@ -56499,7 +56746,7 @@ module.exports = {
 /* 252 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(126)
+const {parseOption, parseOptionAs3DVector, parseOptionAs2DVector, parseOptionAs3DVectorList, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(127)
 const {defaultResolution3D, defaultResolution2D, EPS} = __webpack_require__(5)
 const Vector3 = __webpack_require__(12)
 const Vertex3 = __webpack_require__(41)
@@ -57224,15 +57471,15 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _headerPanel = __webpack_require__(461);
+var _headerPanel = __webpack_require__(462);
 
 var _headerPanel2 = _interopRequireDefault(_headerPanel);
 
-var _middlePanel = __webpack_require__(465);
+var _middlePanel = __webpack_require__(466);
 
 var _middlePanel2 = _interopRequireDefault(_middlePanel);
 
-var _footerPanel = __webpack_require__(485);
+var _footerPanel = __webpack_require__(486);
 
 var _footerPanel2 = _interopRequireDefault(_footerPanel);
 
@@ -57329,11 +57576,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _canvasPanel = __webpack_require__(468);
+var _canvasPanel = __webpack_require__(469);
 
 var _canvasPanel2 = _interopRequireDefault(_canvasPanel);
 
-var _controlPanel = __webpack_require__(480);
+var _controlPanel = __webpack_require__(481);
 
 var _controlPanel2 = _interopRequireDefault(_controlPanel);
 
@@ -57365,19 +57612,19 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _limitsetCanvas = __webpack_require__(471);
+var _limitsetCanvas = __webpack_require__(472);
 
 var _limitsetCanvas2 = _interopRequireDefault(_limitsetCanvas);
 
-var _prismCanvas = __webpack_require__(473);
+var _prismCanvas = __webpack_require__(474);
 
 var _prismCanvas2 = _interopRequireDefault(_prismCanvas);
 
-var _parameterCanvas = __webpack_require__(475);
+var _parameterCanvas = __webpack_require__(476);
 
 var _parameterCanvas2 = _interopRequireDefault(_parameterCanvas);
 
-var _sphaiahedraCanvas = __webpack_require__(477);
+var _sphaiahedraCanvas = __webpack_require__(478);
 
 var _sphaiahedraCanvas2 = _interopRequireDefault(_sphaiahedraCanvas);
 
@@ -57729,6 +57976,41 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 exports.default = {
     props: ['canvasHandler', 'spheirahedraHandler'],
@@ -57748,6 +58030,9 @@ exports.default = {
         },
         changeDihedralAngleType: function changeDihedralAngleType(event) {
             this.canvasHandler.changeDihedralAngleType(this.spheirahedraHandler.currentDihedralAngleIndex);
+        },
+        changeSliceType: function changeSliceType(event) {
+            this.canvasHandler.reRenderLimitsetCanvas();
         },
         updateRenderParameter: function updateRenderParameter(event) {
             this.canvasHandler.reRenderLimitsetCanvas();
@@ -58094,11 +58379,11 @@ var _spheirahedraHandler = __webpack_require__(267);
 
 var _spheirahedraHandler2 = _interopRequireDefault(_spheirahedraHandler);
 
-var _canvasHandler = __webpack_require__(450);
+var _canvasHandler = __webpack_require__(451);
 
 var _canvasHandler2 = _interopRequireDefault(_canvasHandler);
 
-var _root = __webpack_require__(457);
+var _root = __webpack_require__(458);
 
 var _root2 = _interopRequireDefault(_root);
 
@@ -58144,8 +58429,8 @@ window.addEventListener('load', function () {
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* WEBPACK VAR INJECTION */(function(global, setImmediate) {/*!
- * Vue.js v2.6.12
- * (c) 2014-2020 Evan You
+ * Vue.js v2.6.14
+ * (c) 2014-2021 Evan You
  * Released under the MIT License.
  */
 /*  */
@@ -59836,13 +60121,14 @@ function assertProp (
       type = [type];
     }
     for (var i = 0; i < type.length && !valid; i++) {
-      var assertedType = assertType(value, type[i]);
+      var assertedType = assertType(value, type[i], vm);
       expectedTypes.push(assertedType.expectedType || '');
       valid = assertedType.valid;
     }
   }
 
-  if (!valid) {
+  var haveExpectedTypes = expectedTypes.some(function (t) { return t; });
+  if (!valid && haveExpectedTypes) {
     warn(
       getInvalidTypeMessage(name, value, expectedTypes),
       vm
@@ -59860,9 +60146,9 @@ function assertProp (
   }
 }
 
-var simpleCheckRE = /^(String|Number|Boolean|Function|Symbol)$/;
+var simpleCheckRE = /^(String|Number|Boolean|Function|Symbol|BigInt)$/;
 
-function assertType (value, type) {
+function assertType (value, type, vm) {
   var valid;
   var expectedType = getType(type);
   if (simpleCheckRE.test(expectedType)) {
@@ -59877,7 +60163,12 @@ function assertType (value, type) {
   } else if (expectedType === 'Array') {
     valid = Array.isArray(value);
   } else {
-    valid = value instanceof type;
+    try {
+      valid = value instanceof type;
+    } catch (e) {
+      warn('Invalid prop type: "' + String(type) + '" is not a constructor', vm);
+      valid = false;
+    }
   }
   return {
     valid: valid,
@@ -59885,13 +60176,15 @@ function assertType (value, type) {
   }
 }
 
+var functionTypeCheckRE = /^\s*function (\w+)/;
+
 /**
  * Use function string name to check built-in types,
  * because a simple equality check will fail when running
  * across different vms / iframes.
  */
 function getType (fn) {
-  var match = fn && fn.toString().match(/^\s*function (\w+)/);
+  var match = fn && fn.toString().match(functionTypeCheckRE);
   return match ? match[1] : ''
 }
 
@@ -59916,18 +60209,19 @@ function getInvalidTypeMessage (name, value, expectedTypes) {
     " Expected " + (expectedTypes.map(capitalize).join(', '));
   var expectedType = expectedTypes[0];
   var receivedType = toRawType(value);
-  var expectedValue = styleValue(value, expectedType);
-  var receivedValue = styleValue(value, receivedType);
   // check if we need to specify expected value
-  if (expectedTypes.length === 1 &&
-      isExplicable(expectedType) &&
-      !isBoolean(expectedType, receivedType)) {
-    message += " with value " + expectedValue;
+  if (
+    expectedTypes.length === 1 &&
+    isExplicable(expectedType) &&
+    isExplicable(typeof value) &&
+    !isBoolean(expectedType, receivedType)
+  ) {
+    message += " with value " + (styleValue(value, expectedType));
   }
   message += ", got " + receivedType + " ";
   // check if we need to specify received value
   if (isExplicable(receivedType)) {
-    message += "with value " + receivedValue + ".";
+    message += "with value " + (styleValue(value, receivedType)) + ".";
   }
   return message
 }
@@ -59942,9 +60236,9 @@ function styleValue (value, type) {
   }
 }
 
+var EXPLICABLE_TYPES = ['string', 'number', 'boolean'];
 function isExplicable (value) {
-  var explicitTypes = ['string', 'number', 'boolean'];
-  return explicitTypes.some(function (elem) { return value.toLowerCase() === elem; })
+  return EXPLICABLE_TYPES.some(function (elem) { return value.toLowerCase() === elem; })
 }
 
 function isBoolean () {
@@ -60148,7 +60442,7 @@ if (false) {
   var allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +
-    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' +
+    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,BigInt,' +
     'require' // for Webpack/Browserify
   );
 
@@ -60676,6 +60970,12 @@ function isWhitespace (node) {
 
 /*  */
 
+function isAsyncPlaceholder (node) {
+  return node.isComment && node.asyncFactory
+}
+
+/*  */
+
 function normalizeScopedSlots (
   slots,
   normalSlots,
@@ -60732,9 +61032,10 @@ function normalizeScopedSlot(normalSlots, key, fn) {
     res = res && typeof res === 'object' && !Array.isArray(res)
       ? [res] // single vnode
       : normalizeChildren(res);
+    var vnode = res && res[0];
     return res && (
-      res.length === 0 ||
-      (res.length === 1 && res[0].isComment) // #9658
+      !vnode ||
+      (res.length === 1 && vnode.isComment && !isAsyncPlaceholder(vnode)) // #9658, #10391
     ) ? undefined
       : res
   };
@@ -60807,26 +61108,28 @@ function renderList (
  */
 function renderSlot (
   name,
-  fallback,
+  fallbackRender,
   props,
   bindObject
 ) {
   var scopedSlotFn = this.$scopedSlots[name];
   var nodes;
-  if (scopedSlotFn) { // scoped slot
+  if (scopedSlotFn) {
+    // scoped slot
     props = props || {};
     if (bindObject) {
       if (false) {
-        warn(
-          'slot v-bind without argument expects an Object',
-          this
-        );
+        warn('slot v-bind without argument expects an Object', this);
       }
       props = extend(extend({}, bindObject), props);
     }
-    nodes = scopedSlotFn(props) || fallback;
+    nodes =
+      scopedSlotFn(props) ||
+      (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender);
   } else {
-    nodes = this.$slots[name] || fallback;
+    nodes =
+      this.$slots[name] ||
+      (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender);
   }
 
   var target = props && props.slot;
@@ -60876,6 +61179,7 @@ function checkKeyCodes (
   } else if (eventKeyName) {
     return hyphenate(eventKeyName) !== key
   }
+  return eventKeyCode === undefined
 }
 
 /*  */
@@ -61407,8 +61711,10 @@ function createComponent (
 }
 
 function createComponentInstanceForVnode (
-  vnode, // we know it's MountedComponentVNode but flow doesn't
-  parent // activeInstance in lifecycle state
+  // we know it's MountedComponentVNode but flow doesn't
+  vnode,
+  // activeInstance in lifecycle state
+  parent
 ) {
   var options = {
     _isComponent: true,
@@ -61878,12 +62184,6 @@ function resolveAsyncComponent (
 
 /*  */
 
-function isAsyncPlaceholder (node) {
-  return node.isComment && node.asyncFactory
-}
-
-/*  */
-
 function getFirstComponentChild (children) {
   if (Array.isArray(children)) {
     for (var i = 0; i < children.length; i++) {
@@ -62250,7 +62550,8 @@ function updateChildComponent (
   var hasDynamicScopedSlot = !!(
     (newScopedSlots && !newScopedSlots.$stable) ||
     (oldScopedSlots !== emptyObject && !oldScopedSlots.$stable) ||
-    (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key)
+    (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key) ||
+    (!newScopedSlots && vm.$scopedSlots.$key)
   );
 
   // Any static slot children from the parent may have changed during parent's
@@ -62704,11 +63005,8 @@ Watcher.prototype.run = function run () {
       var oldValue = this.value;
       this.value = value;
       if (this.user) {
-        try {
-          this.cb.call(this.vm, value, oldValue);
-        } catch (e) {
-          handleError(e, this.vm, ("callback for watcher \"" + (this.expression) + "\""));
-        }
+        var info = "callback for watcher \"" + (this.expression) + "\"";
+        invokeWithErrorHandling(this.cb, this.vm, [value, oldValue], this.vm, info);
       } else {
         this.cb.call(this.vm, value, oldValue);
       }
@@ -62932,6 +63230,8 @@ function initComputed (vm, computed) {
         warn(("The computed property \"" + key + "\" is already defined in data."), vm);
       } else if (vm.$options.props && key in vm.$options.props) {
         warn(("The computed property \"" + key + "\" is already defined as a prop."), vm);
+      } else if (vm.$options.methods && key in vm.$options.methods) {
+        warn(("The computed property \"" + key + "\" is already defined as a method."), vm);
       }
     }
   }
@@ -63084,11 +63384,10 @@ function stateMixin (Vue) {
     options.user = true;
     var watcher = new Watcher(vm, expOrFn, cb, options);
     if (options.immediate) {
-      try {
-        cb.call(vm, watcher.value);
-      } catch (error) {
-        handleError(error, vm, ("callback for immediate watcher \"" + (watcher.expression) + "\""));
-      }
+      var info = "callback for immediate watcher \"" + (watcher.expression) + "\"";
+      pushTarget();
+      invokeWithErrorHandling(cb, vm, [watcher.value], vm, info);
+      popTarget();
     }
     return function unwatchFn () {
       watcher.teardown();
@@ -63388,6 +63687,8 @@ function initAssetRegisters (Vue) {
 
 
 
+
+
 function getComponentName (opts) {
   return opts && (opts.Ctor.options.name || opts.tag)
 }
@@ -63409,9 +63710,9 @@ function pruneCache (keepAliveInstance, filter) {
   var keys = keepAliveInstance.keys;
   var _vnode = keepAliveInstance._vnode;
   for (var key in cache) {
-    var cachedNode = cache[key];
-    if (cachedNode) {
-      var name = getComponentName(cachedNode.componentOptions);
+    var entry = cache[key];
+    if (entry) {
+      var name = entry.name;
       if (name && !filter(name)) {
         pruneCacheEntry(cache, key, keys, _vnode);
       }
@@ -63425,9 +63726,9 @@ function pruneCacheEntry (
   keys,
   current
 ) {
-  var cached$$1 = cache[key];
-  if (cached$$1 && (!current || cached$$1.tag !== current.tag)) {
-    cached$$1.componentInstance.$destroy();
+  var entry = cache[key];
+  if (entry && (!current || entry.tag !== current.tag)) {
+    entry.componentInstance.$destroy();
   }
   cache[key] = null;
   remove(keys, key);
@@ -63445,6 +63746,32 @@ var KeepAlive = {
     max: [String, Number]
   },
 
+  methods: {
+    cacheVNode: function cacheVNode() {
+      var ref = this;
+      var cache = ref.cache;
+      var keys = ref.keys;
+      var vnodeToCache = ref.vnodeToCache;
+      var keyToCache = ref.keyToCache;
+      if (vnodeToCache) {
+        var tag = vnodeToCache.tag;
+        var componentInstance = vnodeToCache.componentInstance;
+        var componentOptions = vnodeToCache.componentOptions;
+        cache[keyToCache] = {
+          name: getComponentName(componentOptions),
+          tag: tag,
+          componentInstance: componentInstance,
+        };
+        keys.push(keyToCache);
+        // prune oldest entry
+        if (this.max && keys.length > parseInt(this.max)) {
+          pruneCacheEntry(cache, keys[0], keys, this._vnode);
+        }
+        this.vnodeToCache = null;
+      }
+    }
+  },
+
   created: function created () {
     this.cache = Object.create(null);
     this.keys = [];
@@ -63459,12 +63786,17 @@ var KeepAlive = {
   mounted: function mounted () {
     var this$1 = this;
 
+    this.cacheVNode();
     this.$watch('include', function (val) {
       pruneCache(this$1, function (name) { return matches(val, name); });
     });
     this.$watch('exclude', function (val) {
       pruneCache(this$1, function (name) { return !matches(val, name); });
     });
+  },
+
+  updated: function updated () {
+    this.cacheVNode();
   },
 
   render: function render () {
@@ -63500,12 +63832,9 @@ var KeepAlive = {
         remove(keys, key);
         keys.push(key);
       } else {
-        cache[key] = vnode;
-        keys.push(key);
-        // prune oldest entry
-        if (this.max && keys.length > parseInt(this.max)) {
-          pruneCacheEntry(cache, keys[0], keys, this._vnode);
-        }
+        // delay setting the cache until update
+        this.vnodeToCache = vnode;
+        this.keyToCache = key;
       }
 
       vnode.data.keepAlive = true;
@@ -63588,7 +63917,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.6.12';
+Vue.version = '2.6.14';
 
 /*  */
 
@@ -63625,7 +63954,7 @@ var isBooleanAttr = makeMap(
   'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
   'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' +
   'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' +
-  'required,reversed,scoped,seamless,selected,sortable,translate,' +
+  'required,reversed,scoped,seamless,selected,sortable,' +
   'truespeed,typemustmatch,visible'
 );
 
@@ -63749,7 +64078,7 @@ var isHTMLTag = makeMap(
 // contain child elements.
 var isSVG = makeMap(
   'svg,animate,circle,clippath,cursor,defs,desc,ellipse,filter,font-face,' +
-  'foreignObject,g,glyph,image,line,marker,mask,missing-glyph,path,pattern,' +
+  'foreignobject,g,glyph,image,line,marker,mask,missing-glyph,path,pattern,' +
   'polygon,polyline,rect,switch,symbol,text,textpath,tspan,use,view',
   true
 );
@@ -63952,7 +64281,8 @@ var hooks = ['create', 'activate', 'update', 'remove', 'destroy'];
 
 function sameVnode (a, b) {
   return (
-    a.key === b.key && (
+    a.key === b.key &&
+    a.asyncFactory === b.asyncFactory && (
       (
         a.tag === b.tag &&
         a.isComment === b.isComment &&
@@ -63960,7 +64290,6 @@ function sameVnode (a, b) {
         sameInputType(a, b)
       ) || (
         isTrue(a.isAsyncPlaceholder) &&
-        a.asyncFactory === b.asyncFactory &&
         isUndef(b.asyncFactory.error)
       )
     )
@@ -64846,7 +65175,7 @@ function updateAttrs (oldVnode, vnode) {
     cur = attrs[key];
     old = oldAttrs[key];
     if (old !== cur) {
-      setAttr(elm, key, cur);
+      setAttr(elm, key, cur, vnode.data.pre);
     }
   }
   // #4391: in IE9, setting type can reset value for input[type=radio]
@@ -64866,8 +65195,8 @@ function updateAttrs (oldVnode, vnode) {
   }
 }
 
-function setAttr (el, key, value) {
-  if (el.tagName.indexOf('-') > -1) {
+function setAttr (el, key, value, isInPre) {
+  if (isInPre || el.tagName.indexOf('-') > -1) {
     baseSetAttr(el, key, value);
   } else if (isBooleanAttr(key)) {
     // set attribute for blank value
@@ -66579,7 +66908,7 @@ if (inBrowser) {
 
 /* harmony default export */ __webpack_exports__["default"] = (Vue);
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(79), __webpack_require__(152).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(79), __webpack_require__(151).setImmediate))
 
 /***/ }),
 /* 266 */
@@ -66815,7 +67144,7 @@ var _implementations13 = __webpack_require__(295);
 
 var _implementations14 = _interopRequireDefault(_implementations13);
 
-var _glUtils = __webpack_require__(159);
+var _glUtils = __webpack_require__(158);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -67320,6 +67649,7 @@ var CubeD = function (_SpheirahedraCube4) {
         var _this4 = _possibleConstructorReturn(this, (CubeD.__proto__ || Object.getPrototypeOf(CubeD)).call(this, tb, tc));
 
         _this4.planes = _spheirahedra2.default.PRISM_PLANES_236;
+        _this4.slicePlanes = _spheirahedra2.default.SLICE_PLANES_FROM_236;
         return _this4;
     }
 
@@ -67357,6 +67687,7 @@ var CubeE = function (_SpheirahedraCube5) {
         var _this5 = _possibleConstructorReturn(this, (CubeE.__proto__ || Object.getPrototypeOf(CubeE)).call(this, tb, tc));
 
         _this5.planes = _spheirahedra2.default.PRISM_PLANES_236;
+        _this5.slicePlanes = _spheirahedra2.default.SLICE_PLANES_FROM_236;
         return _this5;
     }
 
@@ -67423,6 +67754,7 @@ var CubeH = function (_SpheirahedraCube6) {
         var _this6 = _possibleConstructorReturn(this, (CubeH.__proto__ || Object.getPrototypeOf(CubeH)).call(this, tb, tc));
 
         _this6.planes = _spheirahedra2.default.PRISM_PLANES_236;
+        _this6.slicePlanes = _spheirahedra2.default.SLICE_PLANES_FROM_236;
         return _this6;
     }
 
@@ -67488,6 +67820,7 @@ var CubeI = function (_SpheirahedraCube7) {
         var _this7 = _possibleConstructorReturn(this, (CubeI.__proto__ || Object.getPrototypeOf(CubeI)).call(this, tb, tc));
 
         _this7.planes = _spheirahedra2.default.PRISM_PLANES_244;
+        _this7.slicePlanes = _spheirahedra2.default.SLICE_PLANES_FROM_244;
         return _this7;
     }
 
@@ -67538,6 +67871,12 @@ var CubeI = function (_SpheirahedraCube7) {
                 'conditions': conditions,
                 'regionCondition': regionConditions
             };
+        }
+    }, {
+        key: 'computeDividePlanes',
+        value: function computeDividePlanes() {
+            this.dividePlanes = [];
+            this.dividePlanes.push(this.computePlane(0, 3, 5));
         }
     }]);
 
@@ -67677,9 +68016,9 @@ CAG.Vertex = __webpack_require__(112)
 CSG.Plane = __webpack_require__(43)
 CSG.Polygon = __webpack_require__(44)
 CSG.Polygon2D = __webpack_require__(178)
-CSG.Line2D = __webpack_require__(153)
-CSG.Line3D = __webpack_require__(127)
-CSG.Path2D = __webpack_require__(128)
+CSG.Line2D = __webpack_require__(152)
+CSG.Line3D = __webpack_require__(128)
+CSG.Path2D = __webpack_require__(129)
 CSG.OrthoNormalBasis = __webpack_require__(97)
 CSG.Matrix4x4 = __webpack_require__(81)
 
@@ -67687,7 +68026,7 @@ CAG.Side = __webpack_require__(113)
 
 CSG.Connector = __webpack_require__(111).Connector
 CSG.ConnectorList = __webpack_require__(111).ConnectorList
-CSG.Properties = __webpack_require__(155)
+CSG.Properties = __webpack_require__(154)
 
 const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(277)
 const {sphere, cube, roundedCube, cylinder, roundedCylinder, cylinderElliptic, polyhedron} = __webpack_require__(179)
@@ -67713,7 +68052,7 @@ CSG.fromSlices = fromSlices
 
 CSG.toPointCloud = __webpack_require__(279).toPointCloud
 
-const CAGMakers = __webpack_require__(154)
+const CAGMakers = __webpack_require__(153)
 CAG.fromObject = CAGMakers.fromObject
 CAG.fromPointsNoCheck = CAGMakers.fromPointsNoCheck
 CAG.fromPath2 = CAGMakers.fromPath2
@@ -68489,7 +68828,7 @@ const OrthoNormalBasis = __webpack_require__(97)
 const {interpolateBetween2DPointsForY, insertSorted, fnNumberSort} = __webpack_require__(71)
 const Vertex = __webpack_require__(64)
 const Vector2D = __webpack_require__(22)
-const Line2D = __webpack_require__(153)
+const Line2D = __webpack_require__(152)
 const Polygon = __webpack_require__(44)
 
 // Retesselation function for a set of coplanar polygons. See the introduction at the top of
@@ -69155,11 +69494,11 @@ module.exports = fixTJunctions
 /***/ (function(module, exports, __webpack_require__) {
 
 const CAG = __webpack_require__(72)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(129)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(130)
 const {defaultResolution2D} = __webpack_require__(6)
 const Vector2D = __webpack_require__(22)
-const Path2D = __webpack_require__(128)
-const {fromCompactBinary} = __webpack_require__(154)
+const Path2D = __webpack_require__(129)
+const {fromCompactBinary} = __webpack_require__(153)
 
 /** Construct a circle.
  * @param {Object} [options] - options for construction
@@ -69508,9 +69847,9 @@ if (!nunjucks.currentEnv){
 	env = nunjucks.currentEnv;
 }
 var dependencies = nunjucks.webpackDependencies || (nunjucks.webpackDependencies = {});
-dependencies["./uniforms.njk.frag"] = __webpack_require__( 156 );
-dependencies["./color.njk.frag"] = __webpack_require__( 157 );
-dependencies["./raytrace.njk.frag"] = __webpack_require__( 158 );
+dependencies["./uniforms.njk.frag"] = __webpack_require__( 155 );
+dependencies["./color.njk.frag"] = __webpack_require__( 156 );
+dependencies["./raytrace.njk.frag"] = __webpack_require__( 157 );
 
 
 
@@ -69647,9 +69986,9 @@ if (!nunjucks.currentEnv){
 	env = nunjucks.currentEnv;
 }
 var dependencies = nunjucks.webpackDependencies || (nunjucks.webpackDependencies = {});
-dependencies["./uniforms.njk.frag"] = __webpack_require__( 156 );
-dependencies["./color.njk.frag"] = __webpack_require__( 157 );
-dependencies["./raytrace.njk.frag"] = __webpack_require__( 158 );
+dependencies["./uniforms.njk.frag"] = __webpack_require__( 155 );
+dependencies["./color.njk.frag"] = __webpack_require__( 156 );
+dependencies["./raytrace.njk.frag"] = __webpack_require__( 157 );
 
 
 
@@ -69810,9 +70149,9 @@ if (!nunjucks.currentEnv){
 	env = nunjucks.currentEnv;
 }
 var dependencies = nunjucks.webpackDependencies || (nunjucks.webpackDependencies = {});
-dependencies["./uniforms.njk.frag"] = __webpack_require__( 156 );
-dependencies["./color.njk.frag"] = __webpack_require__( 157 );
-dependencies["./raytrace.njk.frag"] = __webpack_require__( 158 );
+dependencies["./uniforms.njk.frag"] = __webpack_require__( 155 );
+dependencies["./color.njk.frag"] = __webpack_require__( 156 );
+dependencies["./raytrace.njk.frag"] = __webpack_require__( 157 );
 
 
 
@@ -69827,7 +70166,7 @@ var colno = 0;
 var output = "";
 try {
 var parentTemplate = null;
-output += "#version 300 es\n\nprecision mediump float;\n\n";
+output += " #version 300 es\n\nprecision mediump float;\n\n";
 var tasks = [];
 tasks.push(
 function(callback) {
@@ -69887,11 +70226,11 @@ output += result;
 callback(null);
 });
 env.waterfall(tasks, function(){
-output += "\n\nconst int ID_PRISM = 0;\nconst int ID_INI_SPHERES = 1;\n\nfloat g_invNum;\nvec4 distFunc(const vec3 pos) {\n    vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);\n\t";
+output += "\n\nconst int ID_PRISM = 0;\nconst int ID_INI_SPHERES = 1;\nconst int ID_SLICE = 2;\n\nfloat g_invNum;\nvec4 distFunc(const vec3 pos) {\n    vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);\n\t";
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 0) {
-output += "\n    hit = (u_displayPrism) ? DistUnion(hit, vec4(DistInfSpheirahedraAll(pos), ID_PRISM, -1, -1)) : hit;\n\n    float dd = DistLimitsetTerrain(pos, g_invNum);\n    ";
+output += "\n    hit = (u_displayPrism) ? DistUnion(hit, vec4(DistInfSpheirahedraAll(pos), ID_PRISM, -1, -1)) : hit;\n\n    float dd = DistLimitsetTerrain(pos, g_invNum);\n    hit = DistUnion(vec4(dd, ID_PRISM, -1, -1), hit);\n    ";
 frame = frame.push();
-var t_15 = (lineno = 20, colno = 21, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numBoundingPlanes")]));
+var t_15 = (lineno = 22, colno = 21, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numBoundingPlanes")]));
 if(t_15) {t_15 = runtime.fromIterator(t_15);
 var t_14 = t_15.length;
 for(var t_13=0; t_13 < t_15.length; t_13++) {
@@ -69904,16 +70243,16 @@ frame.set("loop.revindex0", t_14 - t_13 - 1);
 frame.set("loop.first", t_13 === 0);
 frame.set("loop.last", t_13 === t_14 - 1);
 frame.set("loop.length", t_14);
-output += "\n    dd = max(DistPlane(pos, u_boundingPlanes[";
+output += "\n    hit = DistSubtract(vec4(DistPlane(pos, u_boundingPlanes[";
 output += runtime.suppressValue(t_16, env.opts.autoescape);
-output += "].origin,\n                       u_boundingPlanes[";
+output += "].origin,\n                                      u_boundingPlanes[";
 output += runtime.suppressValue(t_16, env.opts.autoescape);
-output += "].normal),\n             dd);\n    ";
+output += "].normal), ID_SLICE, -1, -1), hit);\n    ";
 ;
 }
 }
 frame = frame.pop();
-output += "\n\n    return DistUnion(hit, vec4(dd,\n                               ID_PRISM, -1, -1));\n\t";
+output += "\n    if(u_enableSlice) {\n        for(int i = 0; i < 12; i++) {\n            if(i > u_numSlicePlanes) break;\n            hit = DistSubtract(vec4(DistPlane(pos, u_slicePlanes[i].origin,\n                                              u_slicePlanes[i].normal), ID_SLICE, -1, -1), hit);\n        }\n    }\n    \n    return hit;\n\t";
 ;
 }
 else {
@@ -69922,12 +70261,12 @@ output += "\n\treturn DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_bo
 ;
 }
 else {
-output += "\n\treturn DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_boundingSphere.center, g_invNum),\n\t\t\t\t\t\t\t   ID_PRISM, -1, -1));\n\t";
+output += "\n\thit = DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_boundingSphere.center, g_invNum),\n\t\t\t\t\t\t\t   ID_PRISM, -1, -1));\n        if(u_enableSlice) {\n          hit = DistSubtract(vec4(DistPlane(pos,\n                                            u_quasiSphereSlicePlane.origin,\n                                            normalize(u_quasiSphereSlicePlane.normal)),\n                                  ID_SLICE, -1, -1), hit);\n          \n        }\n        return hit;\n\t";
 ;
 }
 ;
 }
-output += "\n}\n\nconst vec2 NORMAL_COEFF = vec2(0.001, 0.);\nvec3 computeNormal(const vec3 p) {\n    return normalize(vec3(distFunc(p + NORMAL_COEFF.xyy).x - distFunc(p - NORMAL_COEFF.xyy).x,\n                          distFunc(p + NORMAL_COEFF.yxy).x - distFunc(p - NORMAL_COEFF.yxy).x,\n                          distFunc(p + NORMAL_COEFF.yyx).x - distFunc(p - NORMAL_COEFF.yyx).x));\n}\n\nconst int MAX_MARCHING_LOOP = 5000;\nvoid march(const vec3 rayOrg, const vec3 rayDir,\n           inout IsectInfo isectInfo,\n\t\t   float tmin, float tmax) {\n    float rayLength = tmin;\n    vec3 rayPos = rayOrg + rayDir * rayLength;\n    vec4 dist = vec4(-1);\n    for(int i = 0 ; i < MAX_MARCHING_LOOP ; i++) {\n        if(rayLength > tmax) break;\n        dist = distFunc(rayPos);\n        rayLength += dist.x;\n        rayPos = rayOrg + rayDir * rayLength;\n        if(dist.x < u_marchingThreshold) {\n            isectInfo.objId = int(dist.y);\n            //isectInfo.objIndex = int(dist.z);\n            //isectInfo.objComponentId = int(dist.w);\n\t\t\tisectInfo.matColor = Hsv2rgb((1., -0.13 + (g_invNum) * 0.01), 1., 1.);\n            isectInfo.intersection = rayPos;\n            isectInfo.normal = computeNormal(rayPos);\n            isectInfo.mint = rayLength;\n            isectInfo.hit = true;\n            break;\n        }\n    }\n}\n\n// This function is based on FractalLab's implementation\n// http://hirnsohle.de/test/fractalLab/\nfloat ambientOcclusion(vec3 p, vec3 n, float eps, float aoIntensity ){\n    float o = 1.0;\n    float k = aoIntensity;\n    float d = 2.0 * eps;\n\n    for (int i = 0; i < 5; i++) {\n        o -= (d - distFunc(p + n * d).x) * k;\n        d += eps;\n        k *= 0.5;\n    }\n\n    return clamp(o, 0.0, 1.0);\n}\n\nfloat computeShadowFactor (const vec3 rayOrg, const vec3 rayDir,\n                           const float mint, const float maxt, const float k) {\n    float shadowFactor = 1.0;\n    for(float t = mint ; t < maxt ;){\n        float d = distFunc(rayOrg + rayDir * t).x;\n        if(d < u_marchingThreshold) {\n            shadowFactor = 0.;\n            break;\n        }\n\n        shadowFactor = min(shadowFactor, k * d / t);\n        t += d;\n    }\n    return clamp(shadowFactor, 0.0, 1.0);\n}\n\nconst vec3 AMBIENT_FACTOR = vec3(0.3);\nconst vec3 LIGHT_DIR = normalize(vec3(0, 1, 0));\nvec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {\n    IsectInfo isectInfo = NewIsectInfo();\n    vec3 rayPos = rayOrg;\n\n    vec3 l = vec3(0);\n    float alpha = 1.;\n\n    float transparency = 0.8;\n    float coeff = 1.;\n\n    for(int depth = 0 ; depth < 8; depth++){\n\t\tfloat tmin = 0.;\n\t\tfloat tmax = MAX_FLOAT;\n\t\tbool hit = true;\n\n\t\t";
+output += "\n}\n\nconst vec2 NORMAL_COEFF = vec2(0.001, 0.);\nvec3 computeNormal(const vec3 p) {\n    return normalize(vec3(distFunc(p + NORMAL_COEFF.xyy).x - distFunc(p - NORMAL_COEFF.xyy).x,\n                          distFunc(p + NORMAL_COEFF.yxy).x - distFunc(p - NORMAL_COEFF.yxy).x,\n                          distFunc(p + NORMAL_COEFF.yyx).x - distFunc(p - NORMAL_COEFF.yyx).x));\n}\n\nconst int MAX_MARCHING_LOOP = 5000;\nvoid march(const vec3 rayOrg, const vec3 rayDir,\n           inout IsectInfo isectInfo,\n\t\t   float tmin, float tmax) {\n    float rayLength = tmin;\n    vec3 rayPos = rayOrg + rayDir * rayLength;\n    vec4 dist = vec4(-1);\n    for(int i = 0 ; i < MAX_MARCHING_LOOP ; i++) {\n        if(rayLength > tmax) break;\n        dist = distFunc(rayPos);\n        rayLength += dist.x;\n        rayPos = rayOrg + rayDir * rayLength;\n        if(dist.x < u_marchingThreshold) {\n            isectInfo.objId = int(dist.y);\n            //isectInfo.objIndex = int(dist.z);\n            //isectInfo.objComponentId = int(dist.w);\n            if(isectInfo.objId == ID_PRISM) {\n                isectInfo.matColor = Hsv2rgb((1., -0.13 + (g_invNum) * 0.01), 1., 1.);\n            } else if(isectInfo.objId == ID_SLICE) {\n                isectInfo.matColor = Hsv2rgb(g_sliceInvNum * 0.01, 1., 1.);\n            }\n            isectInfo.intersection = rayPos;\n            isectInfo.normal = computeNormal(rayPos);\n            isectInfo.mint = rayLength;\n            isectInfo.hit = true;\n            break;\n        }\n    }\n}\n\n// This function is based on FractalLab's implementation\n// http://hirnsohle.de/test/fractalLab/\nfloat ambientOcclusion(vec3 p, vec3 n, float eps, float aoIntensity ){\n    float o = 1.0;\n    float k = aoIntensity;\n    float d = 2.0 * eps;\n\n    for (int i = 0; i < 5; i++) {\n        o -= (d - distFunc(p + n * d).x) * k;\n        d += eps;\n        k *= 0.5;\n    }\n\n    return clamp(o, 0.0, 1.0);\n}\n\nfloat computeShadowFactor (const vec3 rayOrg, const vec3 rayDir,\n                           const float mint, const float maxt, const float k) {\n    float shadowFactor = 1.0;\n    for(float t = mint ; t < maxt ;){\n        float d = distFunc(rayOrg + rayDir * t).x;\n        if(d < u_marchingThreshold) {\n            shadowFactor = 0.;\n            break;\n        }\n\n        shadowFactor = min(shadowFactor, k * d / t);\n        t += d;\n    }\n    return clamp(shadowFactor, 0.0, 1.0);\n}\n\nconst vec3 AMBIENT_FACTOR = vec3(0.3);\nconst vec3 LIGHT_DIR = normalize(vec3(0, 1, 0));\nvec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {\n    IsectInfo isectInfo = NewIsectInfo();\n    vec3 rayPos = rayOrg;\n\n    vec3 l = vec3(0);\n    float alpha = 1.;\n\n    float transparency = 0.8;\n    float coeff = 1.;\n\n    for(int depth = 0 ; depth < 8; depth++){\n\t\tfloat tmin = 0.;\n\t\tfloat tmax = MAX_FLOAT;\n\t\tbool hit = true;\n\n\t\t";
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 0) {
 output += "\n        hit = IntersectBoundingPlane(vec3(0, 1, 0), vec3(0, u_boundingPlaneY, 0),\n\t\t  \t\t\t\t\t\t\t rayPos, rayDir,\n                                     tmin, tmax);\n\t\t";
 ;
@@ -69940,7 +70279,7 @@ output += "\n\n        if(hit)\n            march(rayPos, rayDir, isectInfo, tmi
 if(runtime.contextOrFrameLookup(context, frame, "renderMode") == 0) {
 output += "\n\t\tif(u_displaySpheirahedraSphere) {\n\t\t\t";
 frame = frame.push();
-var t_19 = (lineno = 135, colno = 20, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
+var t_19 = (lineno = 154, colno = 20, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numPrismSpheres")]));
 if(t_19) {t_19 = runtime.fromIterator(t_19);
 var t_18 = t_19.length;
 for(var t_17=0; t_17 < t_19.length; t_17++) {
@@ -69972,7 +70311,7 @@ output += "\n\t\t}\n\t\t";
 else {
 output += "\n\t\tif(u_displaySpheirahedraSphere) {\n\t\t\t";
 frame = frame.push();
-var t_23 = (lineno = 145, colno = 20, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
+var t_23 = (lineno = 164, colno = 20, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "range"), "range", context, [0,runtime.contextOrFrameLookup(context, frame, "numSpheirahedraSpheres")]));
 if(t_23) {t_23 = runtime.fromIterator(t_23);
 var t_22 = t_23.length;
 for(var t_21=0; t_21 < t_23.length; t_21++) {
@@ -70272,6 +70611,7 @@ var TetrahedronB = function (_Tetrahedron2) {
         var _this2 = _possibleConstructorReturn(this, (TetrahedronB.__proto__ || Object.getPrototypeOf(TetrahedronB)).call(this, 0, 0));
 
         _this2.planes = _spheirahedra2.default.PRISM_PLANES_236;
+        _this2.slicePlanes = _spheirahedra2.default.SLICE_PLANES_FROM_236;
         return _this2;
     }
 
@@ -70287,6 +70627,7 @@ var TetrahedronC = function (_Tetrahedron3) {
         var _this3 = _possibleConstructorReturn(this, (TetrahedronC.__proto__ || Object.getPrototypeOf(TetrahedronC)).call(this, 0, 0));
 
         _this3.planes = _spheirahedra2.default.PRISM_PLANES_244;
+        _this3.slicePlanes = _spheirahedra2.default.SLICE_PLANES_FROM_244;
         return _this3;
     }
 
@@ -70622,6 +70963,7 @@ var PrismD = function (_Prism4) {
         var _this4 = _possibleConstructorReturn(this, (PrismD.__proto__ || Object.getPrototypeOf(PrismD)).call(this, tb, 0));
 
         _this4.planes = _spheirahedra2.default.PRISM_PLANES_236;
+        _this4.slicePlanes = _spheirahedra2.default.SLICE_PLANES_FROM_236;
         return _this4;
     }
 
@@ -70648,6 +70990,7 @@ var PrismE = function (_Prism5) {
         var _this5 = _possibleConstructorReturn(this, (PrismE.__proto__ || Object.getPrototypeOf(PrismE)).call(this, tb, 0));
 
         _this5.planes = _spheirahedra2.default.PRISM_PLANES_244;
+        _this5.slicePlanes = _spheirahedra2.default.SLICE_PLANES_FROM_244;
         return _this5;
     }
 
@@ -70674,6 +71017,7 @@ var PrismF = function (_Prism6) {
         var _this6 = _possibleConstructorReturn(this, (PrismF.__proto__ || Object.getPrototypeOf(PrismF)).call(this, tb, 0));
 
         _this6.planes = _spheirahedra2.default.PRISM_PLANES_244;
+        _this6.slicePlanes = _spheirahedra2.default.SLICE_PLANES_FROM_244;
         return _this6;
     }
 
@@ -71165,6 +71509,15 @@ var CakeA = function (_Cake) {
             var cx = -r6 / RT_2;
             var cy = 1 - r6 / RT_2;
             this.planes[2] = new _plane2.default(new _vector3d2.default(cx, 4, cy), new _vector3d2.default((cx + dx) * 0.5, 6, (cy + dy) * 0.5), new _vector3d2.default(dx, -3, dy), this.planes[2].normal);
+            this.slicePlanes[0][2] = this.planes[2];
+
+            this.slicePlanes[1][2] = this.planes[2].invertOnPlane(this.planes[0]);
+
+            this.slicePlanes[2][2] = this.planes[2].invertOnPlane(this.planes[0]);
+            this.slicePlanes[2][3] = this.planes[3].invertOnPlane(this.planes[1]);
+
+            this.slicePlanes[3][2] = this.planes[2].invertOnPlane(this.planes[0]);
+            this.slicePlanes[3][1] = this.planes[1].invertOnPlane(this.planes[3]);
         }
     }, {
         key: 'computeInversionSphere',
@@ -71203,6 +71556,15 @@ var CakeB = function (_Cake2) {
             var dx = cy;
             var dy = cx;
             this.planes[2] = new _plane2.default(new _vector3d2.default(cx, 4, cy), new _vector3d2.default((cx + dx) * 0.5, 6, (cy + dy) * 0.5), new _vector3d2.default(dx, -2, dy), this.planes[2].normal);
+            this.slicePlanes[0][2] = this.planes[2];
+
+            this.slicePlanes[1][2] = this.planes[2].invertOnPlane(this.planes[0]);
+
+            this.slicePlanes[2][2] = this.planes[2].invertOnPlane(this.planes[0]);
+            this.slicePlanes[2][3] = this.planes[3].invertOnPlane(this.planes[1]);
+
+            this.slicePlanes[3][2] = this.planes[2].invertOnPlane(this.planes[0]);
+            this.slicePlanes[3][1] = this.planes[1].invertOnPlane(this.planes[3]);
         }
     }, {
         key: 'computeInversionSphere',
@@ -71240,6 +71602,16 @@ var CakeC = function (_Cake3) {
             var cx = -r6 / RT_2;
             var cy = 1 - r6 / RT_2;
             this.planes[2] = new _plane2.default(new _vector3d2.default(cx, 4, cy), new _vector3d2.default((cx + dx) * 0.5, 6, (cy + dy) * 0.5), new _vector3d2.default(dx, -3, dy), this.planes[2].normal);
+
+            this.slicePlanes[0][2] = this.planes[2];
+
+            this.slicePlanes[1][2] = this.planes[2].invertOnPlane(this.planes[0]);
+
+            this.slicePlanes[2][2] = this.planes[2].invertOnPlane(this.planes[0]);
+            this.slicePlanes[2][3] = this.planes[3].invertOnPlane(this.planes[1]);
+
+            this.slicePlanes[3][2] = this.planes[2].invertOnPlane(this.planes[0]);
+            this.slicePlanes[3][1] = this.planes[1].invertOnPlane(this.planes[3]);
         }
     }, {
         key: 'computeInversionSphere',
@@ -71296,6 +71668,9 @@ var HexahedralCake2 = function (_Spheirahedra) {
 
         _this.vertexIndexes = [[0, 3, 5], [0, 1, 4], [1, 2, 4], [2, 3, 5], [1, 4, 5], [2, 4, 5], [0, 1, 2]];
         _this.numVertexes = _this.vertexIndexes.length;
+
+        _this.numSlicePlanes = 4;
+        _this.slicePlanes = _spheirahedra2.default.SLICE_PLANES_FROM_2222_SQUARE;
         return _this;
     }
 
@@ -71393,6 +71768,15 @@ var CakeA = function (_Cake) {
             var cx = -bc / RT_2;
             var cy = 1 - bc / RT_2;
             this.planes[2] = new _plane2.default(new _vector3d2.default(cx, 4, cy), new _vector3d2.default((cx + dx) * 0.5, 6, (cy + dy) * 0.5), new _vector3d2.default(dx, -3, dy), this.planes[2].normal);
+            this.slicePlanes[0][2] = this.planes[2];
+
+            this.slicePlanes[1][2] = this.planes[2].invertOnPlane(this.planes[0]);
+
+            this.slicePlanes[2][2] = this.planes[2].invertOnPlane(this.planes[0]);
+            this.slicePlanes[2][3] = this.planes[3].invertOnPlane(this.planes[1]);
+
+            this.slicePlanes[3][2] = this.planes[2].invertOnPlane(this.planes[0]);
+            this.slicePlanes[3][1] = this.planes[1].invertOnPlane(this.planes[3]);
         }
     }, {
         key: 'computeInversionSphere',
@@ -71425,6 +71809,16 @@ var CakeB = function (_Cake2) {
             var s6 = new _sphere2.default(0, this.zb, -1 + r6, r6);
 
             this.prismSpheres = [s5, s6];
+
+            this.slicePlanes[0][2] = this.planes[2];
+
+            this.slicePlanes[1][2] = this.planes[2].invertOnPlane(this.planes[0]);
+
+            this.slicePlanes[2][2] = this.planes[2].invertOnPlane(this.planes[0]);
+            this.slicePlanes[2][3] = this.planes[3].invertOnPlane(this.planes[1]);
+
+            this.slicePlanes[3][2] = this.planes[2].invertOnPlane(this.planes[0]);
+            this.slicePlanes[3][1] = this.planes[1].invertOnPlane(this.planes[3]);
         }
     }, {
         key: 'computeInversionSphere',
@@ -71487,6 +71881,9 @@ var HexahedralCake3 = function (_Spheirahedra) {
         _this.numVertexes = _this.vertexIndexes.length;
         _this.numDividePlanes = 2;
         _this.twoDividePlanes = true;
+
+        _this.numSlicePlanes = 4;
+        _this.slicePlanes = _spheirahedra2.default.SLICE_PLANES_FROM_2222_SQUARE;
         return _this;
     }
 
@@ -71541,11 +71938,11 @@ const svgSerializer = __webpack_require__(309)
 const x3dSerializer = __webpack_require__(330)
 
 const amfDeSerializer = __webpack_require__(333)
-const gcodeDeSerializer = __webpack_require__(365)
-const jsonDeSerializer = __webpack_require__(366)
-const objDeSerializer = __webpack_require__(386)
-const stlDeSerializer = __webpack_require__(407)
-const svgDeSerializer = __webpack_require__(428)
+const gcodeDeSerializer = __webpack_require__(366)
+const jsonDeSerializer = __webpack_require__(367)
+const objDeSerializer = __webpack_require__(387)
+const stlDeSerializer = __webpack_require__(408)
+const svgDeSerializer = __webpack_require__(429)
 
 module.exports = {
   makeBlob,
@@ -71703,7 +72100,7 @@ Blob.prototype = {
 
 module.exports = makeBlob
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(130).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(114).Buffer))
 
 /***/ }),
 /* 299 */
@@ -71837,9 +72234,7 @@ function fromByteArray (uint8) {
 
   // go through the array every three bytes, we'll deal with trailing stuff later
   for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-    parts.push(encodeChunk(
-      uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)
-    ))
+    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)))
   }
 
   // pad the end with zeros, but make sure to not forget the extra bytes
@@ -71868,6 +72263,7 @@ function fromByteArray (uint8) {
 /* 300 */
 /***/ (function(module, exports) {
 
+/*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -72648,11 +73044,11 @@ CSG.getTag = getTag
 CSG.Vector2D = __webpack_require__(13)
 CSG.Vector3D = __webpack_require__(7)
 CSG.Vertex = __webpack_require__(31)
-CAG.Vertex = __webpack_require__(114)
+CAG.Vertex = __webpack_require__(115)
 CSG.Plane = __webpack_require__(30)
 CSG.Polygon = __webpack_require__(23)
 CSG.Polygon2D = __webpack_require__(183)
-CSG.Line2D = __webpack_require__(160)
+CSG.Line2D = __webpack_require__(159)
 CSG.Line3D = __webpack_require__(131)
 CSG.Path2D = __webpack_require__(133)
 CSG.OrthoNormalBasis = __webpack_require__(84)
@@ -72662,7 +73058,7 @@ CAG.Side = __webpack_require__(132)
 
 CSG.Connector = __webpack_require__(99).Connector
 CSG.ConnectorList = __webpack_require__(99).ConnectorList
-CSG.Properties = __webpack_require__(161)
+CSG.Properties = __webpack_require__(160)
 
 const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(327)
 const {sphere, cube, roundedCube, cylinder, roundedCylinder, cylinderElliptic, polyhedron} = __webpack_require__(192)
@@ -72700,7 +73096,7 @@ CAG.fromCompactBinary = CAGFactories.fromCompactBinary
 
 /// ////////////////////////////////////
 // option parsers
-const optionsParsers = __webpack_require__(115)
+const optionsParsers = __webpack_require__(116)
 
 // ////////////////////////////////////
 addTransformationMethodsToPrototype(CSG.prototype)
@@ -73515,7 +73911,7 @@ const OrthoNormalBasis = __webpack_require__(84)
 const {interpolateBetween2DPointsForY, insertSorted, fnNumberSort} = __webpack_require__(45)
 const Vertex = __webpack_require__(31)
 const Vector2D = __webpack_require__(13)
-const Line2D = __webpack_require__(160)
+const Line2D = __webpack_require__(159)
 const Polygon = __webpack_require__(23)
 
 // Retesselation function for a set of coplanar polygons. See the introduction at the top of
@@ -73898,7 +74294,7 @@ module.exports = {area, getBounds}
 
 const {EPS, defaultResolution3D} = __webpack_require__(0)
 const OrthoNormalBasis = __webpack_require__(84)
-const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(115)
+const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(116)
 const Vector3D = __webpack_require__(7)
 const Matrix4 = __webpack_require__(73)
 const Path2D = __webpack_require__(133)
@@ -75123,10 +75519,10 @@ module.exports = {sectionCut, cutByPlane}
 /***/ (function(module, exports, __webpack_require__) {
 
 const CAG = __webpack_require__(47)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(115)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(116)
 const {defaultResolution2D} = __webpack_require__(0)
 const Vector2D = __webpack_require__(13)
-const Vertex2 = __webpack_require__(114)
+const Vertex2 = __webpack_require__(115)
 const Path2D = __webpack_require__(133)
 const {fromCompactBinary, fromPoints, fromPath2, fromSides} = __webpack_require__(65)
 
@@ -76502,7 +76898,7 @@ History:
 //
 // //////////////////////////////////////////
 const translate = __webpack_require__(334)
-const deserializeToCSG = __webpack_require__(364)
+const deserializeToCSG = __webpack_require__(365)
 
 /**
  * Parse the given AMF source (xml) and return either a JSCAD script or a CSG/CAG object
@@ -77407,7 +77803,7 @@ const OrthoNormalBasis = __webpack_require__(86)
 const {interpolateBetween2DPointsForY, insertSorted, fnNumberSort} = __webpack_require__(48)
 const Vertex = __webpack_require__(33)
 const Vector2D = __webpack_require__(14)
-const Line2D = __webpack_require__(162)
+const Line2D = __webpack_require__(161)
 const Polygon = __webpack_require__(24)
 
 // Retesselation function for a set of coplanar polygons. See the introduction at the top of
@@ -77790,7 +78186,7 @@ module.exports = {area, getBounds}
 
 const {EPS, defaultResolution3D} = __webpack_require__(1)
 const OrthoNormalBasis = __webpack_require__(86)
-const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(117)
+const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(118)
 const Vector3D = __webpack_require__(8)
 const Matrix4 = __webpack_require__(74)
 const Path2D = __webpack_require__(136)
@@ -79015,10 +79411,10 @@ module.exports = {sectionCut, cutByPlane}
 /***/ (function(module, exports, __webpack_require__) {
 
 const CAG = __webpack_require__(50)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(117)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(118)
 const {defaultResolution2D} = __webpack_require__(1)
 const Vector2D = __webpack_require__(14)
-const Vertex2 = __webpack_require__(116)
+const Vertex2 = __webpack_require__(117)
 const Path2D = __webpack_require__(136)
 const {fromCompactBinary, fromPoints, fromPath2, fromSides} = __webpack_require__(66)
 
@@ -79267,15 +79663,15 @@ module.exports = {toPointCloud}
 
 module.exports = Stream;
 
-var EE = __webpack_require__(164).EventEmitter;
+var EE = __webpack_require__(163).EventEmitter;
 var inherits = __webpack_require__(101);
 
 inherits(Stream, EE);
-Stream.Readable = __webpack_require__(165);
-Stream.Writable = __webpack_require__(359);
-Stream.Duplex = __webpack_require__(360);
-Stream.Transform = __webpack_require__(361);
-Stream.PassThrough = __webpack_require__(362);
+Stream.Readable = __webpack_require__(164);
+Stream.Writable = __webpack_require__(360);
+Stream.Duplex = __webpack_require__(361);
+Stream.Transform = __webpack_require__(362);
+Stream.PassThrough = __webpack_require__(363);
 
 // Backwards-compat with node 0.4.x
 Stream.Stream = Stream;
@@ -79388,7 +79784,7 @@ Stream.prototype.pipe = function(dest, options) {
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Buffer = __webpack_require__(138).Buffer;
+var Buffer = __webpack_require__(165).Buffer;
 var util = __webpack_require__(356);
 
 function copyBuffer(src, target, offset) {
@@ -79548,6 +79944,77 @@ function config (name) {
 /* 358 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
+/* eslint-disable node/no-deprecated-api */
+var buffer = __webpack_require__(114)
+var Buffer = buffer.Buffer
+
+// alternative to using Object.keys for old browsers
+function copyProps (src, dst) {
+  for (var key in src) {
+    dst[key] = src[key]
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer, exports)
+  exports.Buffer = SafeBuffer
+}
+
+function SafeBuffer (arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.prototype = Object.create(Buffer.prototype)
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer)
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number')
+  }
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  var buf = Buffer(size)
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding)
+    } else {
+      buf.fill(fill)
+    }
+  } else {
+    buf.fill(0)
+  }
+  return buf
+}
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return Buffer(size)
+}
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return buffer.SlowBuffer(size)
+}
+
+
+/***/ }),
+/* 359 */
+/***/ (function(module, exports, __webpack_require__) {
+
 "use strict";
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -79581,7 +80048,7 @@ module.exports = PassThrough;
 var Transform = __webpack_require__(211);
 
 /*<replacement>*/
-var util = Object.create(__webpack_require__(118));
+var util = Object.create(__webpack_require__(119));
 util.inherits = __webpack_require__(101);
 /*</replacement>*/
 
@@ -79598,35 +80065,35 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
 };
 
 /***/ }),
-/* 359 */
+/* 360 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(166);
 
 
 /***/ }),
-/* 360 */
+/* 361 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(88);
 
 
 /***/ }),
-/* 361 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(165).Transform
-
-
-/***/ }),
 /* 362 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(165).PassThrough
+module.exports = __webpack_require__(164).Transform
 
 
 /***/ }),
 /* 363 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(164).PassThrough
+
+
+/***/ }),
+/* 364 */
 /***/ (function(module, exports) {
 
 function amfMesh (element) {
@@ -79787,7 +80254,7 @@ module.exports = {
 
 
 /***/ }),
-/* 364 */
+/* 365 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {CSG} = __webpack_require__(195)
@@ -79820,7 +80287,7 @@ module.exports = deserializeToCSG
 
 
 /***/ }),
-/* 365 */
+/* 366 */
 /***/ (function(module, exports) {
 
 
@@ -79937,7 +80404,7 @@ module.exports = {
 
 
 /***/ }),
-/* 366 */
+/* 367 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -79955,7 +80422,7 @@ Notes:
 */
 
 // import { CSG } from '@jscad/csg'
-const {CSG, CAG} = __webpack_require__(367)
+const {CSG, CAG} = __webpack_require__(368)
 
 // //////////////////////////////////////////
 //
@@ -80053,7 +80520,7 @@ module.exports = {
 
 
 /***/ }),
-/* 367 */
+/* 368 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -80138,7 +80605,7 @@ for solid CAD anyway.
 
 */
 
-const {addTransformationMethodsToPrototype, addCenteringToPrototype} = __webpack_require__(368)
+const {addTransformationMethodsToPrototype, addCenteringToPrototype} = __webpack_require__(369)
 let CSG = __webpack_require__(90)
 let CAG = __webpack_require__(53)
 
@@ -80179,23 +80646,23 @@ CSG.getTag = getTag
 CSG.Vector2D = __webpack_require__(15)
 CSG.Vector3D = __webpack_require__(9)
 CSG.Vertex = __webpack_require__(35)
-CAG.Vertex = __webpack_require__(119)
+CAG.Vertex = __webpack_require__(120)
 CSG.Plane = __webpack_require__(34)
 CSG.Polygon = __webpack_require__(25)
 CSG.Polygon2D = __webpack_require__(212)
 CSG.Line2D = __webpack_require__(169)
-CSG.Line3D = __webpack_require__(139)
-CSG.Path2D = __webpack_require__(141)
+CSG.Line3D = __webpack_require__(138)
+CSG.Path2D = __webpack_require__(140)
 CSG.OrthoNormalBasis = __webpack_require__(89)
 CSG.Matrix4x4 = __webpack_require__(75)
 
-CAG.Side = __webpack_require__(140)
+CAG.Side = __webpack_require__(139)
 
 CSG.Connector = __webpack_require__(102).Connector
 CSG.ConnectorList = __webpack_require__(102).ConnectorList
 CSG.Properties = __webpack_require__(170)
 
-const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(384)
+const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(385)
 const {sphere, cube, roundedCube, cylinder, roundedCylinder, cylinderElliptic, polyhedron} = __webpack_require__(221)
 
 CSG.sphere = sphere
@@ -80218,7 +80685,7 @@ CSG.fromObject = fromObject
 CSG.fromSlices = fromSlices
 CSG.fromPolygons = fromPolygons
 
-CSG.toPointCloud = __webpack_require__(385).toPointCloud
+CSG.toPointCloud = __webpack_require__(386).toPointCloud
 
 const CAGFactories = __webpack_require__(67)
 CAG.fromSides = CAGFactories.fromSides
@@ -80231,7 +80698,7 @@ CAG.fromCompactBinary = CAGFactories.fromCompactBinary
 
 /// ////////////////////////////////////
 // option parsers
-const optionsParsers = __webpack_require__(120)
+const optionsParsers = __webpack_require__(121)
 
 // ////////////////////////////////////
 addTransformationMethodsToPrototype(CSG.prototype)
@@ -80268,7 +80735,7 @@ module.exports = globalApi
 
 
 /***/ }),
-/* 368 */
+/* 369 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Matrix4x4 = __webpack_require__(75)
@@ -80355,7 +80822,7 @@ module.exports = {
 
 
 /***/ }),
-/* 369 */
+/* 370 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {_CSGDEBUG, EPS} = __webpack_require__(2)
@@ -80870,7 +81337,7 @@ module.exports = Tree
 
 
 /***/ }),
-/* 370 */
+/* 371 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(2)
@@ -80900,7 +81367,7 @@ module.exports = {linesIntersect}
 
 
 /***/ }),
-/* 371 */
+/* 372 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {isCAG} = __webpack_require__(51)
@@ -81007,12 +81474,12 @@ module.exports = {
 
 
 /***/ }),
-/* 372 */
+/* 373 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const FuzzyFactory = __webpack_require__(216)
 const {EPS} = __webpack_require__(2)
-const Side = __webpack_require__(140)
+const Side = __webpack_require__(139)
 
 const FuzzyCAGFactory = function () {
   this.vertexfactory = new FuzzyFactory(2, EPS)
@@ -81038,7 +81505,7 @@ module.exports = FuzzyCAGFactory
 
 
 /***/ }),
-/* 373 */
+/* 374 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(2)
@@ -81386,7 +81853,7 @@ module.exports = reTesselateCoplanarPolygons
 
 
 /***/ }),
-/* 374 */
+/* 375 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(15)
@@ -81424,18 +81891,18 @@ module.exports = {area, getBounds}
 
 
 /***/ }),
-/* 375 */
+/* 376 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS, defaultResolution3D} = __webpack_require__(2)
 const OrthoNormalBasis = __webpack_require__(89)
-const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(120)
+const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(121)
 const Vector3D = __webpack_require__(9)
 const Matrix4 = __webpack_require__(75)
-const Path2D = __webpack_require__(141)
+const Path2D = __webpack_require__(140)
 const {Connector} = __webpack_require__(102)
 const {fromPolygons} = __webpack_require__(52)
-const {cagToPointsArray, clamp, rightMultiply1x3VectorToArray, polygonFromPoints} = __webpack_require__(376)
+const {cagToPointsArray, clamp, rightMultiply1x3VectorToArray, polygonFromPoints} = __webpack_require__(377)
 const {fromPoints} = __webpack_require__(67)
 
 /** extrude the CAG in a certain plane.
@@ -81787,7 +82254,7 @@ module.exports = {
 
 
 /***/ }),
-/* 376 */
+/* 377 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vertex3 = __webpack_require__(35)
@@ -81856,10 +82323,10 @@ module.exports = {cagToPointsArray, clamp, rightMultiply1x3VectorToArray, polygo
 
 
 /***/ }),
-/* 377 */
+/* 378 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Path2D = __webpack_require__(141)
+const Path2D = __webpack_require__(140)
 
 const cagoutlinePaths = function (_cag) {
   let cag = _cag.canonicalized()
@@ -81942,7 +82409,7 @@ module.exports = cagoutlinePaths
 
 
 /***/ }),
-/* 378 */
+/* 379 */
 /***/ (function(module, exports) {
 
 /* converts input data to array if it is not already an array */
@@ -81956,7 +82423,7 @@ module.exports = toArray
 
 
 /***/ }),
-/* 379 */
+/* 380 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Polygon = __webpack_require__(25)
@@ -82175,7 +82642,7 @@ module.exports = solidFromSlices
 
 
 /***/ }),
-/* 380 */
+/* 381 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(2)
@@ -82497,7 +82964,7 @@ module.exports = fixTJunctions
 
 
 /***/ }),
-/* 381 */
+/* 382 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(9)
@@ -82551,7 +83018,7 @@ module.exports = {bounds, volume, area}
 
 
 /***/ }),
-/* 382 */
+/* 383 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CAG = __webpack_require__(53) // FIXME: circular dependency !
@@ -82580,7 +83047,7 @@ module.exports = {projectToOrthoNormalBasis}
 
 
 /***/ }),
-/* 383 */
+/* 384 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(2)
@@ -82650,15 +83117,15 @@ module.exports = {sectionCut, cutByPlane}
 
 
 /***/ }),
-/* 384 */
+/* 385 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CAG = __webpack_require__(53)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(120)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(121)
 const {defaultResolution2D} = __webpack_require__(2)
 const Vector2D = __webpack_require__(15)
-const Vertex2 = __webpack_require__(119)
-const Path2D = __webpack_require__(141)
+const Vertex2 = __webpack_require__(120)
+const Path2D = __webpack_require__(140)
 const {fromCompactBinary, fromPoints, fromPath2, fromSides} = __webpack_require__(67)
 
 /** Construct a circle.
@@ -82841,7 +83308,7 @@ module.exports = {
 
 
 /***/ }),
-/* 385 */
+/* 386 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CSG = __webpack_require__(90)
@@ -82880,11 +83347,11 @@ module.exports = {toPointCloud}
 
 
 /***/ }),
-/* 386 */
+/* 387 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { vt2jscad } = __webpack_require__(387)
-const {CSG} = __webpack_require__(388)
+const { vt2jscad } = __webpack_require__(388)
+const {CSG} = __webpack_require__(389)
 
 /**
  * Parse the given obj data and return either a JSCAD script or a CSG/CAG object
@@ -82973,7 +83440,7 @@ module.exports = {
 
 
 /***/ }),
-/* 387 */
+/* 388 */
 /***/ (function(module, exports) {
 
 // positions, triangles, normals and colors
@@ -83006,7 +83473,7 @@ module.exports = {
 
 
 /***/ }),
-/* 388 */
+/* 389 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -83091,7 +83558,7 @@ for solid CAD anyway.
 
 */
 
-const {addTransformationMethodsToPrototype, addCenteringToPrototype} = __webpack_require__(389)
+const {addTransformationMethodsToPrototype, addCenteringToPrototype} = __webpack_require__(390)
 let CSG = __webpack_require__(92)
 let CAG = __webpack_require__(56)
 
@@ -83132,23 +83599,23 @@ CSG.getTag = getTag
 CSG.Vector2D = __webpack_require__(16)
 CSG.Vector3D = __webpack_require__(10)
 CSG.Vertex = __webpack_require__(37)
-CAG.Vertex = __webpack_require__(121)
+CAG.Vertex = __webpack_require__(122)
 CSG.Plane = __webpack_require__(36)
 CSG.Polygon = __webpack_require__(26)
 CSG.Polygon2D = __webpack_require__(222)
 CSG.Line2D = __webpack_require__(171)
-CSG.Line3D = __webpack_require__(142)
-CSG.Path2D = __webpack_require__(144)
+CSG.Line3D = __webpack_require__(141)
+CSG.Path2D = __webpack_require__(143)
 CSG.OrthoNormalBasis = __webpack_require__(91)
 CSG.Matrix4x4 = __webpack_require__(76)
 
-CAG.Side = __webpack_require__(143)
+CAG.Side = __webpack_require__(142)
 
 CSG.Connector = __webpack_require__(103).Connector
 CSG.ConnectorList = __webpack_require__(103).ConnectorList
 CSG.Properties = __webpack_require__(172)
 
-const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(405)
+const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(406)
 const {sphere, cube, roundedCube, cylinder, roundedCylinder, cylinderElliptic, polyhedron} = __webpack_require__(231)
 
 CSG.sphere = sphere
@@ -83171,7 +83638,7 @@ CSG.fromObject = fromObject
 CSG.fromSlices = fromSlices
 CSG.fromPolygons = fromPolygons
 
-CSG.toPointCloud = __webpack_require__(406).toPointCloud
+CSG.toPointCloud = __webpack_require__(407).toPointCloud
 
 const CAGFactories = __webpack_require__(68)
 CAG.fromSides = CAGFactories.fromSides
@@ -83184,7 +83651,7 @@ CAG.fromCompactBinary = CAGFactories.fromCompactBinary
 
 /// ////////////////////////////////////
 // option parsers
-const optionsParsers = __webpack_require__(122)
+const optionsParsers = __webpack_require__(123)
 
 // ////////////////////////////////////
 addTransformationMethodsToPrototype(CSG.prototype)
@@ -83221,7 +83688,7 @@ module.exports = globalApi
 
 
 /***/ }),
-/* 389 */
+/* 390 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Matrix4x4 = __webpack_require__(76)
@@ -83308,7 +83775,7 @@ module.exports = {
 
 
 /***/ }),
-/* 390 */
+/* 391 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {_CSGDEBUG, EPS} = __webpack_require__(3)
@@ -83823,7 +84290,7 @@ module.exports = Tree
 
 
 /***/ }),
-/* 391 */
+/* 392 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(3)
@@ -83853,7 +84320,7 @@ module.exports = {linesIntersect}
 
 
 /***/ }),
-/* 392 */
+/* 393 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {isCAG} = __webpack_require__(54)
@@ -83960,12 +84427,12 @@ module.exports = {
 
 
 /***/ }),
-/* 393 */
+/* 394 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const FuzzyFactory = __webpack_require__(226)
 const {EPS} = __webpack_require__(3)
-const Side = __webpack_require__(143)
+const Side = __webpack_require__(142)
 
 const FuzzyCAGFactory = function () {
   this.vertexfactory = new FuzzyFactory(2, EPS)
@@ -83991,7 +84458,7 @@ module.exports = FuzzyCAGFactory
 
 
 /***/ }),
-/* 394 */
+/* 395 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(3)
@@ -84339,7 +84806,7 @@ module.exports = reTesselateCoplanarPolygons
 
 
 /***/ }),
-/* 395 */
+/* 396 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(16)
@@ -84377,18 +84844,18 @@ module.exports = {area, getBounds}
 
 
 /***/ }),
-/* 396 */
+/* 397 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS, defaultResolution3D} = __webpack_require__(3)
 const OrthoNormalBasis = __webpack_require__(91)
-const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(122)
+const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(123)
 const Vector3D = __webpack_require__(10)
 const Matrix4 = __webpack_require__(76)
-const Path2D = __webpack_require__(144)
+const Path2D = __webpack_require__(143)
 const {Connector} = __webpack_require__(103)
 const {fromPolygons} = __webpack_require__(55)
-const {cagToPointsArray, clamp, rightMultiply1x3VectorToArray, polygonFromPoints} = __webpack_require__(397)
+const {cagToPointsArray, clamp, rightMultiply1x3VectorToArray, polygonFromPoints} = __webpack_require__(398)
 const {fromPoints} = __webpack_require__(68)
 
 /** extrude the CAG in a certain plane.
@@ -84740,7 +85207,7 @@ module.exports = {
 
 
 /***/ }),
-/* 397 */
+/* 398 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vertex3 = __webpack_require__(37)
@@ -84809,10 +85276,10 @@ module.exports = {cagToPointsArray, clamp, rightMultiply1x3VectorToArray, polygo
 
 
 /***/ }),
-/* 398 */
+/* 399 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Path2D = __webpack_require__(144)
+const Path2D = __webpack_require__(143)
 
 const cagoutlinePaths = function (_cag) {
   let cag = _cag.canonicalized()
@@ -84895,7 +85362,7 @@ module.exports = cagoutlinePaths
 
 
 /***/ }),
-/* 399 */
+/* 400 */
 /***/ (function(module, exports) {
 
 /* converts input data to array if it is not already an array */
@@ -84909,7 +85376,7 @@ module.exports = toArray
 
 
 /***/ }),
-/* 400 */
+/* 401 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Polygon = __webpack_require__(26)
@@ -85128,7 +85595,7 @@ module.exports = solidFromSlices
 
 
 /***/ }),
-/* 401 */
+/* 402 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(3)
@@ -85450,7 +85917,7 @@ module.exports = fixTJunctions
 
 
 /***/ }),
-/* 402 */
+/* 403 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(10)
@@ -85504,7 +85971,7 @@ module.exports = {bounds, volume, area}
 
 
 /***/ }),
-/* 403 */
+/* 404 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CAG = __webpack_require__(56) // FIXME: circular dependency !
@@ -85533,7 +86000,7 @@ module.exports = {projectToOrthoNormalBasis}
 
 
 /***/ }),
-/* 404 */
+/* 405 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(3)
@@ -85603,15 +86070,15 @@ module.exports = {sectionCut, cutByPlane}
 
 
 /***/ }),
-/* 405 */
+/* 406 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CAG = __webpack_require__(56)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(122)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(123)
 const {defaultResolution2D} = __webpack_require__(3)
 const Vector2D = __webpack_require__(16)
-const Vertex2 = __webpack_require__(121)
-const Path2D = __webpack_require__(144)
+const Vertex2 = __webpack_require__(122)
+const Path2D = __webpack_require__(143)
 const {fromCompactBinary, fromPoints, fromPath2, fromSides} = __webpack_require__(68)
 
 /** Construct a circle.
@@ -85794,7 +86261,7 @@ module.exports = {
 
 
 /***/ }),
-/* 406 */
+/* 407 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CSG = __webpack_require__(92)
@@ -85833,11 +86300,11 @@ module.exports = {toPointCloud}
 
 
 /***/ }),
-/* 407 */
+/* 408 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { CSG } = __webpack_require__(408)
-const { vt2jscad } = __webpack_require__(427)
+const { CSG } = __webpack_require__(409)
+const { vt2jscad } = __webpack_require__(428)
 const { BinaryReader } = __webpack_require__(98)
 
 // STL function from http://jsfiddle.net/Riham/yzvGD/35/
@@ -86235,7 +86702,7 @@ module.exports = {
 
 
 /***/ }),
-/* 408 */
+/* 409 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -86320,7 +86787,7 @@ for solid CAD anyway.
 
 */
 
-const {addTransformationMethodsToPrototype, addCenteringToPrototype} = __webpack_require__(409)
+const {addTransformationMethodsToPrototype, addCenteringToPrototype} = __webpack_require__(410)
 let CSG = __webpack_require__(94)
 let CAG = __webpack_require__(59)
 
@@ -86361,23 +86828,23 @@ CSG.getTag = getTag
 CSG.Vector2D = __webpack_require__(17)
 CSG.Vector3D = __webpack_require__(11)
 CSG.Vertex = __webpack_require__(39)
-CAG.Vertex = __webpack_require__(123)
+CAG.Vertex = __webpack_require__(124)
 CSG.Plane = __webpack_require__(38)
 CSG.Polygon = __webpack_require__(27)
 CSG.Polygon2D = __webpack_require__(232)
 CSG.Line2D = __webpack_require__(173)
-CSG.Line3D = __webpack_require__(145)
-CSG.Path2D = __webpack_require__(147)
+CSG.Line3D = __webpack_require__(144)
+CSG.Path2D = __webpack_require__(146)
 CSG.OrthoNormalBasis = __webpack_require__(93)
 CSG.Matrix4x4 = __webpack_require__(77)
 
-CAG.Side = __webpack_require__(146)
+CAG.Side = __webpack_require__(145)
 
 CSG.Connector = __webpack_require__(104).Connector
 CSG.ConnectorList = __webpack_require__(104).ConnectorList
 CSG.Properties = __webpack_require__(174)
 
-const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(425)
+const {circle, ellipse, rectangle, roundedRectangle} = __webpack_require__(426)
 const {sphere, cube, roundedCube, cylinder, roundedCylinder, cylinderElliptic, polyhedron} = __webpack_require__(241)
 
 CSG.sphere = sphere
@@ -86400,7 +86867,7 @@ CSG.fromObject = fromObject
 CSG.fromSlices = fromSlices
 CSG.fromPolygons = fromPolygons
 
-CSG.toPointCloud = __webpack_require__(426).toPointCloud
+CSG.toPointCloud = __webpack_require__(427).toPointCloud
 
 const CAGFactories = __webpack_require__(69)
 CAG.fromSides = CAGFactories.fromSides
@@ -86413,7 +86880,7 @@ CAG.fromCompactBinary = CAGFactories.fromCompactBinary
 
 /// ////////////////////////////////////
 // option parsers
-const optionsParsers = __webpack_require__(124)
+const optionsParsers = __webpack_require__(125)
 
 // ////////////////////////////////////
 addTransformationMethodsToPrototype(CSG.prototype)
@@ -86450,7 +86917,7 @@ module.exports = globalApi
 
 
 /***/ }),
-/* 409 */
+/* 410 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Matrix4x4 = __webpack_require__(77)
@@ -86537,7 +87004,7 @@ module.exports = {
 
 
 /***/ }),
-/* 410 */
+/* 411 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {_CSGDEBUG, EPS} = __webpack_require__(4)
@@ -87052,7 +87519,7 @@ module.exports = Tree
 
 
 /***/ }),
-/* 411 */
+/* 412 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(4)
@@ -87082,7 +87549,7 @@ module.exports = {linesIntersect}
 
 
 /***/ }),
-/* 412 */
+/* 413 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {isCAG} = __webpack_require__(57)
@@ -87189,12 +87656,12 @@ module.exports = {
 
 
 /***/ }),
-/* 413 */
+/* 414 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const FuzzyFactory = __webpack_require__(236)
 const {EPS} = __webpack_require__(4)
-const Side = __webpack_require__(146)
+const Side = __webpack_require__(145)
 
 const FuzzyCAGFactory = function () {
   this.vertexfactory = new FuzzyFactory(2, EPS)
@@ -87220,7 +87687,7 @@ module.exports = FuzzyCAGFactory
 
 
 /***/ }),
-/* 414 */
+/* 415 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(4)
@@ -87568,7 +88035,7 @@ module.exports = reTesselateCoplanarPolygons
 
 
 /***/ }),
-/* 415 */
+/* 416 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(17)
@@ -87606,18 +88073,18 @@ module.exports = {area, getBounds}
 
 
 /***/ }),
-/* 416 */
+/* 417 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS, defaultResolution3D} = __webpack_require__(4)
 const OrthoNormalBasis = __webpack_require__(93)
-const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(124)
+const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(125)
 const Vector3D = __webpack_require__(11)
 const Matrix4 = __webpack_require__(77)
-const Path2D = __webpack_require__(147)
+const Path2D = __webpack_require__(146)
 const {Connector} = __webpack_require__(104)
 const {fromPolygons} = __webpack_require__(58)
-const {cagToPointsArray, clamp, rightMultiply1x3VectorToArray, polygonFromPoints} = __webpack_require__(417)
+const {cagToPointsArray, clamp, rightMultiply1x3VectorToArray, polygonFromPoints} = __webpack_require__(418)
 const {fromPoints} = __webpack_require__(69)
 
 /** extrude the CAG in a certain plane.
@@ -87969,7 +88436,7 @@ module.exports = {
 
 
 /***/ }),
-/* 417 */
+/* 418 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vertex3 = __webpack_require__(39)
@@ -88038,10 +88505,10 @@ module.exports = {cagToPointsArray, clamp, rightMultiply1x3VectorToArray, polygo
 
 
 /***/ }),
-/* 418 */
+/* 419 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Path2D = __webpack_require__(147)
+const Path2D = __webpack_require__(146)
 
 const cagoutlinePaths = function (_cag) {
   let cag = _cag.canonicalized()
@@ -88124,7 +88591,7 @@ module.exports = cagoutlinePaths
 
 
 /***/ }),
-/* 419 */
+/* 420 */
 /***/ (function(module, exports) {
 
 /* converts input data to array if it is not already an array */
@@ -88138,7 +88605,7 @@ module.exports = toArray
 
 
 /***/ }),
-/* 420 */
+/* 421 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Polygon = __webpack_require__(27)
@@ -88357,7 +88824,7 @@ module.exports = solidFromSlices
 
 
 /***/ }),
-/* 421 */
+/* 422 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(4)
@@ -88679,7 +89146,7 @@ module.exports = fixTJunctions
 
 
 /***/ }),
-/* 422 */
+/* 423 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(11)
@@ -88733,7 +89200,7 @@ module.exports = {bounds, volume, area}
 
 
 /***/ }),
-/* 423 */
+/* 424 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CAG = __webpack_require__(59) // FIXME: circular dependency !
@@ -88762,7 +89229,7 @@ module.exports = {projectToOrthoNormalBasis}
 
 
 /***/ }),
-/* 424 */
+/* 425 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(4)
@@ -88832,15 +89299,15 @@ module.exports = {sectionCut, cutByPlane}
 
 
 /***/ }),
-/* 425 */
+/* 426 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CAG = __webpack_require__(59)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(124)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(125)
 const {defaultResolution2D} = __webpack_require__(4)
 const Vector2D = __webpack_require__(17)
-const Vertex2 = __webpack_require__(123)
-const Path2D = __webpack_require__(147)
+const Vertex2 = __webpack_require__(124)
+const Path2D = __webpack_require__(146)
 const {fromCompactBinary, fromPoints, fromPath2, fromSides} = __webpack_require__(69)
 
 /** Construct a circle.
@@ -89023,7 +89490,7 @@ module.exports = {
 
 
 /***/ }),
-/* 426 */
+/* 427 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CSG = __webpack_require__(94)
@@ -89062,7 +89529,7 @@ module.exports = {toPointCloud}
 
 
 /***/ }),
-/* 427 */
+/* 428 */
 /***/ (function(module, exports) {
 
 // positions, triangles, normals and colors
@@ -89095,7 +89562,7 @@ module.exports = {
 
 
 /***/ }),
-/* 428 */
+/* 429 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -89113,10 +89580,10 @@ All code released under MIT license
 const sax = __webpack_require__(207)
 const {CAG} = __webpack_require__(242)
 
-const {cagLengthX, cagLengthY} = __webpack_require__(151)
-const {svgSvg, svgRect, svgCircle, svgGroup, svgLine, svgPath, svgEllipse, svgPolygon, svgPolyline, svgUse} = __webpack_require__(447)
-const shapesMapCsg = __webpack_require__(448)
-const shapesMapJscad = __webpack_require__(449)
+const {cagLengthX, cagLengthY} = __webpack_require__(150)
+const {svgSvg, svgRect, svgCircle, svgGroup, svgLine, svgPath, svgEllipse, svgPolygon, svgPolyline, svgUse} = __webpack_require__(448)
+const shapesMapCsg = __webpack_require__(449)
+const shapesMapJscad = __webpack_require__(450)
 
 /**
 * Parse the given svg data and return either a JSCAD script or a CSG/CAG object
@@ -89475,7 +89942,7 @@ module.exports = {deserialize}
 
 
 /***/ }),
-/* 429 */
+/* 430 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Matrix4x4 = __webpack_require__(78)
@@ -89562,7 +90029,7 @@ module.exports = {
 
 
 /***/ }),
-/* 430 */
+/* 431 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {_CSGDEBUG, EPS} = __webpack_require__(5)
@@ -90077,7 +90544,7 @@ module.exports = Tree
 
 
 /***/ }),
-/* 431 */
+/* 432 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(5)
@@ -90107,7 +90574,7 @@ module.exports = {linesIntersect}
 
 
 /***/ }),
-/* 432 */
+/* 433 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {isCAG} = __webpack_require__(60)
@@ -90214,12 +90681,12 @@ module.exports = {
 
 
 /***/ }),
-/* 433 */
+/* 434 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const FuzzyFactory = __webpack_require__(247)
 const {EPS} = __webpack_require__(5)
-const Side = __webpack_require__(149)
+const Side = __webpack_require__(148)
 
 const FuzzyCAGFactory = function () {
   this.vertexfactory = new FuzzyFactory(2, EPS)
@@ -90245,7 +90712,7 @@ module.exports = FuzzyCAGFactory
 
 
 /***/ }),
-/* 434 */
+/* 435 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(5)
@@ -90593,7 +91060,7 @@ module.exports = reTesselateCoplanarPolygons
 
 
 /***/ }),
-/* 435 */
+/* 436 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector2D = __webpack_require__(18)
@@ -90631,18 +91098,18 @@ module.exports = {area, getBounds}
 
 
 /***/ }),
-/* 436 */
+/* 437 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS, defaultResolution3D} = __webpack_require__(5)
 const OrthoNormalBasis = __webpack_require__(95)
-const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(126)
+const {parseOptionAs3DVector, parseOptionAsBool, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(127)
 const Vector3D = __webpack_require__(12)
 const Matrix4 = __webpack_require__(78)
-const Path2D = __webpack_require__(150)
+const Path2D = __webpack_require__(149)
 const {Connector} = __webpack_require__(105)
 const {fromPolygons} = __webpack_require__(61)
-const {cagToPointsArray, clamp, rightMultiply1x3VectorToArray, polygonFromPoints} = __webpack_require__(437)
+const {cagToPointsArray, clamp, rightMultiply1x3VectorToArray, polygonFromPoints} = __webpack_require__(438)
 const {fromPoints} = __webpack_require__(70)
 
 /** extrude the CAG in a certain plane.
@@ -90994,7 +91461,7 @@ module.exports = {
 
 
 /***/ }),
-/* 437 */
+/* 438 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vertex3 = __webpack_require__(41)
@@ -91063,10 +91530,10 @@ module.exports = {cagToPointsArray, clamp, rightMultiply1x3VectorToArray, polygo
 
 
 /***/ }),
-/* 438 */
+/* 439 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Path2D = __webpack_require__(150)
+const Path2D = __webpack_require__(149)
 
 const cagoutlinePaths = function (_cag) {
   let cag = _cag.canonicalized()
@@ -91149,7 +91616,7 @@ module.exports = cagoutlinePaths
 
 
 /***/ }),
-/* 439 */
+/* 440 */
 /***/ (function(module, exports) {
 
 /* converts input data to array if it is not already an array */
@@ -91163,7 +91630,7 @@ module.exports = toArray
 
 
 /***/ }),
-/* 440 */
+/* 441 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Polygon = __webpack_require__(28)
@@ -91382,7 +91849,7 @@ module.exports = solidFromSlices
 
 
 /***/ }),
-/* 441 */
+/* 442 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(5)
@@ -91704,7 +92171,7 @@ module.exports = fixTJunctions
 
 
 /***/ }),
-/* 442 */
+/* 443 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Vector3D = __webpack_require__(12)
@@ -91758,7 +92225,7 @@ module.exports = {bounds, volume, area}
 
 
 /***/ }),
-/* 443 */
+/* 444 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CAG = __webpack_require__(62) // FIXME: circular dependency !
@@ -91787,7 +92254,7 @@ module.exports = {projectToOrthoNormalBasis}
 
 
 /***/ }),
-/* 444 */
+/* 445 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {EPS} = __webpack_require__(5)
@@ -91857,15 +92324,15 @@ module.exports = {sectionCut, cutByPlane}
 
 
 /***/ }),
-/* 445 */
+/* 446 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CAG = __webpack_require__(62)
-const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(126)
+const {parseOptionAs2DVector, parseOptionAsFloat, parseOptionAsInt} = __webpack_require__(127)
 const {defaultResolution2D} = __webpack_require__(5)
 const Vector2D = __webpack_require__(18)
-const Vertex2 = __webpack_require__(125)
-const Path2D = __webpack_require__(150)
+const Vertex2 = __webpack_require__(126)
+const Path2D = __webpack_require__(149)
 const {fromCompactBinary, fromPoints, fromPath2, fromSides} = __webpack_require__(70)
 
 /** Construct a circle.
@@ -92048,7 +92515,7 @@ module.exports = {
 
 
 /***/ }),
-/* 446 */
+/* 447 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const CSG = __webpack_require__(96)
@@ -92087,10 +92554,10 @@ module.exports = {toPointCloud}
 
 
 /***/ }),
-/* 447 */
+/* 448 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const {cagColor, cssStyle, css2cag} = __webpack_require__(151)
+const {cagColor, cssStyle, css2cag} = __webpack_require__(150)
 const {pxPmm} = __webpack_require__(106)
 
 const svgCore = function (obj, element) {
@@ -92539,11 +93006,11 @@ module.exports = {
 
 
 /***/ }),
-/* 448 */
+/* 449 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {CSG, CAG} = __webpack_require__(242)
-const {svg2cagX, svg2cagY, cagLengthX, cagLengthY, cagLengthP, reflect, groupValue} = __webpack_require__(151)
+const {svg2cagX, svg2cagY, cagLengthX, cagLengthY, cagLengthP, reflect, groupValue} = __webpack_require__(150)
 const {cssPxUnit} = __webpack_require__(106)
 
 const shapesMap = function (obj, codify, params) {
@@ -92931,10 +93398,10 @@ function path (obj, svgUnitsPmm, svgUnitsX, svgUnitsY, svgUnitsV, svgGroups) {
 
 
 /***/ }),
-/* 449 */
+/* 450 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const {svg2cagX, svg2cagY, cagLengthX, cagLengthY, cagLengthP, reflect, groupValue} = __webpack_require__(151)
+const {svg2cagX, svg2cagY, cagLengthX, cagLengthY, cagLengthP, reflect, groupValue} = __webpack_require__(150)
 const {cssPxUnit} = __webpack_require__(106)
 
 const shapesMap = function (obj, codify, params) {
@@ -93326,7 +93793,7 @@ function path (obj, svgUnitsPmm, svgUnitsX, svgUnitsY, svgUnitsV, params, svgGro
 
 
 /***/ }),
-/* 450 */
+/* 451 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -93338,11 +93805,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _canvas2d = __webpack_require__(451);
+var _canvas2d = __webpack_require__(452);
 
 var _canvas2d2 = _interopRequireDefault(_canvas2d);
 
-var _canvas3d = __webpack_require__(452);
+var _canvas3d = __webpack_require__(453);
 
 var _canvas3d2 = _interopRequireDefault(_canvas3d);
 
@@ -93521,7 +93988,7 @@ var CanvasHandler = function () {
 exports.default = CanvasHandler;
 
 /***/ }),
-/* 451 */
+/* 452 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -93541,7 +94008,7 @@ var _vector2d = __webpack_require__(110);
 
 var _vector2d2 = _interopRequireDefault(_vector2d);
 
-var _glUtils = __webpack_require__(159);
+var _glUtils = __webpack_require__(158);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -93700,7 +94167,7 @@ var Canvas2D = function (_Canvas) {
 exports.default = Canvas2D;
 
 /***/ }),
-/* 452 */
+/* 453 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -93724,9 +94191,9 @@ var _vector3d = __webpack_require__(42);
 
 var _vector3d2 = _interopRequireDefault(_vector3d);
 
-var _camera = __webpack_require__(453);
+var _camera = __webpack_require__(454);
 
-var _glUtils = __webpack_require__(159);
+var _glUtils = __webpack_require__(158);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -93737,10 +94204,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var RENDER_VERTEX = __webpack_require__(181);
-var RENDER_FRAGMENT = __webpack_require__(454);
-var RENDER_FLIPPED_VERTEX = __webpack_require__(455);
+var RENDER_FRAGMENT = __webpack_require__(455);
+var RENDER_FLIPPED_VERTEX = __webpack_require__(456);
 
-var BRDF_LUT = __webpack_require__(456);
+var BRDF_LUT = __webpack_require__(457);
 
 var Canvas3D = function (_Canvas) {
     _inherits(Canvas3D, _Canvas);
@@ -94173,7 +94640,7 @@ var Canvas3D = function (_Canvas) {
 exports.default = Canvas3D;
 
 /***/ }),
-/* 453 */
+/* 454 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -94653,25 +95120,25 @@ var FlyCamera = exports.FlyCamera = function (_Camera2) {
 }(Camera);
 
 /***/ }),
-/* 454 */
+/* 455 */
 /***/ (function(module, exports) {
 
 module.exports = "#version 300 es\nprecision mediump float;\n\nin vec2 v_texCoord;\nuniform sampler2D u_texture;\n\nconst float DISPLAY_GAMMA_COEFF = 1. / 2.2;\nvec4 gammaCorrect(vec4 rgba) {\n    return vec4((min(pow(rgba.r, DISPLAY_GAMMA_COEFF), 1.)),\n                (min(pow(rgba.g, DISPLAY_GAMMA_COEFF), 1.)),\n                (min(pow(rgba.b, DISPLAY_GAMMA_COEFF), 1.)),\n                rgba.a);\n}\n\nout vec4 outColor;\nvoid main() {\n    outColor = gammaCorrect(textureLod(u_texture, v_texCoord, 0.0));\n}\n"
 
 /***/ }),
-/* 455 */
+/* 456 */
 /***/ (function(module, exports) {
 
 module.exports = "#version 300 es\n\nin vec2 a_vertex;\nout vec2 v_texCoord;\n\nvoid main() {\n    v_texCoord = a_vertex.xy * 0.5 + 0.5;\n    gl_Position = vec4(a_vertex.x, -a_vertex.y, 0., 1.0);\n}\n"
 
 /***/ }),
-/* 456 */
+/* 457 */
 /***/ (function(module, exports) {
 
 module.exports = "data:image/png;base64,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"
 
 /***/ }),
-/* 457 */
+/* 458 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -94679,9 +95146,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_root_vue__ = __webpack_require__(254);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_root_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_root_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_root_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_root_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_16180dea_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_root_vue__ = __webpack_require__(490);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_16180dea_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_root_vue__ = __webpack_require__(491);
 function injectStyle (ssrContext) {
-  __webpack_require__(458)
+  __webpack_require__(459)
 }
 var normalizeComponent = __webpack_require__(63)
 /* script */
@@ -94710,20 +95177,20 @@ var Component = normalizeComponent(
 
 
 /***/ }),
-/* 458 */
+/* 459 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(459);
+var content = __webpack_require__(460);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var update = __webpack_require__(108)("6ae16538", content, true, {});
 
 /***/ }),
-/* 459 */
+/* 460 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(107)(false);
@@ -94737,7 +95204,7 @@ exports.push([module.i, "#root{flex-direction:column;overflow:hidden}#content,#r
 
 
 /***/ }),
-/* 460 */
+/* 461 */
 /***/ (function(module, exports) {
 
 /**
@@ -94770,7 +95237,7 @@ module.exports = function listToStyles (parentId, list) {
 
 
 /***/ }),
-/* 461 */
+/* 462 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -94778,9 +95245,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_headerPanel_vue__ = __webpack_require__(255);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_headerPanel_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_headerPanel_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_headerPanel_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_headerPanel_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_6dd65512_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_headerPanel_vue__ = __webpack_require__(464);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_6dd65512_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_headerPanel_vue__ = __webpack_require__(465);
 function injectStyle (ssrContext) {
-  __webpack_require__(462)
+  __webpack_require__(463)
 }
 var normalizeComponent = __webpack_require__(63)
 /* script */
@@ -94809,20 +95276,20 @@ var Component = normalizeComponent(
 
 
 /***/ }),
-/* 462 */
+/* 463 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(463);
+var content = __webpack_require__(464);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var update = __webpack_require__(108)("300cd5fb", content, true, {});
 
 /***/ }),
-/* 463 */
+/* 464 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(107)(false);
@@ -94836,7 +95303,7 @@ exports.push([module.i, "header{font-family:Times New Roman;border-style:ridge;b
 
 
 /***/ }),
-/* 464 */
+/* 465 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -94846,7 +95313,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
 
 /***/ }),
-/* 465 */
+/* 466 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -94854,9 +95321,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_middlePanel_vue__ = __webpack_require__(256);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_middlePanel_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_middlePanel_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_middlePanel_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_middlePanel_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_9478bb72_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_middlePanel_vue__ = __webpack_require__(484);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_9478bb72_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_middlePanel_vue__ = __webpack_require__(485);
 function injectStyle (ssrContext) {
-  __webpack_require__(466)
+  __webpack_require__(467)
 }
 var normalizeComponent = __webpack_require__(63)
 /* script */
@@ -94885,20 +95352,20 @@ var Component = normalizeComponent(
 
 
 /***/ }),
-/* 466 */
+/* 467 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(467);
+var content = __webpack_require__(468);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var update = __webpack_require__(108)("cfad387e", content, true, {});
 
 /***/ }),
-/* 467 */
+/* 468 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(107)(false);
@@ -94912,7 +95379,7 @@ exports.push([module.i, ".contentPanel{flex:1;display:flex;flex-direction:row;ov
 
 
 /***/ }),
-/* 468 */
+/* 469 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -94920,9 +95387,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_canvasPanel_vue__ = __webpack_require__(257);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_canvasPanel_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_canvasPanel_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_canvasPanel_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_canvasPanel_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_1f9adfe8_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_canvasPanel_vue__ = __webpack_require__(479);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_1f9adfe8_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_canvasPanel_vue__ = __webpack_require__(480);
 function injectStyle (ssrContext) {
-  __webpack_require__(469)
+  __webpack_require__(470)
 }
 var normalizeComponent = __webpack_require__(63)
 /* script */
@@ -94951,20 +95418,20 @@ var Component = normalizeComponent(
 
 
 /***/ }),
-/* 469 */
+/* 470 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(470);
+var content = __webpack_require__(471);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var update = __webpack_require__(108)("29c91436", content, true, {});
 
 /***/ }),
-/* 470 */
+/* 471 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(107)(false);
@@ -94978,7 +95445,7 @@ exports.push([module.i, "#rootPanel{width:100%;height:100%;overflow:hidden;flex:
 
 
 /***/ }),
-/* 471 */
+/* 472 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -94986,7 +95453,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_limitsetCanvas_vue__ = __webpack_require__(258);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_limitsetCanvas_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_limitsetCanvas_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_limitsetCanvas_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_limitsetCanvas_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_0ac77a49_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_limitsetCanvas_vue__ = __webpack_require__(472);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_0ac77a49_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_limitsetCanvas_vue__ = __webpack_require__(473);
 var normalizeComponent = __webpack_require__(63)
 /* script */
 
@@ -95014,7 +95481,7 @@ var Component = normalizeComponent(
 
 
 /***/ }),
-/* 472 */
+/* 473 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95024,7 +95491,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
 
 /***/ }),
-/* 473 */
+/* 474 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95032,7 +95499,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_prismCanvas_vue__ = __webpack_require__(259);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_prismCanvas_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_prismCanvas_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_prismCanvas_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_prismCanvas_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_20033f8c_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_prismCanvas_vue__ = __webpack_require__(474);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_20033f8c_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_prismCanvas_vue__ = __webpack_require__(475);
 var normalizeComponent = __webpack_require__(63)
 /* script */
 
@@ -95060,7 +95527,7 @@ var Component = normalizeComponent(
 
 
 /***/ }),
-/* 474 */
+/* 475 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95070,7 +95537,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
 
 /***/ }),
-/* 475 */
+/* 476 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95078,7 +95545,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_parameterCanvas_vue__ = __webpack_require__(260);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_parameterCanvas_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_parameterCanvas_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_parameterCanvas_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_parameterCanvas_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_c653fdec_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_parameterCanvas_vue__ = __webpack_require__(476);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_c653fdec_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_parameterCanvas_vue__ = __webpack_require__(477);
 var normalizeComponent = __webpack_require__(63)
 /* script */
 
@@ -95106,7 +95573,7 @@ var Component = normalizeComponent(
 
 
 /***/ }),
-/* 476 */
+/* 477 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95116,7 +95583,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
 
 /***/ }),
-/* 477 */
+/* 478 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95124,7 +95591,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sphaiahedraCanvas_vue__ = __webpack_require__(261);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sphaiahedraCanvas_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sphaiahedraCanvas_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sphaiahedraCanvas_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_sphaiahedraCanvas_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_312d6081_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sphaiahedraCanvas_vue__ = __webpack_require__(478);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_312d6081_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_sphaiahedraCanvas_vue__ = __webpack_require__(479);
 var normalizeComponent = __webpack_require__(63)
 /* script */
 
@@ -95152,7 +95619,7 @@ var Component = normalizeComponent(
 
 
 /***/ }),
-/* 478 */
+/* 479 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95162,7 +95629,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
 
 /***/ }),
-/* 479 */
+/* 480 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95172,7 +95639,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
 
 /***/ }),
-/* 480 */
+/* 481 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -95180,9 +95647,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_controlPanel_vue__ = __webpack_require__(262);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_controlPanel_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_controlPanel_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_controlPanel_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_controlPanel_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_3a944f3f_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_controlPanel_vue__ = __webpack_require__(483);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_406a1543_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_controlPanel_vue__ = __webpack_require__(484);
 function injectStyle (ssrContext) {
-  __webpack_require__(481)
+  __webpack_require__(482)
 }
 var normalizeComponent = __webpack_require__(63)
 /* script */
@@ -95200,7 +95667,7 @@ var __vue_scopeId__ = null
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_controlPanel_vue___default.a,
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_3a944f3f_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_controlPanel_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_406a1543_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_controlPanel_vue__["a" /* default */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -95211,20 +95678,20 @@ var Component = normalizeComponent(
 
 
 /***/ }),
-/* 481 */
+/* 482 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(482);
+var content = __webpack_require__(483);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(108)("3acfe054", content, true, {});
+var update = __webpack_require__(108)("31f2a0f2", content, true, {});
 
 /***/ }),
-/* 482 */
+/* 483 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(107)(false);
@@ -95238,21 +95705,11 @@ exports.push([module.i, "#controlPanel{border-style:ridge;width:300px;flex-basis
 
 
 /***/ }),
-/* 483 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{attrs:{"id":"controlPanel"}},[_c('div',{attrs:{"id":"control"}},[_c('div',{staticClass:"uiGroup"},[_vm._v("\n      Polyhedron:\n      "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.selectedSpheirahedron),expression:"selectedSpheirahedron"}],attrs:{"id":"sphairahedraTypeBox"},on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.selectedSpheirahedron=$event.target.multiple ? $$selectedVal : $$selectedVal[0]},_vm.changeSpheirahedron]}},_vm._l((Object.keys(_vm.spheirahedraHandler.baseTypes)),function(k){return _c('option',[_vm._v("\n          "+_vm._s(k)+"\n        ")])}),0),_c('br'),_vm._v("\n      Dihedral Angle Type:\n      "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.spheirahedraHandler.currentDihedralAngleIndex),expression:"spheirahedraHandler.currentDihedralAngleIndex"}],on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.spheirahedraHandler, "currentDihedralAngleIndex", $event.target.multiple ? $$selectedVal : $$selectedVal[0])},_vm.changeDihedralAngleType]}},_vm._l((_vm.spheirahedraHandler.baseTypes[_vm.selectedSpheirahedron]),function(item,index){return _c('option',[_vm._v("\n          "+_vm._s(index)+"\n        ")])}),0),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.zb),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.zb",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.zb)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "zb", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v(" "),_c('label',[_vm._v("Zb ")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.zc),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.zc",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.zc)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "zc", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v(" "),_c('label',[_vm._v("Zc")]),_c('br')]),_vm._v(" "),_c('div',{staticClass:"uiGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Limit Set  -  Samples: "+_vm._s(_vm.canvasHandler.limitsetCanvas.numSamples)+" of "+_vm._s(_vm.canvasHandler.limitsetCanvas.maxSamples))]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Mode")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode),expression:"canvasHandler.spheirahedraHandler.limitRenderingMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"0"},domProps:{"checked":_vm._q(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode,_vm._n("0"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.spheirahedraHandler, "limitRenderingMode", _vm._n("0"))},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Terrain Limit Set ")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode),expression:"canvasHandler.spheirahedraHandler.limitRenderingMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"1"},domProps:{"checked":_vm._q(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode,_vm._n("1"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.spheirahedraHandler, "limitRenderingMode", _vm._n("1"))},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Limit Set from seed spheres")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode),expression:"canvasHandler.spheirahedraHandler.limitRenderingMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"2"},domProps:{"checked":_vm._q(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode,_vm._n("2"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.spheirahedraHandler, "limitRenderingMode", _vm._n("2"))},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Limit Set from sphairahedron")])]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Rendering Parameters")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.maxIterations),expression:"canvasHandler.limitsetCanvas.maxIterations"}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.maxIterations)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "maxIterations", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("Max Iterations"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.maxSamples),expression:"canvasHandler.limitsetCanvas.maxSamples",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.maxSamples)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "maxSamples", _vm._n($event.target.value))},"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Max Samples"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.marchingThreshold),expression:"canvasHandler.limitsetCanvas.marchingThreshold"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.000001","min":"0.0000001"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.marchingThreshold)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "marchingThreshold", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("MarchingThreshold"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.fudgeFactor),expression:"canvasHandler.limitsetCanvas.fudgeFactor"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.01","min":"0.001","max":"1.0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.fudgeFactor)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "fudgeFactor", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("FudgeFactor"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.aoEps),expression:"canvasHandler.limitsetCanvas.aoEps"}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0","step":"0.0001"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.aoEps)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "aoEps", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("AO Epsilon"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.aoIntensity),expression:"canvasHandler.limitsetCanvas.aoIntensity"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.0001","min":"0.0000001"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.aoIntensity)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "aoIntensity", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("AO Intensity\n      ")]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Shading")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.metallicRoughness.x),expression:"canvasHandler.limitsetCanvas.metallicRoughness.x",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01","min":"0.0","max":"1.0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.metallicRoughness.x)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas.metallicRoughness, "x", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Metallic"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.metallicRoughness.y),expression:"canvasHandler.limitsetCanvas.metallicRoughness.y",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01","min":"0.0","max":"1.0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.metallicRoughness.y)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas.metallicRoughness, "y", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Roughness"),_c('br'),_vm._v("\n        Light Direction"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.lightDirection.x),expression:"canvasHandler.limitsetCanvas.lightDirection.x",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.lightDirection.x)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas.lightDirection, "x", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("X"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.lightDirection.y),expression:"canvasHandler.limitsetCanvas.lightDirection.y",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.lightDirection.y)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas.lightDirection, "y", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Y"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.lightDirection.z),expression:"canvasHandler.limitsetCanvas.lightDirection.z",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.lightDirection.z)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas.lightDirection, "z", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Z"),_c('br'),_vm._v("\n        Light Direction"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.prismCanvas.lightDirection.x),expression:"canvasHandler.prismCanvas.lightDirection.x",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.prismCanvas.lightDirection.x)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.prismCanvas.lightDirection, "x", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("X"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.prismCanvas.lightDirection.y),expression:"canvasHandler.prismCanvas.lightDirection.y",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.prismCanvas.lightDirection.y)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.prismCanvas.lightDirection, "y", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Y"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.prismCanvas.lightDirection.z),expression:"canvasHandler.prismCanvas.lightDirection.z",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.prismCanvas.lightDirection.z)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.prismCanvas.lightDirection, "z", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Z"),_c('br')]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Inversion Sphere")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere)?_vm._i(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere,null)>-1:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "constrainsInversionSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "constrainsInversionSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "constrainsInversionSphere", $$c)}},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Constrains")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center, "x", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("X"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center, "y", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Y"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center, "z", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Z"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.r),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.r",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.r)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere, "r", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("R"),_c('br')]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Camera Mode")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.cameraMode),expression:"canvasHandler.limitsetCanvas.cameraMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"0"},domProps:{"checked":_vm._q(_vm.canvasHandler.limitsetCanvas.cameraMode,_vm._n("0"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.limitsetCanvas, "cameraMode", _vm._n("0"))},_vm.changeCameraMode]}}),_vm._v(" "),_c('label',[_vm._v("Camera on Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.cameraMode),expression:"canvasHandler.limitsetCanvas.cameraMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"1"},domProps:{"checked":_vm._q(_vm.canvasHandler.limitsetCanvas.cameraMode,_vm._n("1"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.limitsetCanvas, "cameraMode", _vm._n("1"))},_vm.changeCameraMode]}}),_vm._v(" "),_c('label',[_vm._v("Fly")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.resetCamera}},[_vm._v("Reset Camera")]),_c('br')]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Display")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere),expression:"canvasHandler.limitsetCanvas.displaySpheirahedraSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere)?_vm._i(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere,null)>-1:(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "displaySpheirahedraSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "displaySpheirahedraSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "displaySpheirahedraSphere", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Spheirahedra Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere),expression:"canvasHandler.limitsetCanvas.displayBoundingSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere)?_vm._i(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere,null)>-1:(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.displayBoundingSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayBoundingSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayBoundingSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayBoundingSphere", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Bounding Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet),expression:"canvasHandler.limitsetCanvas.displayPrismWithLimitSet"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet)?_vm._i(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet,null)>-1:(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayPrismWithLimitSet", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayPrismWithLimitSet", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayPrismWithLimitSet", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Prism")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.castShadow),expression:"canvasHandler.limitsetCanvas.castShadow"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.castShadow)?_vm._i(_vm.canvasHandler.limitsetCanvas.castShadow,null)>-1:(_vm.canvasHandler.limitsetCanvas.castShadow)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.castShadow,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "castShadow", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "castShadow", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "castShadow", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Cast Shadow")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.colorWeight),expression:"canvasHandler.limitsetCanvas.colorWeight"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.colorWeight)},on:{"change":_vm.updateRenderParameter,"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "colorWeight", $event.target.value)}}}),_vm._v(" "),_c('label',[_vm._v("Color Weight")]),_c('br')])]),_vm._v(" "),_c('div',{staticClass:"uiGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Sphairahedron")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere),expression:"canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere)?_vm._i(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere,null)>-1:(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displaySpheirahedraSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displaySpheirahedraSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displaySpheirahedraSphere", $$c)}},_vm.renderSpheirahedraCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Spheirahedra Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere),expression:"canvasHandler.spheirahedraCanvas.displayConvexSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere)?_vm._i(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere,null)>-1:(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayConvexSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayConvexSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayConvexSphere", $$c)}},_vm.renderSpheirahedraCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Convex Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere),expression:"canvasHandler.spheirahedraCanvas.displayInversionSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere)?_vm._i(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere,null)>-1:(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayInversionSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayInversionSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayInversionSphere", $$c)}},_vm.renderSpheirahedraCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Inversion Sphere")])]),_vm._v(" "),_c('div',{staticClass:"uiGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Sphairahedral Prism")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere),expression:"canvasHandler.prismCanvas.displaySpheirahedraSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere)?_vm._i(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere,null)>-1:(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.prismCanvas, "displaySpheirahedraSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.prismCanvas, "displaySpheirahedraSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.prismCanvas, "displaySpheirahedraSphere", $$c)}},_vm.renderPrismCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Sphairahedra Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.prismCanvas.displayInversionSphere),expression:"canvasHandler.prismCanvas.displayInversionSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.prismCanvas.displayInversionSphere)?_vm._i(_vm.canvasHandler.prismCanvas.displayInversionSphere,null)>-1:(_vm.canvasHandler.prismCanvas.displayInversionSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.prismCanvas.displayInversionSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.prismCanvas, "displayInversionSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.prismCanvas, "displayInversionSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.prismCanvas, "displayInversionSphere", $$c)}},_vm.renderPrismCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Inversion Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism),expression:"canvasHandler.prismCanvas.displayRawSpheirahedralPrism"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism)?_vm._i(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism,null)>-1:(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism)},on:{"change":[function($event){var $$a=_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.prismCanvas, "displayRawSpheirahedralPrism", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.prismCanvas, "displayRawSpheirahedralPrism", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.prismCanvas, "displayRawSpheirahedralPrism", $$c)}},_vm.renderPrismCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Raw Prism")])]),_vm._v(" "),_c('div',{staticClass:"uiGroup"},[_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.reflectionIndex),expression:"reflectionIndex",modifiers:{"number":true}}],attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.reflectionIndex)},on:{"input":function($event){if($event.target.composing){ return; }_vm.reflectionIndex=_vm._n($event.target.value)},"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("ReflectionIndex\n      "),_c('button',{on:{"click":_vm.applyReflection}},[_vm._v("Reflection")]),_vm._v(" "),_c('button',{on:{"click":_vm.resetReflections}},[_vm._v("reset")])]),_vm._v(" "),_c('div',{staticClass:"uiGroup",attrs:{"id":"saveGroup"}},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Save")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.productRenderWidth),expression:"productRenderWidth",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.productRenderWidth)},on:{"input":function($event){if($event.target.composing){ return; }_vm.productRenderWidth=_vm._n($event.target.value)},"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v(" :\n      "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.productRenderHeight),expression:"productRenderHeight",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.productRenderHeight)},on:{"input":function($event){if($event.target.composing){ return; }_vm.productRenderHeight=_vm._n($event.target.value)},"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("w:h"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.productRenderMaxSamples),expression:"productRenderMaxSamples",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.productRenderMaxSamples)},on:{"input":function($event){if($event.target.composing){ return; }_vm.productRenderMaxSamples=_vm._n($event.target.value)},"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Samples"),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveLimitsetImage}},[_vm._v("Save Limit Set Image")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedralPrismImage}},[_vm._v("Save Sphairahedral Prism Image")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedronImage}},[_vm._v("Save Sphairahedron Image")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedraPrismMesh}},[_vm._v("Export Sphairahedral Prism Stl")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedronMesh}},[_vm._v("Export Sphairahedron Stl")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSceneParamJson}},[_vm._v("Export Parameter as Json")]),_c('br')])])])}
-var staticRenderFns = []
-var esExports = { render: render, staticRenderFns: staticRenderFns }
-/* harmony default export */ __webpack_exports__["a"] = (esExports);
-
-/***/ }),
 /* 484 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"contentPanel"},[_c('canvas-panel',{attrs:{"canvasHandler":_vm.canvasHandler,"spheirahedraHandler":_vm.spheirahedraHandler}}),_vm._v(" "),_c('control-panel',{attrs:{"canvasHandler":_vm.canvasHandler,"spheirahedraHandler":_vm.spheirahedraHandler}})],1)}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{attrs:{"id":"controlPanel"}},[_c('div',{attrs:{"id":"control"}},[_c('div',{staticClass:"uiGroup"},[_vm._v("\n      Polyhedron:\n      "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.selectedSpheirahedron),expression:"selectedSpheirahedron"}],attrs:{"id":"sphairahedraTypeBox"},on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.selectedSpheirahedron=$event.target.multiple ? $$selectedVal : $$selectedVal[0]},_vm.changeSpheirahedron]}},_vm._l((Object.keys(_vm.spheirahedraHandler.baseTypes)),function(k){return _c('option',[_vm._v("\n          "+_vm._s(k)+"\n        ")])}),0),_c('br'),_vm._v("\n      Dihedral Angle Type:\n      "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.spheirahedraHandler.currentDihedralAngleIndex),expression:"spheirahedraHandler.currentDihedralAngleIndex"}],on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.spheirahedraHandler, "currentDihedralAngleIndex", $event.target.multiple ? $$selectedVal : $$selectedVal[0])},_vm.changeDihedralAngleType]}},_vm._l((_vm.spheirahedraHandler.baseTypes[_vm.selectedSpheirahedron]),function(item,index){return _c('option',[_vm._v("\n          "+_vm._s(index)+"\n        ")])}),0),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.zb),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.zb",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.zb)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "zb", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v(" "),_c('label',[_vm._v("Zb ")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.zc),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.zc",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.zc)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "zc", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v(" "),_c('label',[_vm._v("Zc")]),_c('br')]),_vm._v(" "),_c('div',{staticClass:"uiGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Limit Set  -  Samples: "+_vm._s(_vm.canvasHandler.limitsetCanvas.numSamples)+" of "+_vm._s(_vm.canvasHandler.limitsetCanvas.maxSamples))]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Mode")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode),expression:"canvasHandler.spheirahedraHandler.limitRenderingMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"0"},domProps:{"checked":_vm._q(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode,_vm._n("0"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.spheirahedraHandler, "limitRenderingMode", _vm._n("0"))},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Terrain Limit Set ")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode),expression:"canvasHandler.spheirahedraHandler.limitRenderingMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"1"},domProps:{"checked":_vm._q(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode,_vm._n("1"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.spheirahedraHandler, "limitRenderingMode", _vm._n("1"))},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Limit Set from seed spheres")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode),expression:"canvasHandler.spheirahedraHandler.limitRenderingMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"2"},domProps:{"checked":_vm._q(_vm.canvasHandler.spheirahedraHandler.limitRenderingMode,_vm._n("2"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.spheirahedraHandler, "limitRenderingMode", _vm._n("2"))},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Limit Set from sphairahedron")])]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Rendering Parameters")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.maxIterations),expression:"canvasHandler.limitsetCanvas.maxIterations"}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.maxIterations)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "maxIterations", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("Max Iterations"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.maxSamples),expression:"canvasHandler.limitsetCanvas.maxSamples",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.maxSamples)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "maxSamples", _vm._n($event.target.value))},"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Max Samples"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.marchingThreshold),expression:"canvasHandler.limitsetCanvas.marchingThreshold"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.000001","min":"0.0000001"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.marchingThreshold)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "marchingThreshold", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("MarchingThreshold"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.fudgeFactor),expression:"canvasHandler.limitsetCanvas.fudgeFactor"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.01","min":"0.001","max":"1.0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.fudgeFactor)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "fudgeFactor", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("FudgeFactor"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.aoEps),expression:"canvasHandler.limitsetCanvas.aoEps"}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0","step":"0.0001"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.aoEps)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "aoEps", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("AO Epsilon"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.aoIntensity),expression:"canvasHandler.limitsetCanvas.aoIntensity"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.0001","min":"0.0000001"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.aoIntensity)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "aoIntensity", $event.target.value)},_vm.updateRenderParameter]}}),_vm._v("AO Intensity\n      ")]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Shading")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.metallicRoughness.x),expression:"canvasHandler.limitsetCanvas.metallicRoughness.x",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01","min":"0.0","max":"1.0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.metallicRoughness.x)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas.metallicRoughness, "x", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Metallic"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.metallicRoughness.y),expression:"canvasHandler.limitsetCanvas.metallicRoughness.y",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01","min":"0.0","max":"1.0"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.metallicRoughness.y)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas.metallicRoughness, "y", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Roughness"),_c('br'),_vm._v("\n        Light Direction"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.lightDirection.x),expression:"canvasHandler.limitsetCanvas.lightDirection.x",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.lightDirection.x)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas.lightDirection, "x", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("X"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.lightDirection.y),expression:"canvasHandler.limitsetCanvas.lightDirection.y",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.lightDirection.y)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas.lightDirection, "y", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Y"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.lightDirection.z),expression:"canvasHandler.limitsetCanvas.lightDirection.z",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.lightDirection.z)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas.lightDirection, "z", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Z"),_c('br'),_vm._v("\n        Light Direction"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.prismCanvas.lightDirection.x),expression:"canvasHandler.prismCanvas.lightDirection.x",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.prismCanvas.lightDirection.x)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.prismCanvas.lightDirection, "x", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("X"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.prismCanvas.lightDirection.y),expression:"canvasHandler.prismCanvas.lightDirection.y",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.prismCanvas.lightDirection.y)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.prismCanvas.lightDirection, "y", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Y"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.prismCanvas.lightDirection.z),expression:"canvasHandler.prismCanvas.lightDirection.z",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.prismCanvas.lightDirection.z)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.prismCanvas.lightDirection, "z", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Z"),_c('br')]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Inversion Sphere")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere)?_vm._i(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere,null)>-1:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.constrainsInversionSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "constrainsInversionSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "constrainsInversionSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "constrainsInversionSphere", $$c)}},_vm.updateLimitSetShader]}}),_vm._v(" "),_c('label',[_vm._v("Constrains")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.x)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center, "x", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("X"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.y)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center, "y", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Y"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center.z)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.center, "z", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Z"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.r),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.r",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere.r)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.inversionSphere, "r", _vm._n($event.target.value))},_vm.reRenderAll],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("R"),_c('br')]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Camera Mode")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.cameraMode),expression:"canvasHandler.limitsetCanvas.cameraMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"0"},domProps:{"checked":_vm._q(_vm.canvasHandler.limitsetCanvas.cameraMode,_vm._n("0"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.limitsetCanvas, "cameraMode", _vm._n("0"))},_vm.changeCameraMode]}}),_vm._v(" "),_c('label',[_vm._v("Camera on Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.canvasHandler.limitsetCanvas.cameraMode),expression:"canvasHandler.limitsetCanvas.cameraMode",modifiers:{"number":true}}],attrs:{"type":"radio","value":"1"},domProps:{"checked":_vm._q(_vm.canvasHandler.limitsetCanvas.cameraMode,_vm._n("1"))},on:{"change":[function($event){_vm.$set(_vm.canvasHandler.limitsetCanvas, "cameraMode", _vm._n("1"))},_vm.changeCameraMode]}}),_vm._v(" "),_c('label',[_vm._v("Fly")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.resetCamera}},[_vm._v("Reset Camera")]),_c('br')]),_vm._v(" "),_c('div',{staticClass:"uiInnerGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Display")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere),expression:"canvasHandler.limitsetCanvas.displaySpheirahedraSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere)?_vm._i(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere,null)>-1:(_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.displaySpheirahedraSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "displaySpheirahedraSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "displaySpheirahedraSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "displaySpheirahedraSphere", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Spheirahedra Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere),expression:"canvasHandler.limitsetCanvas.displayBoundingSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere)?_vm._i(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere,null)>-1:(_vm.canvasHandler.limitsetCanvas.displayBoundingSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.displayBoundingSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayBoundingSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayBoundingSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayBoundingSphere", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Bounding Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet),expression:"canvasHandler.limitsetCanvas.displayPrismWithLimitSet"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet)?_vm._i(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet,null)>-1:(_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.displayPrismWithLimitSet,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayPrismWithLimitSet", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayPrismWithLimitSet", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "displayPrismWithLimitSet", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Prism")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.castShadow),expression:"canvasHandler.limitsetCanvas.castShadow"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.limitsetCanvas.castShadow)?_vm._i(_vm.canvasHandler.limitsetCanvas.castShadow,null)>-1:(_vm.canvasHandler.limitsetCanvas.castShadow)},on:{"change":[function($event){var $$a=_vm.canvasHandler.limitsetCanvas.castShadow,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "castShadow", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.limitsetCanvas, "castShadow", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.limitsetCanvas, "castShadow", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Cast Shadow")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.limitsetCanvas.colorWeight),expression:"canvasHandler.limitsetCanvas.colorWeight"}],staticStyle:{"width":"80px"},attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.canvasHandler.limitsetCanvas.colorWeight)},on:{"change":_vm.updateRenderParameter,"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.canvasHandler.limitsetCanvas, "colorWeight", $event.target.value)}}}),_vm._v(" "),_c('label',[_vm._v("Color Weight")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.enableSlice),expression:"canvasHandler.spheirahedraHandler.currentSpheirahedra.enableSlice"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.enableSlice)?_vm._i(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.enableSlice,null)>-1:(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.enableSlice)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra.enableSlice,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "enableSlice", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "enableSlice", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.spheirahedraHandler.currentSpheirahedra, "enableSlice", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" "),_c('label',[_vm._v("Slice")]),_c('br'),_vm._v("\n        Slice Type\n        "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.spheirahedraHandler.currentSpheirahedra.currentSliceIndex),expression:"spheirahedraHandler.currentSpheirahedra.currentSliceIndex"}],on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.spheirahedraHandler.currentSpheirahedra, "currentSliceIndex", $event.target.multiple ? $$selectedVal : $$selectedVal[0])},_vm.changeSliceType]}},_vm._l((_vm.spheirahedraHandler.currentSpheirahedra.slicePlanes),function(item,index){return _c('option',[_vm._v("\n          "+_vm._s(index)+"\n        ")])}),0),_c('br'),_vm._v("\n        Slice Plane Origin"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1.x),expression:"spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1.x",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.001"},domProps:{"value":(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1.x)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1, "x", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("X"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1.y),expression:"spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1.y",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.001"},domProps:{"value":(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1.y)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1, "y", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Y"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1.z),expression:"spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1.z",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.001"},domProps:{"value":(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1.z)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.p1, "z", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Z"),_c('br'),_vm._v("\n        Slice Plane Normal"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlaneFlipNormal),expression:"spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlaneFlipNormal"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlaneFlipNormal)?_vm._i(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlaneFlipNormal,null)>-1:(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlaneFlipNormal)},on:{"change":[function($event){var $$a=_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlaneFlipNormal,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.spheirahedraHandler.currentSpheirahedra, "quasiSphereSlicePlaneFlipNormal", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.spheirahedraHandler.currentSpheirahedra, "quasiSphereSlicePlaneFlipNormal", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.spheirahedraHandler.currentSpheirahedra, "quasiSphereSlicePlaneFlipNormal", $$c)}},_vm.updateRenderParameter]}}),_vm._v(" FlipNormal"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal.x),expression:"spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal.x",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal.x)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal, "x", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("X"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal.y),expression:"spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal.y",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal.y)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal, "y", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Y"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal.z),expression:"spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal.z",modifiers:{"number":true}}],attrs:{"type":"number","step":"0.01"},domProps:{"value":(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal.z)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.$set(_vm.spheirahedraHandler.currentSpheirahedra.quasiSphereSlicePlane.normal, "z", _vm._n($event.target.value))},_vm.updateRenderParameter],"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Z"),_c('br')])]),_vm._v(" "),_c('div',{staticClass:"uiGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Sphairahedron")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere),expression:"canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere)?_vm._i(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere,null)>-1:(_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraCanvas.displaySpheirahedraSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displaySpheirahedraSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displaySpheirahedraSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displaySpheirahedraSphere", $$c)}},_vm.renderSpheirahedraCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Spheirahedra Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere),expression:"canvasHandler.spheirahedraCanvas.displayConvexSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere)?_vm._i(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere,null)>-1:(_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraCanvas.displayConvexSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayConvexSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayConvexSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayConvexSphere", $$c)}},_vm.renderSpheirahedraCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Convex Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere),expression:"canvasHandler.spheirahedraCanvas.displayInversionSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere)?_vm._i(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere,null)>-1:(_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.spheirahedraCanvas.displayInversionSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayInversionSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayInversionSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.spheirahedraCanvas, "displayInversionSphere", $$c)}},_vm.renderSpheirahedraCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Inversion Sphere")])]),_vm._v(" "),_c('div',{staticClass:"uiGroup"},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Sphairahedral Prism")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere),expression:"canvasHandler.prismCanvas.displaySpheirahedraSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere)?_vm._i(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere,null)>-1:(_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.prismCanvas.displaySpheirahedraSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.prismCanvas, "displaySpheirahedraSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.prismCanvas, "displaySpheirahedraSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.prismCanvas, "displaySpheirahedraSphere", $$c)}},_vm.renderPrismCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Sphairahedra Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.prismCanvas.displayInversionSphere),expression:"canvasHandler.prismCanvas.displayInversionSphere"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.prismCanvas.displayInversionSphere)?_vm._i(_vm.canvasHandler.prismCanvas.displayInversionSphere,null)>-1:(_vm.canvasHandler.prismCanvas.displayInversionSphere)},on:{"change":[function($event){var $$a=_vm.canvasHandler.prismCanvas.displayInversionSphere,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.prismCanvas, "displayInversionSphere", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.prismCanvas, "displayInversionSphere", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.prismCanvas, "displayInversionSphere", $$c)}},_vm.renderPrismCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Inversion Sphere")]),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism),expression:"canvasHandler.prismCanvas.displayRawSpheirahedralPrism"}],attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism)?_vm._i(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism,null)>-1:(_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism)},on:{"change":[function($event){var $$a=_vm.canvasHandler.prismCanvas.displayRawSpheirahedralPrism,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.canvasHandler.prismCanvas, "displayRawSpheirahedralPrism", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.canvasHandler.prismCanvas, "displayRawSpheirahedralPrism", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.canvasHandler.prismCanvas, "displayRawSpheirahedralPrism", $$c)}},_vm.renderPrismCanvas]}}),_vm._v(" "),_c('label',[_vm._v("Raw Prism")])]),_vm._v(" "),_c('div',{staticClass:"uiGroup"},[_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.reflectionIndex),expression:"reflectionIndex",modifiers:{"number":true}}],attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.reflectionIndex)},on:{"input":function($event){if($event.target.composing){ return; }_vm.reflectionIndex=_vm._n($event.target.value)},"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("ReflectionIndex\n      "),_c('button',{on:{"click":_vm.applyReflection}},[_vm._v("Reflection")]),_vm._v(" "),_c('button',{on:{"click":_vm.resetReflections}},[_vm._v("reset")])]),_vm._v(" "),_c('div',{staticClass:"uiGroup",attrs:{"id":"saveGroup"}},[_c('h4',{staticClass:"uiGroupTitle"},[_vm._v("Save")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.productRenderWidth),expression:"productRenderWidth",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.productRenderWidth)},on:{"input":function($event){if($event.target.composing){ return; }_vm.productRenderWidth=_vm._n($event.target.value)},"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v(" :\n      "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.productRenderHeight),expression:"productRenderHeight",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.productRenderHeight)},on:{"input":function($event){if($event.target.composing){ return; }_vm.productRenderHeight=_vm._n($event.target.value)},"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("w:h"),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model.number",value:(_vm.productRenderMaxSamples),expression:"productRenderMaxSamples",modifiers:{"number":true}}],staticStyle:{"width":"80px"},attrs:{"type":"number","min":"0"},domProps:{"value":(_vm.productRenderMaxSamples)},on:{"input":function($event){if($event.target.composing){ return; }_vm.productRenderMaxSamples=_vm._n($event.target.value)},"blur":function($event){return _vm.$forceUpdate()}}}),_vm._v("Samples"),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveLimitsetImage}},[_vm._v("Save Limit Set Image")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedralPrismImage}},[_vm._v("Save Sphairahedral Prism Image")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedronImage}},[_vm._v("Save Sphairahedron Image")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedraPrismMesh}},[_vm._v("Export Sphairahedral Prism Stl")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSphairahedronMesh}},[_vm._v("Export Sphairahedron Stl")]),_c('br'),_vm._v(" "),_c('button',{on:{"click":_vm.saveSceneParamJson}},[_vm._v("Export Parameter as Json")]),_c('br')])])])}
 var staticRenderFns = []
 var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
@@ -95262,13 +95719,23 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"contentPanel"},[_c('canvas-panel',{attrs:{"canvasHandler":_vm.canvasHandler,"spheirahedraHandler":_vm.spheirahedraHandler}}),_vm._v(" "),_c('control-panel',{attrs:{"canvasHandler":_vm.canvasHandler,"spheirahedraHandler":_vm.spheirahedraHandler}})],1)}
+var staticRenderFns = []
+var esExports = { render: render, staticRenderFns: staticRenderFns }
+/* harmony default export */ __webpack_exports__["a"] = (esExports);
+
+/***/ }),
+/* 486 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_footerPanel_vue__ = __webpack_require__(263);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_footerPanel_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_footerPanel_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_footerPanel_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_footerPanel_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_3aeaf3f2_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_footerPanel_vue__ = __webpack_require__(488);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_3aeaf3f2_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_footerPanel_vue__ = __webpack_require__(489);
 function injectStyle (ssrContext) {
-  __webpack_require__(486)
+  __webpack_require__(487)
 }
 var normalizeComponent = __webpack_require__(63)
 /* script */
@@ -95297,20 +95764,20 @@ var Component = normalizeComponent(
 
 
 /***/ }),
-/* 486 */
+/* 487 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(487);
+var content = __webpack_require__(488);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var update = __webpack_require__(108)("1072883e", content, true, {});
 
 /***/ }),
-/* 487 */
+/* 488 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(107)(false);
@@ -95324,23 +95791,23 @@ exports.push([module.i, "footer{border-style:ridge;border-color:gray;background-
 
 
 /***/ }),
-/* 488 */
+/* 489 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _vm._m(0)}
-var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('footer',[_c('div',{attrs:{"id":"left"}},[_c('a',{attrs:{"id":"ghLink","href":"https://github.com/soma-arc/SphairahedronExperiment","target":"_blank"}},[_c('img',{staticClass:"imgLink",attrs:{"src":__webpack_require__(489)}})]),_vm._v(" "),_c('a',{attrs:{"id":"link","href":"https://youtu.be/vgrGWiYf-xU","target":"_blank"}},[_vm._v("\n      Introductory video on YouTube\n    ")])]),_vm._v(" "),_c('div',[_vm._v("\n    Created by soma_arc\n  ")])])}]
+var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('footer',[_c('div',{attrs:{"id":"left"}},[_c('a',{attrs:{"id":"ghLink","href":"https://github.com/soma-arc/SphairahedronExperiment","target":"_blank"}},[_c('img',{staticClass:"imgLink",attrs:{"src":__webpack_require__(490)}})]),_vm._v(" "),_c('a',{attrs:{"id":"link","href":"https://youtu.be/vgrGWiYf-xU","target":"_blank"}},[_vm._v("\n      Introductory video on YouTube\n    ")])]),_vm._v(" "),_c('div',[_vm._v("\n    Created by soma_arc\n  ")])])}]
 var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
 
 /***/ }),
-/* 489 */
+/* 490 */
 /***/ (function(module, exports) {
 
 module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpFNTE3OEEyQTk5QTAxMUUyOUExNUJDMTA0NkE4OTA0RCIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpFNTE3OEEyQjk5QTAxMUUyOUExNUJDMTA0NkE4OTA0RCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkU1MTc4QTI4OTlBMDExRTI5QTE1QkMxMDQ2QTg5MDREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkU1MTc4QTI5OTlBMDExRTI5QTE1QkMxMDQ2QTg5MDREIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+m4QGuQAAAyRJREFUeNrEl21ojWEYx895TDPbMNlBK46IUiNmPvHBSUjaqc0H8pF5+aDUKPEBqU2NhRQpX5Rv5jWlDIWlMCv7MMSWsWwmb3tpXub4XXWdPHvc9/Gc41nu+nedc7/8r/99PffLdYdDPsvkwsgkTBwsA/PADJCnzX2gHTwBt8Hl7p537/3whn04XoDZDcpBlk+9P8AFcAghzRkJwPF4zGGw0Y9QS0mAM2AnQj77FqCzrtcwB1Hk81SYojHK4DyGuQ6mhIIrBWB9Xm7ug/6B/nZrBHBegrkFxoVGpnwBMSLR9EcEcC4qb8pP14BWcBcUgewMnF3T34VqhWMFkThLJAalwnENOAKiHpJq1FZgI2AT6HZtuxZwR9GidSHtI30jOrbawxlVX78/AbNfhHlomEUJJI89O2MqeE79T8/nk8nMBm/dK576hZgmA3cp/R4l9/UeSxiHLVIlNm4nFfT0bxyuIj7LHRTKai+zdJobwMKzcZSJb0ePV5PKN+BqAAKE47UlMnERELMM3EdYP/yrd+XYb2mOiYBiQ8OQnoRBlXrl9JZix7D1pHTazu4MoyBcnYamqAjIMTR8G4FT8LuhLsexXYYjICBiqhQBvYb6fLZIJCjPypVvaOoVAW2WcasCnL2Nq82xHJNSqlCeFcDshaPK0twkAhosjZL31QYw+1rlMpWGMArl23SBsZZO58F2tlJXmjOXS+s4WGvpMiBJT/I2PInZ6lIs9/hBsNS1hS6BG0DSqmYEDRlCXQrmy50P1oDRKTSegmNbUsA0zDMwRhPJXeCE3vWLPQMvan6X8AgIa1vcR4AkGZkDR4ejJ1UHpsaVI0g2LInpOsNFUud1rhxSV+fzC9Woz2EZkWQuja7/B+jUrgtIMpy9YCW4n4K41YfzRneW5E1KJTe4B2Zq1Q5EHEtj4U3AfEzR5SVY4l7QYQPJdN2as7RKBF0BPZqqH4VgMAMBL8Byxr7y8zCZiDlnOcEKIPmUpgB5Z2ww5RdOiiRiNajUmWda5IG6WbhsyY2fx6m8gLcoJDJFkH219M3We1+cnda93pfycZpIJEL/s/wSYADmOAwAQgdpBAAAAABJRU5ErkJggg=="
 
 /***/ }),
-/* 490 */
+/* 491 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
