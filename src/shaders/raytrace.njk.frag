@@ -297,6 +297,65 @@ vec3 BRDF(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecul
     return c;
 }
 
+struct SpotLight {
+    vec3 position;
+    vec3 direction;
+    float cutOff;
+    float outerCutOff;
+  
+    float constant;
+    float linear;
+    float quadratic;
+  
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    
+    vec3 power;
+};
+
+SpotLight g_spotLight;
+
+vec3 BRDFSpotlight(vec3 baseColor, float metallic, float roughness, vec3 dielectricSpecular,
+                   vec3 L, vec3 V, vec3 N, vec3 intersection) {
+    vec3 H = normalize(L+V);
+
+    float LoH = clamp(dot(L, H), 0.0, 1.0);
+    float NoH = clamp(dot(N, H), 0.0, 1.0);
+    float VoH = clamp(dot(V, H), 0.0, 1.0);
+    float NoL = clamp(dot(N, L), 0.0, 1.0);
+    float NoV = abs(dot(N, V));
+
+    float theta = dot(normalize(g_spotLight.position - intersection), normalize(-g_spotLight.direction)); 
+    float epsilon = g_spotLight.cutOff - g_spotLight.outerCutOff;
+    float intensity = clamp((theta - g_spotLight.outerCutOff) / epsilon, 0.0, 1.0);
+
+    float dist = length(g_spotLight.position - intersection);
+    float attenuation = 1.0 / (g_spotLight.constant + g_spotLight.linear * dist + g_spotLight.quadratic * (dist * dist)); 
+    
+    vec3 F0 = mix(dielectricSpecular, baseColor, metallic);
+    vec3 cDiff = mix(baseColor * (1. - dielectricSpecular.r),
+                     BLACK,
+                     metallic);
+    float alpha = roughness * roughness;
+    float alphaSq = alpha * alpha;
+
+    // Schlick's approximation
+    vec3 F = F0 + (vec3(1.) - F0) * pow((1. - VoH), 5.);
+
+    vec3 diffuse = (vec3(1.) - F) * cDiff * DIV_PI;
+
+    //float G = SmithJoint_G(alphaSq, NoL, NoV);
+    float G = Smith_G(alphaSq, NoL, NoV);
+
+    float D = GGX_D(alphaSq, NoH);
+
+    vec3 specular = (F * G * D) / (4. * NoL * NoV);
+    vec3  c = clamp((diffuse + specular) * NoL, 0.0, 1.0);
+    c += computeIBL(cDiff, F0, normalize(reflect(-V, N)), L, NoL, NoV);
+    return c * attenuation * intensity;
+}
+
 {% if shaderType == SHADER_TYPE_LIMITSET %}
 void SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {
     vec3 diff = pos - center;
