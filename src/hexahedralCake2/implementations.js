@@ -34,6 +34,15 @@ class CakeA extends Cake {
                                    new Vec3((cx + dx) * 0.5, 6, (cy + dy) * 0.5),
                                    new Vec3(dx, -3, dy),
                                    this.planes[2].normal);
+        this.slicePlanes[0][2] = this.planes[2];
+
+        this.slicePlanes[1][2] = this.planes[2].invertOnPlane(this.planes[0]);
+
+        this.slicePlanes[2][2] = this.planes[2].invertOnPlane(this.planes[0]);
+        this.slicePlanes[2][3] = this.planes[3].invertOnPlane(this.planes[1]);
+
+        this.slicePlanes[3][2] = this.planes[2].invertOnPlane(this.planes[0]);
+        this.slicePlanes[3][1] = this.planes[1].invertOnPlane(this.planes[3]);
     }
 
     computeInversionSphere() {
@@ -66,6 +75,15 @@ class CakeB extends Cake {
                                    new Vec3((cx + dx) * 0.5, 6, (cy + dy) * 0.5),
                                    new Vec3(dx, -2, dy),
                                    this.planes[2].normal);
+        this.slicePlanes[0][2] = this.planes[2];
+
+        this.slicePlanes[1][2] = this.planes[2].invertOnPlane(this.planes[0]);
+
+        this.slicePlanes[2][2] = this.planes[2].invertOnPlane(this.planes[0]);
+        this.slicePlanes[2][3] = this.planes[3].invertOnPlane(this.planes[1]);
+
+        this.slicePlanes[3][2] = this.planes[2].invertOnPlane(this.planes[0]);
+        this.slicePlanes[3][1] = this.planes[1].invertOnPlane(this.planes[3]);
     }
 
     computeInversionSphere() {
@@ -98,6 +116,16 @@ class CakeC extends Cake {
                                    new Vec3((cx + dx) * 0.5, 6, (cy + dy) * 0.5),
                                    new Vec3(dx, -3, dy),
                                    this.planes[2].normal);
+
+        this.slicePlanes[0][2] = this.planes[2];
+
+        this.slicePlanes[1][2] = this.planes[2].invertOnPlane(this.planes[0]);
+
+        this.slicePlanes[2][2] = this.planes[2].invertOnPlane(this.planes[0]);
+        this.slicePlanes[2][3] = this.planes[3].invertOnPlane(this.planes[1]);
+
+        this.slicePlanes[3][2] = this.planes[2].invertOnPlane(this.planes[0]);
+        this.slicePlanes[3][1] = this.planes[1].invertOnPlane(this.planes[3]);
     }
 
     computeInversionSphere() {

@@ -15,6 +15,9 @@ export default class HexahedralCake3 extends Spheirahedra {
         this.numVertexes = this.vertexIndexes.length;
         this.numDividePlanes = 2;
         this.twoDividePlanes = true;
+
+        this.numSlicePlanes = 4;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_2222_SQUARE;
     }
 
     computeGenSpheres() {

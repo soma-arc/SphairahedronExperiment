@@ -54,6 +54,7 @@ class PrismD extends Prism {
     constructor(tb) {
         super(tb, 0);
         this.planes = Spheirahedra.PRISM_PLANES_236;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_236;
     }
 
     computeSpheres() {
@@ -69,6 +70,7 @@ class PrismE extends Prism {
     constructor(tb) {
         super(tb, 0);
         this.planes = Spheirahedra.PRISM_PLANES_244;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_244;
     }
 
     computeSpheres() {
@@ -84,6 +86,7 @@ class PrismF extends Prism {
     constructor(tb) {
         super(tb, 0);
         this.planes = Spheirahedra.PRISM_PLANES_244;
+        this.slicePlanes = Spheirahedra.SLICE_PLANES_FROM_244;
     }
 
     computeSpheres() {

@@ -366,7 +366,6 @@ void SphereInvert(inout vec3 pos, inout float dr, vec3 center, vec2 r) {
 }
 
 {% if renderMode == 0 %}
-float g_sliceInvNum = 0.;
 float DistLimitsetTerrain(vec3 pos, out float invNum) {
     float dr = 1.;
     invNum = 0.;
@@ -434,11 +433,13 @@ float DistLimitsetFromSeedSpheres(vec3 pos, out float invNum) {
 float DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {
     float dr = 1.;
     invNum = 0.;
+    g_sliceInvNum = 0.;
     for(int i = 0; i < 1000; i++) {
         if(u_maxIterations <= i) break;
         bool inFund = true;
 		{% for n in range(0, numSpheirahedraSpheres) %}
 		if(distance(pos, u_spheirahedraSpheres[{{ n }}].center) < u_spheirahedraSpheres[{{ n }}].r.x) {
+                  g_sliceInvNum++;
             invNum += (float({{ (n + 1) *  10 }}) + invNum) * u_colorWeight + 1.;
 			SphereInvert(pos, dr,
 						 u_spheirahedraSpheres[{{ n }}].center,
@@ -454,3 +455,4 @@ float DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {
 
 {% endif %}
 {% endif %}
+
