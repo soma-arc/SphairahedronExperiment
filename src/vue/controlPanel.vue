@@ -70,6 +70,10 @@
         </div>
         <div class="uiInnerGroup">
           <h4 class="uiGroupTitle">Shading</h4>
+          <input type="checkbox"
+                 v-model="canvasHandler.spheirahedraHandler.currentSpheirahedra.useFlashLight"
+                 @change="updateRenderParameter">
+          <label>FlashLight</label><br>
           <input v-model.number="canvasHandler.limitsetCanvas.metallicRoughness.x"
                  type="number" step="0.01" min="0.0" max="1.0"
                  @input="updateRenderParameter">Metallic<br>

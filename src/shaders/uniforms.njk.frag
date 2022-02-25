@@ -56,6 +56,7 @@ uniform bool u_enableSlice;
 uniform int u_numSlicePlanes;
 uniform Plane u_slicePlanes[12];
 uniform Plane u_quasiSphereSlicePlane;
+uniform bool u_useFlashLight;
 
 const int RENDER_LIMIT_TERRAIN = 0;
 const int RENDER_LIMIT_SEED_SPHERE = 1;

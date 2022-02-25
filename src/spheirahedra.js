@@ -44,6 +44,7 @@ export default class Spheirahedra {
                                                new Vec3(0, 0, 0),
                                                new Vec3(1, 0, 0));
         this.quasiSphereSlicePlaneFlipNormal = false;
+        this.useFlashLight = false;
 
         this.prismSpheres = new Array(3);
         this.planes = [];
@@ -375,6 +376,7 @@ export default class Spheirahedra {
     getUniformLocations(gl, program) {
         const uniLocations = [];
 
+        uniLocations.push(gl.getUniformLocation(program, 'u_useFlashLight'));
         uniLocations.push(gl.getUniformLocation(program, 'u_enableSlice'));
         uniLocations.push(gl.getUniformLocation(program, 'u_numSlicePlanes'));
         for (let i = 0; i < this.maxSlicePlanes; i++) {
@@ -446,6 +448,7 @@ export default class Spheirahedra {
     }
 
     setUniformValues(gl, uniLocations, uniI, scale) {
+        gl.uniform1i(uniLocations[uniI++], this.useFlashLight);
         gl.uniform1i(uniLocations[uniI++], this.enableSlice);
         gl.uniform1i(uniLocations[uniI++], this.slicePlanes[this.currentSliceIndex].length);
         for (let i = 0; i < this.maxSlicePlanes; i++) {

@@ -194,16 +194,25 @@ vec4 computeColor(const vec3 rayOrg, const vec3 rayDir) {
                 isectInfo = NewIsectInfo();
                 continue;
             } else {
-                // vec3 c = BRDF(matColor, u_metallicRoughness.x, u_metallicRoughness.y,
-                //               dielectricSpecular,
-                //               -u_lightDirection, -rayDir, isectInfo.normal);
-                vec3 c = BRDFSpotlight(matColor, u_metallicRoughness.x, u_metallicRoughness.y,
-                                       dielectricSpecular,
-                                       -g_spotLight.direction, -rayDir, isectInfo.normal, isectInfo.intersection);
-                float k = u_castShadow ?
-                    computeShadowFactor(isectInfo.intersection + 0.0001 * isectInfo.normal,
-                                        -u_lightDirection,
-                                        0.001, 5., 100.) : 1.;
+                vec3 c;
+                float k;
+                if(u_useFlashLight) {
+                    c = BRDFSpotlight(matColor, u_metallicRoughness.x, u_metallicRoughness.y,
+                                      dielectricSpecular,
+                                      -g_spotLight.direction, -rayDir, isectInfo.normal, isectInfo.intersection);
+                    k = u_castShadow ?
+                        computeShadowFactor(isectInfo.intersection + 0.0001 * isectInfo.normal,
+                                            -g_spotLight.direction,
+                                            0.001, 5., 100.) : 1.;
+                } else {
+                    c = BRDF(matColor, u_metallicRoughness.x, u_metallicRoughness.y,
+                             dielectricSpecular,
+                             -u_lightDirection, -rayDir, isectInfo.normal);
+                    k = u_castShadow ?
+                        computeShadowFactor(isectInfo.intersection + 0.0001 * isectInfo.normal,
+                                            -u_lightDirection,
+                                            0.001, 5., 100.) : 1.;
+                }
                 l += (c * k + ambient * ambientOcclusion(isectInfo.intersection,
                                                       isectInfo.normal,
                                                         u_ao.x, u_ao.y )) * coeff;
@@ -227,9 +236,9 @@ void main() {
     g_spotLight.diffuse = vec3(1.);
     g_spotLight.specular = vec3(0.1);
     g_spotLight.constant = 1.;
-    g_spotLight.linear = .09;
-    g_spotLight.quadratic = 0.007;
-    g_spotLight.power = vec3(10);
+    g_spotLight.linear = .1;
+    g_spotLight.quadratic = 0.01;
+    g_spotLight.power = vec3(100);
     vec3 sum = vec3(0);
     vec2 coordOffset = Rand2n(gl_FragCoord.xy, u_numSamples);
     vec3 ray = CalcRay(u_camera.pos, u_camera.target, u_camera.up, u_camera.fov,

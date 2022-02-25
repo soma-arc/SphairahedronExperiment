@@ -351,9 +351,9 @@ vec3 BRDFSpotlight(vec3 baseColor, float metallic, float roughness, vec3 dielect
     float D = GGX_D(alphaSq, NoH);
 
     vec3 specular = (F * G * D) / (4. * NoL * NoV);
-    vec3  c = clamp((diffuse + specular) * NoL, 0.0, 1.0);
+    vec3  c = clamp((diffuse + specular) * NoL * attenuation * intensity, 0.0, 1.0);
     c += computeIBL(cDiff, F0, normalize(reflect(-V, N)), L, NoL, NoV);
-    return c * attenuation * intensity;
+    return c;
 }
 
 {% if shaderType == SHADER_TYPE_LIMITSET %}
