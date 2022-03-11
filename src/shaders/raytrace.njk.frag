@@ -202,10 +202,56 @@ float DistInfSpheirahedra(const vec3 pos) {
     return d;
 }
 
+float DistInfOuterSphairahedron(const vec3 pos) {
+    float d = DistPrism(pos);
+    {% for n in range(0, numDividePlanes) %}
+    d = max(DistPlane(pos, u_dividePlanes[{{ n }}].origin,
+                      -u_dividePlanes[{{ n }}].normal),
+            d);
+    {% endfor %}
+    {% for n in range(0, numExcavationSpheres) %}
+	d = max(-DistSphere(pos, u_excavationPrismSpheres[{{ n }}]),
+			d);
+	{% endfor %}
+	{% for n in range(0, numPrismSpheres) %}
+	d = max(-DistSphere(pos, u_prismSpheres[{{ n }}]),
+			d);
+	{% endfor %}
+    if(u_twoDividePlanes && u_prismSpheres[1].center.y > 0.) {
+        float d2 = DistPrism(pos);
+        d2 = max(-DistPlane(pos, u_prismSpheres[0].center,
+                          vec3(0, -1, 0)),
+                 d2);
+        {% for n in range(0, numPrismSpheres) %}
+        d2 = max(-DistSphere(pos, u_prismSpheres[{{ n }}]),
+                 d2);
+        {% endfor %}
+    
+        d = min(d, d2);
+    }
+    return d;
+}
+
 float DistSpheirahedra(vec3 pos) {
     float d = MAX_FLOAT;
     {% for n in range(0, numDividePlanes) %}
     d = min(d, DistSphere(pos, u_convexSpheres[{{ n }}]));
+    {% endfor %}
+    {% for n in range(0, numExcavationSpheres) %}
+	d = max(-DistSphere(pos, u_excavationSpheres[{{ n }}]),
+			d);
+	{% endfor %}
+	{% for n in range(0, numSpheirahedraSpheres) %}
+    d = max(-DistSphere(pos, u_spheirahedraSpheres[{{ n }}]),
+			d);
+	{% endfor %}
+    return d;
+}
+
+float DistOuterSphairahedron(vec3 pos) {
+  float d = -MAX_FLOAT;
+    {% for n in range(0, numDividePlanes) %}
+    d = max(-DistSphere(pos, u_convexSpheres[{{ n }}]), d);
     {% endfor %}
     {% for n in range(0, numExcavationSpheres) %}
 	d = max(-DistSphere(pos, u_excavationSpheres[{{ n }}]),
@@ -401,6 +447,41 @@ float DistLimitsetTerrain(vec3 pos, out float invNum) {
     }
     return DistInfSpheirahedra(pos) / abs(dr) * u_fudgeFactor;
 }
+float DistLimitsetOuterTerrain(vec3 pos, out float invNum) {
+    float dr = 1.;
+    invNum = 0.;
+    g_sliceInvNum = 0.;
+    float d;
+    for(int i = 0; i < 2000; i++) {
+        if(u_maxIterations <= i) break;
+        bool inFund = true;
+		{% for n in range(0, numPrismSpheres) %}
+		if(distance(pos, u_prismSpheres[{{ n }}].center) < u_prismSpheres[{{ n }}].r.x) {
+            invNum += (float({{ (n + 1) *  10 }}) + invNum) * u_colorWeight + 1.;
+            g_sliceInvNum++;
+			SphereInvert(pos, dr,
+						 u_prismSpheres[{{ n }}].center,
+						 u_prismSpheres[{{ n }}].r);
+			continue;
+		}
+		{% endfor %}
+
+		{% for n in range(0, numPrismPlanes) %}
+		pos -= u_prismPlanes[{{ n }}].origin;
+		d = dot(pos, u_prismPlanes[{{ n }}].normal);
+		if(d > 0.) {
+            invNum += (float({{ (n + 1 + numPrismSpheres) *  10 }}) + invNum) * u_colorWeight + 1.;
+			pos -= 2. * d * u_prismPlanes[{{ n }}].normal;
+			pos += u_prismPlanes[{{ n }}].origin;
+			continue;
+		}
+		pos += u_prismPlanes[{{ n }}].origin;
+		{% endfor %}
+
+        if(inFund) break;
+    }
+    return DistInfOuterSphairahedron(pos) / abs(dr) * u_fudgeFactor;
+}
 {% elif renderMode == 1 %}
 float DistLimitsetFromSeedSpheres(vec3 pos, out float invNum) {
     float dr = 1.;
@@ -451,6 +532,7 @@ float DistLimitsetFromSpheirahedra(vec3 pos, out float invNum) {
     }
 
     return DistSpheirahedra(pos) / abs(dr) * u_fudgeFactor;
+    //return DistOuterSphairahedron(pos) / abs(dr) * u_fudgeFactor;
 }
 
 {% endif %}

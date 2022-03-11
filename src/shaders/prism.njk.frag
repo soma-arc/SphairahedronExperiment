@@ -13,6 +13,10 @@ const int ID_INI_SPHERES = 1;
 
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
+    // hit = DistUnion(hit,
+    //                 u_displeyRawSpheirahedralPrism ?
+    //                 vec4(DistInfSpheirahedraAll(pos), ID_PRISM, -1, -1) :
+    //                 vec4(DistInfOuterSphairahedron(pos), ID_PRISM, -1, -1));
     hit = DistUnion(hit,
                     u_displeyRawSpheirahedralPrism ?
                     vec4(DistInfSpheirahedraAll(pos), ID_PRISM, -1, -1) :

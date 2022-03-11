@@ -15,9 +15,10 @@ const int ID_SLICE = 2;
 float g_invNum;
 vec4 distFunc(const vec3 pos) {
     vec4 hit = vec4(MAX_FLOAT, -1, -1, -1);
-	{% if renderMode == 0 %}
+        {% if renderMode == 0 %}
     hit = (u_displayPrism) ? DistUnion(hit, vec4(DistInfSpheirahedraAll(pos), ID_PRISM, -1, -1)) : hit;
 
+    //float dd = DistLimitsetOuterTerrain(pos, g_invNum);
     float dd = DistLimitsetTerrain(pos, g_invNum);
     hit = DistUnion(vec4(dd, ID_PRISM, -1, -1), hit);
     {% for n in range(0, numBoundingPlanes) %}
@@ -33,12 +34,13 @@ vec4 distFunc(const vec3 pos) {
     }
     
     return hit;
-	{% elif renderMode == 1 %}
-	return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_boundingSphere.center, g_invNum),
-							   ID_PRISM, -1, -1));
-	{% else %}
-	hit = DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_boundingSphere.center, g_invNum),
-							   ID_PRISM, -1, -1));
+        {% elif renderMode == 1 %}
+        return DistUnion(hit, vec4(DistLimitsetFromSeedSpheres(pos + u_boundingSphere.center, g_invNum),
+        						   ID_PRISM, -1, -1));
+        {% else %}
+         hit = DistUnion(hit, vec4(DistLimitsetFromSpheirahedra(pos + u_boundingSphere.center, g_invNum),
+         						   ID_PRISM, -1, -1));
+         //hit = DistUnion(hit, vec4(DistOuterSphairahedron(pos + u_boundingSphere.center), ID_PRISM, -1, -1));
         if(u_enableSlice) {
           hit = DistSubtract(vec4(DistPlane(pos,
                                             u_quasiSphereSlicePlane.origin,
@@ -47,7 +49,7 @@ vec4 distFunc(const vec3 pos) {
           
         }
         return hit;
-	{% endif %}
+        {% endif %}
 }
 
 const vec2 NORMAL_COEFF = vec2(0.001, 0.);

@@ -29,9 +29,12 @@ class CubeA extends SpheirahedraCube {
                            'xx - xy - (3. / 4.)',
                            'yy - xy - (3. / 4.)',
                            'y - x * 2.'],
-            'regionCondition': 'x > 0. && y > 0. && ' +
-                'y > x * 2. && ' +
-                'yy - xy - (3. / 4.) < 0.'
+            'regionCondition': 'x * y - (3. / 4.) < 0. && ' +
+                'x * x - x * y - (3./4.) < 0. && ' +
+                'y * y - x * y - (3./4.) < 0.'
+            // 'regionCondition': 'x > 0. && y > 0. && ' +
+            //     'y > x * 2. && ' +
+            //     'yy - xy - (3. / 4.) < 0.'
         }
     }
 }
