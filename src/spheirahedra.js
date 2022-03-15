@@ -641,12 +641,11 @@ export default class Spheirahedra {
 
     select(mouse, scale) {
         const zbzc = new Vec2(this.zb, this.zc);
-        if (Vec2.distance(mouse, new Vec2(this.zb, this.zc)) < 0.1) {
+        if (Vec2.distance(mouse, new Vec2(this.zb, this.zc)) < this.pointRadius * scale) {
             this.selectedComponentId = Spheirahedra.POINT_ZB_ZC;
             this.diffToComponent = mouse.sub(zbzc);
             return;
         }
-
         this.selectedComponentId = -1;
     }
 

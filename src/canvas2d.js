@@ -4,9 +4,9 @@ import { GetWebGL2Context, CreateSquareVbo, AttachShader,
          LinkProgram } from './glUtils';
 
 export default class Canvas2D extends Canvas {
-    constructor(canvasId, spheirahedra) {
+    constructor(canvasId, sphairahedronHandler) {
         super(canvasId);
-        this.spheirahedra = spheirahedra;
+        this.sphairahedronHandler = sphairahedronHandler;
 
         this.mouseState = {
             isPressing: false,
@@ -68,7 +68,7 @@ export default class Canvas2D extends Canvas {
         this.gl.uniform2f(this.uniLocations[i++], width, height);
         this.gl.uniform3f(this.uniLocations[i++],
                           this.translate.x, this.translate.y, this.scale);
-        this.spheirahedra.setUniformValues(this.gl, this.spheirahedraUniLocations, 0, this.scale);
+        this.sphairahedronHandler.setUniformValues(this.gl, this.spheirahedraUniLocations, 0, this.scale);
     }
 
     render() {
@@ -99,7 +99,13 @@ export default class Canvas2D extends Canvas {
         const mouse = this.calcSceneCoord(event.clientX, event.clientY);
         this.mouseState.button = event.button;
         if (event.button === Canvas.MOUSE_BUTTON_LEFT) {
-            this.spheirahedra.select(mouse, this.scale);
+            this.sphairahedronHandler.select(mouse, this.scale);
+            if (this.sphairahedronHandler.currentSpheirahedra.selectedComponentId === -1) {
+                this.sphairahedronHandler.currentSpheirahedra.zb = mouse.x;
+                this.sphairahedronHandler.currentSpheirahedra.zc = mouse.y;
+                this.sphairahedronHandler.currentSpheirahedra.update();
+                this.isTweaking = true;
+            }
         }
         this.mouseState.prevPosition = mouse;
         this.mouseState.prevTranslate = this.translate;
@@ -112,7 +118,7 @@ export default class Canvas2D extends Canvas {
         if (!this.mouseState.isPressing) return;
         const mouse = this.calcSceneCoord(event.clientX, event.clientY);
         if (this.mouseState.button === Canvas.MOUSE_BUTTON_LEFT) {
-            const moved = this.spheirahedra.move(mouse);
+            const moved = this.sphairahedronHandler.move(mouse);
             if (moved) this.isTweaking = true;
         } else if (this.mouseState.button === Canvas.MOUSE_BUTTON_RIGHT) {
             this.translate = this.translate.sub(mouse.sub(this.mouseState.prevPosition));
