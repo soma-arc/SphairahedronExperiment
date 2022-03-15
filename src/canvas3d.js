@@ -13,9 +13,9 @@ const RENDER_FLIPPED_VERTEX = require('./shaders/renderFlipped.vert');
 const BRDF_LUT = require('./img/brdfLUT.png');
 
 export default class Canvas3D extends Canvas {
-    constructor(canvasId, spheirahedra) {
+    constructor(canvasId, sphairahedronHandler) {
         super(canvasId);
-        this.spheirahedra = spheirahedra;
+        this.sphairahedronHandler = sphairahedronHandler;
 
         this.fudgeFactor = 0.2;
         this.marchingThreshold = 0.00001;
@@ -33,6 +33,7 @@ export default class Canvas3D extends Canvas {
         this.isKeepingSampling = false;
         this.isRenderingLowRes = false;
         this.renderTimer = undefined;
+        this.isPressingCtrl = false;
 
         this.aoEps = 0.0968;
         this.aoIntensity = 2.0;
@@ -195,8 +196,8 @@ export default class Canvas3D extends Canvas {
                           l.x, l.y, l.z);
         this.gl.uniform2f(this.uniLocations[i++],
                           this.metallicRoughness.x, this.metallicRoughness.y);
-        this.spheirahedra.setUniformValues(this.gl, this.spheirahedraUniLocations,
-                                           0, this.scale);
+        this.sphairahedronHandler.setUniformValues(this.gl, this.spheirahedraUniLocations,
+                                                   0, this.scale);
     }
 
     renderToTexture(textures, width, height) {
@@ -290,10 +291,11 @@ export default class Canvas3D extends Canvas {
         const mouse = this.calcCanvasCoord(event.clientX, event.clientY);
         this.mouseState.prevPosition = mouse
         this.mouseState.button = event.button;
-        if (event.button === Canvas.MOUSE_BUTTON_LEFT) {
-            this.camera.mouseLeftDown(mouse);
-        } else if (event.button === Canvas.MOUSE_BUTTON_RIGHT) {
+        if (event.button === Canvas.MOUSE_BUTTON_RIGHT ||
+                   (this.isPressingCtrl && event.button === Canvas.MOUSE_BUTTON_LEFT)) {
             this.camera.mouseRightDown(mouse);
+        } else if (event.button === Canvas.MOUSE_BUTTON_LEFT) {
+            this.camera.mouseLeftDown(mouse);
         }
     }
 
@@ -314,11 +316,12 @@ export default class Canvas3D extends Canvas {
         event.preventDefault();
         if (!this.mouseState.isPressing) return;
         const mouse = this.calcCanvasCoord(event.clientX, event.clientY);
-        if (this.mouseState.button === Canvas.MOUSE_BUTTON_LEFT) {
-            this.camera.mouseLeftMove(mouse, this.mouseState.prevPosition);
-            this.isRendering = true;
-        } else if (this.mouseState.button === Canvas.MOUSE_BUTTON_RIGHT) {
+        if (this.mouseState.button === Canvas.MOUSE_BUTTON_RIGHT ||
+            (this.isPressingCtrl && event.button === Canvas.MOUSE_BUTTON_LEFT)) {
             this.camera.mouseRightMove(mouse, this.mouseState.prevPosition);
+            this.isRendering = true;
+        } else if (this.mouseState.button === Canvas.MOUSE_BUTTON_LEFT) {
+            this.camera.mouseLeftMove(mouse, this.mouseState.prevPosition);
             this.isRendering = true;
         }
     }
@@ -365,6 +368,15 @@ export default class Canvas3D extends Canvas {
             }
             break;
         }
+        case ' ': {
+            this.resetCamera();
+            this.isRendering = true;
+            break;
+        }
+        case 'Control': {
+            this.isPressingCtrl = true;
+            break;
+        }
         }
     }
 
@@ -404,6 +416,7 @@ export default class Canvas3D extends Canvas {
 
     keyupListener(event) {
         this.isRendering = false;
+        this.isPressingCtrl = false;
     }
 
     renderFlippedTex(textures, width, height) {

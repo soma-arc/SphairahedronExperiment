@@ -27,6 +27,7 @@
           <ul id="usage-list">
             <li>Left Button + dragging : rotate camera / tweak parameter </li>
             <li>Right Button + dragging : move camera</li>
+            <li>CtrlKey + Left dragging : move camera</li>
             <li>Wheel : zoom</li>
           </ul>
           <h4><a href="https://www.youtube.com/watch?v=vgrGWiYf-xU" target="_blank"> Introductory Video on YouTube</a></h4>

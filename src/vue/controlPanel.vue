@@ -18,7 +18,7 @@
             v-for="(item, index) in spheirahedraHandler.baseTypes[selectedSpheirahedron]">
             {{ index }}
           </option>
-        </select>
+        </select><br>
         <input type="number"
                v-model.number="canvasHandler.spheirahedraHandler.currentSpheirahedra.zb"
                @input="reRenderAll" style="width: 80px;"

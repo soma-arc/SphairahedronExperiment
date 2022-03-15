@@ -135,4 +135,19 @@ export default class Canvas2D extends Canvas {
         this.mouseState.isPressing = false;
         this.isTweaking = false;
     }
+
+    keydownListener(event) {
+        switch (event.key) {
+        case ' ': {
+            this.sphairahedronHandler.currentSpheirahedra.zb = 0;
+            this.sphairahedronHandler.currentSpheirahedra.zc = 0;
+            this.sphairahedronHandler.currentSpheirahedra.update();
+            this.isTweaking = true;
+        }
+        }
+    }
+
+    keyupListener(event) {
+        this.isTweaking = false;
+    }
 }
