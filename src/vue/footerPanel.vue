@@ -9,6 +9,7 @@
          target="_blank">
         Introductory video on YouTube
       </a>
+      <a id="version">Version 1.0.0</a>
     </div>
     <div>
       Created by soma_arc
@@ -56,6 +57,24 @@
 }
 
 #link {
+    align-items: center;
+    justify-content: center;
+    padding-top: 20px;
+    padding-right: 5px;
+    padding-left: 5px;
+    border-right-style: ridge;
+    border-left-style: ridge;
+    border-right-color: gray;
+    border-left-color: gray;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+}
+
+#version {
     align-items: center;
     justify-content: center;
     padding-top: 20px;
