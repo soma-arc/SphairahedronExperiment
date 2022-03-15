@@ -82,4 +82,8 @@ header-panel {
     height:50px;
 }
 
+canvas {
+    cursor: crosshair;
+}
+
 </style>
